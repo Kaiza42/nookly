@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Nookly.Application.Abstractions;
 using Nookly.Application.Media;
+using Nookly.Application.Discovery;
 using Nookly.Infrastructure.Data;
 using Nookly.Infrastructure.External.Tmdb;
 using Nookly.Infrastructure.Persistence;
@@ -20,6 +21,8 @@ public static class DependencyInjection
 
         services.AddDbContext<NooklyDbContext>(options => options.UseNpgsql(connectionString));
         services.AddScoped<IMediaRepository, MediaRepository>();
+        services.AddScoped<IDiscoveryPreferenceRepository, DiscoveryPreferenceRepository>();
+        services.AddScoped<DiscoveryPreferenceService>();
         services.AddScoped<IMediaService, MediaService>();
         services.Configure<TmdbOptions>(configuration.GetSection(TmdbOptions.SectionName));
         services.AddHttpClient<IExternalMediaSearch, TmdbClient>(client =>

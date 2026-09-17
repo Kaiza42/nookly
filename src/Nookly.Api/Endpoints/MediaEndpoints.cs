@@ -1,5 +1,7 @@
 using Nookly.Application.Abstractions;
 using Nookly.Application.Media;
+using Nookly.Application.Discovery;
+using Nookly.Contracts.Discovery;
 using Nookly.Contracts.Media;
 using Nookly.Contracts.Search;
 using ApplicationCreateMediaRequest = Nookly.Application.Media.CreateMediaRequest;
@@ -30,6 +32,7 @@ public static class MediaEndpoints
             int? year,
             string? actor,
             IExternalMediaSearch search,
+            DiscoveryPreferenceService preferences,
             CancellationToken cancellationToken) =>
         {
             if (year is < 1900 or > 2100)
@@ -46,7 +49,10 @@ public static class MediaEndpoints
                     year,
                     actor,
                     cancellationToken);
-                return Results.Ok(results.Select(item => new MediaSearchResultResponse(
+                var dislikedIds = await preferences.GetDislikedIdsAsync("tmdb", cancellationToken);
+                return Results.Ok(results
+                    .Where(item => !dislikedIds.Contains(item.ExternalId))
+                    .Select(item => new MediaSearchResultResponse(
                     item.ExternalSource,
                     item.ExternalId,
                     item.Title,
@@ -67,6 +73,25 @@ public static class MediaEndpoints
                     "TMDB is temporarily unavailable.",
                     statusCode: StatusCodes.Status502BadGateway);
             }
+        });
+
+        group.MapPost("/preferences", async (
+            SetDiscoveryPreferenceRequest request,
+            DiscoveryPreferenceService preferences,
+            CancellationToken cancellationToken) =>
+        {
+            if (string.IsNullOrWhiteSpace(request.ExternalSource) ||
+                string.IsNullOrWhiteSpace(request.ExternalId))
+            {
+                return Results.BadRequest();
+            }
+
+            await preferences.SaveAsync(
+                request.ExternalSource,
+                request.ExternalId,
+                request.IsLiked,
+                cancellationToken);
+            return Results.NoContent();
         });
 
         group.MapGet("/{id:guid}", async (

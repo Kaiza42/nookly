@@ -1,5 +1,6 @@
 using Nookly.Contracts.Media;
 using Nookly.Contracts.Search;
+using Nookly.Contracts.Discovery;
 
 namespace Nookly.Desktop.Services;
 
@@ -18,6 +19,10 @@ public interface IMediaApiClient
 
     Task<MediaItemResponse> CreateMediaAsync(
         CreateMediaRequest request,
+        CancellationToken cancellationToken = default);
+
+    Task SetDiscoveryPreferenceAsync(
+        SetDiscoveryPreferenceRequest request,
         CancellationToken cancellationToken = default);
 
     Task<MediaItemResponse> UpdateMediaAsync(

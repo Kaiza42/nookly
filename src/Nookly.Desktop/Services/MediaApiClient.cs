@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Nookly.Contracts.Media;
 using Nookly.Contracts.Search;
+using Nookly.Contracts.Discovery;
 
 namespace Nookly.Desktop.Services;
 
@@ -63,6 +64,18 @@ public sealed class MediaApiClient(HttpClient httpClient) : IMediaApiClient
                    JsonOptions,
                    cancellationToken)
                ?? throw new InvalidOperationException("The API returned an empty response.");
+    }
+
+    public async Task SetDiscoveryPreferenceAsync(
+        SetDiscoveryPreferenceRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.PostAsJsonAsync(
+            "api/media/preferences",
+            request,
+            JsonOptions,
+            cancellationToken);
+        response.EnsureSuccessStatusCode();
     }
 
     public async Task<MediaItemResponse> UpdateMediaAsync(

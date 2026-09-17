@@ -4,6 +4,7 @@ using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nookly.Contracts.Media;
+using Nookly.Contracts.Discovery;
 using Nookly.Desktop.Services;
 
 namespace Nookly.Desktop.ViewModels;
@@ -360,6 +361,34 @@ public partial class LibraryViewModel(
         finally
         {
             IsSearching = false;
+        }
+    }
+
+    [RelayCommand]
+    private Task LikeDiscoveryResultAsync(MediaSearchResultViewModel item) =>
+        SaveDiscoveryPreferenceAsync(item, true);
+
+    [RelayCommand]
+    private Task DislikeDiscoveryResultAsync(MediaSearchResultViewModel item) =>
+        SaveDiscoveryPreferenceAsync(item, false);
+
+    private async Task SaveDiscoveryPreferenceAsync(
+        MediaSearchResultViewModel item,
+        bool isLiked)
+    {
+        try
+        {
+            await mediaApiClient.SetDiscoveryPreferenceAsync(new SetDiscoveryPreferenceRequest(
+                item.Result.ExternalSource,
+                item.Result.ExternalId,
+                isLiked));
+            SearchResults.Remove(item);
+            HasSearchResults = SearchResults.Count > 0;
+        }
+        catch (HttpRequestException)
+        {
+            HasSearchError = true;
+            SearchErrorMessage = "Impossible d'enregistrer cette preference.";
         }
     }
 

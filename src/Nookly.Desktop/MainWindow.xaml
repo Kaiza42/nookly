@@ -314,16 +314,13 @@
                     </ListView.ItemContainerStyle>
                     <ListView.ItemTemplate>
                         <DataTemplate>
-                            <Button Command="{Binding DataContext.ShowSearchResultCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                    CommandParameter="{Binding}" Padding="0" Background="Transparent"
-                                    BorderThickness="0" HorizontalContentAlignment="Stretch" Cursor="Hand">
-                                <Border Padding="12" Background="White" BorderBrush="#E0E3E8"
-                                        BorderThickness="1" CornerRadius="6">
+                            <Border Padding="12" Background="White" BorderBrush="#E0E3E8"
+                                    BorderThickness="1" CornerRadius="6">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="64" />
                                             <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="120" />
+                                            <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
                                         <Border Height="88" Background="#E4E7EB" CornerRadius="3">
                                             <Image Source="{Binding PosterUrl}" Stretch="UniformToFill" />
@@ -341,11 +338,22 @@
                                             <TextBlock Text="{Binding Description}" Margin="0,7,0,0"
                                                        Foreground="#747D89" TextTrimming="CharacterEllipsis" />
                                         </StackPanel>
-                                        <TextBlock Grid.Column="2" Text="Voir la fiche" VerticalAlignment="Center"
-                                                   HorizontalAlignment="Right" Foreground="#286C53" FontWeight="SemiBold" />
+                                        <StackPanel Grid.Column="2" Orientation="Horizontal"
+                                                    VerticalAlignment="Center" Margin="12,0,0,0">
+                                            <Button Content="Voir" ToolTip="Voir la fiche"
+                                                    Command="{Binding DataContext.ShowSearchResultCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    CommandParameter="{Binding}" Height="30" Padding="10,0" Margin="0,0,8,0" />
+                                            <Button Content="👍" ToolTip="J'aime"
+                                                    Command="{Binding DataContext.LikeDiscoveryResultCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    CommandParameter="{Binding}" Width="34" Height="30" Margin="0,0,6,0"
+                                                    FontFamily="Segoe UI Emoji" />
+                                            <Button Content="👎" ToolTip="Ne plus me proposer ce titre"
+                                                    Command="{Binding DataContext.DislikeDiscoveryResultCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    CommandParameter="{Binding}" Width="34" Height="30"
+                                                    FontFamily="Segoe UI Emoji" />
+                                        </StackPanel>
                                     </Grid>
-                                </Border>
-                            </Button>
+                            </Border>
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>

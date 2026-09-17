@@ -1,5 +1,6 @@
 using Nookly.Contracts.Media;
 using Nookly.Contracts.Search;
+using Nookly.Contracts.Discovery;
 using Nookly.Desktop.Services;
 using Nookly.Desktop.ViewModels;
 
@@ -140,6 +141,30 @@ public sealed class LibraryViewModelTests
         Assert.Equal("Dune", Assert.Single(viewModel.SearchResults).Title);
     }
 
+    [Fact]
+    public async Task DislikeDiscoveryResult_RemovesAndPersistsTheResult()
+    {
+        var apiClient = new StubMediaApiClient
+        {
+            SearchResults =
+            [
+                new MediaSearchResultResponse(
+                    "tmdb", "438631", "Dune", null, MediaType.Movie,
+                    null, 7.8m, new DateOnly(2021, 9, 15))
+            ]
+        };
+        var viewModel = CreateViewModel(apiClient);
+        await viewModel.OpenDiscoverCommand.ExecuteAsync(null);
+        var result = Assert.Single(viewModel.SearchResults);
+
+        await viewModel.DislikeDiscoveryResultCommand.ExecuteAsync(result);
+
+        Assert.Empty(viewModel.SearchResults);
+        Assert.NotNull(apiClient.LastPreferenceRequest);
+        Assert.False(apiClient.LastPreferenceRequest.IsLiked);
+        Assert.Equal("438631", apiClient.LastPreferenceRequest.ExternalId);
+    }
+
     private static LibraryViewModel CreateViewModel(StubMediaApiClient apiClient)
     {
         return new LibraryViewModel(apiClient, new ConfirmingDialogService());
@@ -159,6 +184,7 @@ public sealed class LibraryViewModelTests
             SearchHandler
         { get; init; }
         public CreateMediaRequest? LastCreateRequest { get; private set; }
+        public SetDiscoveryPreferenceRequest? LastPreferenceRequest { get; private set; }
 
         public Task<IReadOnlyList<MediaItemResponse>> GetMediaAsync(
             CancellationToken cancellationToken = default)
@@ -185,6 +211,14 @@ public sealed class LibraryViewModelTests
             LastCreateRequest = request;
             item = CreateResponse(request.Title, request.Type, MediaStatus.Planned, null);
             return Task.FromResult(item);
+        }
+
+        public Task SetDiscoveryPreferenceAsync(
+            SetDiscoveryPreferenceRequest request,
+            CancellationToken cancellationToken = default)
+        {
+            LastPreferenceRequest = request;
+            return Task.CompletedTask;
         }
 
         public Task<MediaItemResponse> UpdateMediaAsync(
