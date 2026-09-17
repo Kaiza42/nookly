@@ -258,30 +258,34 @@
                     <Button Grid.Column="1" Content="Rechercher" Command="{Binding SearchCommand}"
                             Style="{StaticResource PrimaryButton}" Height="42" Margin="10,25,0,0" />
                 </Grid>
-                <Border Grid.Row="2" Margin="0,8,0,0" Padding="8,5" Background="White"
+                <Border Grid.Row="2" Margin="0,8,0,0" Padding="7,4" Background="White"
                         BorderBrush="#D7DBE1" BorderThickness="1" CornerRadius="6">
                     <WrapPanel>
-                        <StackPanel Width="155" Margin="0,0,10,0">
-                            <TextBlock Text="Type" Margin="0,0,0,2" Foreground="#4D5967" FontSize="10" />
+                        <StackPanel Orientation="Horizontal" Margin="0,0,12,0">
+                            <TextBlock Text="Type" Margin="0,0,6,0" Foreground="#4D5967"
+                                       FontSize="10" VerticalAlignment="Center" />
                             <ComboBox ItemsSource="{Binding DiscoveryMediaTypes}"
                                       SelectedItem="{Binding SelectedDiscoveryType}"
-                                      DisplayMemberPath="Label" Height="24" Padding="5,1" />
+                                      DisplayMemberPath="Label" Width="130" Height="22" Padding="4,0" />
                         </StackPanel>
-                        <StackPanel Width="155" Margin="0,0,10,0">
-                            <TextBlock Text="Genre" Margin="0,0,0,2" Foreground="#4D5967" FontSize="10" />
+                        <StackPanel Orientation="Horizontal" Margin="0,0,12,0">
+                            <TextBlock Text="Genre" Margin="0,0,6,0" Foreground="#4D5967"
+                                       FontSize="10" VerticalAlignment="Center" />
                             <ComboBox ItemsSource="{Binding DiscoveryGenres}"
                                       SelectedItem="{Binding SelectedDiscoveryGenre}"
-                                      DisplayMemberPath="Label" Height="24" Padding="5,1" />
+                                      DisplayMemberPath="Label" Width="130" Height="22" Padding="4,0" />
                         </StackPanel>
-                        <StackPanel Width="95" Margin="0,0,10,0">
-                            <TextBlock Text="Annee" Margin="0,0,0,2" Foreground="#4D5967" FontSize="10" />
+                        <StackPanel Orientation="Horizontal" Margin="0,0,12,0">
+                            <TextBlock Text="Annee" Margin="0,0,6,0" Foreground="#4D5967"
+                                       FontSize="10" VerticalAlignment="Center" />
                             <TextBox Text="{Binding DiscoveryYear, UpdateSourceTrigger=PropertyChanged}"
-                                     Height="24" Padding="6,2" ToolTip="Par exemple 2024" />
+                                     Width="70" Height="22" Padding="5,1" ToolTip="Par exemple 2024" />
                         </StackPanel>
-                        <StackPanel Width="195">
-                            <TextBlock Text="Acteur ou actrice" Margin="0,0,0,2" Foreground="#4D5967" FontSize="10" />
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Acteur" Margin="0,0,6,0" Foreground="#4D5967"
+                                       FontSize="10" VerticalAlignment="Center" />
                             <TextBox Text="{Binding ActorQuery, UpdateSourceTrigger=PropertyChanged}"
-                                     Height="24" Padding="6,2" />
+                                     Width="160" Height="22" Padding="5,1" />
                         </StackPanel>
                     </WrapPanel>
                 </Border>
