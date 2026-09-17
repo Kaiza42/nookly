@@ -84,7 +84,8 @@ public sealed class MediaApiClientTests
               "title": "Dune",
               "type": "Movie",
               "communityRating": 7.8,
-              "releaseDate": "2021-09-15"
+              "releaseDate": "2021-09-15",
+              "cast": ["Timothee Chalamet", "Rebecca Ferguson"]
             }]
             """;
         var handler = new StubHttpMessageHandler(json);
@@ -99,6 +100,7 @@ public sealed class MediaApiClientTests
         var result = Assert.Single(results);
         Assert.Equal("Dune", result.Title);
         Assert.Equal(7.8m, result.CommunityRating);
+        Assert.Equal(["Timothee Chalamet", "Rebecca Ferguson"], result.Cast);
         Assert.Equal(
             "http://localhost/api/media/search?query=Dune%20part%20two",
             handler.LastRequestUri?.OriginalString);

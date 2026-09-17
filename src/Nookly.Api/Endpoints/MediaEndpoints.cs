@@ -54,7 +54,8 @@ public static class MediaEndpoints
                     (ContractMediaType)item.Type,
                     item.PosterUrl,
                     item.CommunityRating,
-                    item.ReleaseDate)));
+                    item.ReleaseDate,
+                    item.Cast)));
             }
             catch (InvalidOperationException exception)
             {

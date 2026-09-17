@@ -35,12 +35,13 @@ public sealed class TmdbClient(HttpClient httpClient, IOptions<TmdbOptions> opti
                 $"search/multi?query={Uri.EscapeDataString(query.Trim())}&include_adult=false&language=fr-FR&page=1",
                 token,
                 cancellationToken);
-            return payload?.Results
+            var searchResults = payload?.Results
                 .Where(result => result.MediaType is "movie" or "tv")
                 .Select(item => MapResult(item, item.MediaType!))
                 .Where(result => !string.IsNullOrWhiteSpace(result.Title))
-                .Take(20)
+                .Take(12)
                 .ToArray() ?? [];
+            return await AddCastAsync(searchResults, token, cancellationToken);
         }
 
         var actorId = await ResolveActorIdAsync(actor, token, cancellationToken);
@@ -93,9 +94,40 @@ public sealed class TmdbClient(HttpClient httpClient, IOptions<TmdbOptions> opti
             filteredResults = filteredResults.OrderBy(_ => Random.Shared.Next());
         }
 
-        return filteredResults
-            .Take(30)
+        var selectedResults = filteredResults
+            .Take(12)
             .ToArray();
+        return await AddCastAsync(selectedResults, token, cancellationToken);
+    }
+
+    private async Task<IReadOnlyList<MediaSearchResult>> AddCastAsync(
+        IReadOnlyList<MediaSearchResult> results,
+        string token,
+        CancellationToken cancellationToken)
+    {
+        return await Task.WhenAll(results.Select(async result =>
+        {
+            try
+            {
+                var mediaKind = result.Type == MediaType.Movie ? "movie" : "tv";
+                var credits = await GetAsync<TmdbCreditsResponse>(
+                    $"{mediaKind}/{result.ExternalId}/credits?language=fr-FR",
+                    token,
+                    cancellationToken);
+                return result with
+                {
+                    Cast = credits?.Cast
+                        .Where(person => !string.IsNullOrWhiteSpace(person.Name))
+                        .Take(3)
+                        .Select(person => person.Name)
+                        .ToArray() ?? []
+                };
+            }
+            catch (HttpRequestException)
+            {
+                return result;
+            }
+        }));
     }
 
     private async Task<long?> ResolveActorIdAsync(
@@ -169,6 +201,12 @@ public sealed class TmdbClient(HttpClient httpClient, IOptions<TmdbOptions> opti
         [property: JsonPropertyName("results")] TmdbPerson[] Results);
 
     private sealed record TmdbPerson([property: JsonPropertyName("id")] long Id);
+
+    private sealed record TmdbCreditsResponse(
+        [property: JsonPropertyName("cast")] TmdbCastMember[] Cast);
+
+    private sealed record TmdbCastMember(
+        [property: JsonPropertyName("name")] string Name);
 
     private sealed record TmdbSearchItem(
         [property: JsonPropertyName("id")] long Id,

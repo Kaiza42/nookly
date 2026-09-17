@@ -20,4 +20,7 @@ public sealed class MediaSearchResultViewModel(MediaSearchResultResponse result)
     public string RatingLabel => result.CommunityRating is null
         ? "Non note"
         : $"{result.CommunityRating:0.0}/10";
+    public string CastLabel => result.Cast is { Count: > 0 }
+        ? string.Join(", ", result.Cast)
+        : "Distribution non disponible";
 }

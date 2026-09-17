@@ -10,4 +10,5 @@ public sealed record MediaSearchResult(
     MediaType Type,
     string? PosterUrl,
     decimal? CommunityRating,
-    DateOnly? ReleaseDate);
+    DateOnly? ReleaseDate,
+    IReadOnlyList<string>? Cast = null);
