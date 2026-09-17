@@ -483,7 +483,7 @@
                             <Grid>
                                 <TextBlock Text="Aucun titre masque."
                                            Foreground="#69717D" VerticalAlignment="Center"
-                                           Visibility="{Binding HasDislikedPreferences, Converter={StaticResource InverseBoolean}}" />
+                                           Visibility="{Binding ShowNoDislikedPreferences, Converter={StaticResource BoolToVisibility}}" />
                                 <ItemsControl ItemsSource="{Binding DislikedPreferences}"
                                               Visibility="{Binding HasDislikedPreferences, Converter={StaticResource BoolToVisibility}}">
                                     <ItemsControl.ItemTemplate>

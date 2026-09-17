@@ -165,6 +165,7 @@ public partial class LibraryViewModel(
     private bool isSettingsPage;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowNoDislikedPreferences))]
     private bool hasDislikedPreferences;
 
     [ObservableProperty]
@@ -174,6 +175,7 @@ public partial class LibraryViewModel(
     private MediaListItemViewModel? selectedLibraryItem;
 
     public bool ShowEmptyState => !IsLoading && !HasError && !HasItems;
+    public bool ShowNoDislikedPreferences => !HasDislikedPreferences;
     public bool HasFilteredItems => FilteredItems.Count > 0;
     public bool ShowNoLibraryResults => HasItems && !HasFilteredItems;
     private bool CanSaveMedia =>
