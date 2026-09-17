@@ -7,7 +7,8 @@ namespace Nookly.Application.Discovery;
 
 public sealed class DiscoveryPreferenceService(
     IDiscoveryPreferenceRepository repository,
-    IExternalMediaSearch externalMediaSearch)
+    IExternalMediaSearch externalMediaSearch,
+    ICurrentMember currentMember)
 {
     public Task<IReadOnlySet<string>> GetDislikedIdsAsync(
         string source,
@@ -38,6 +39,7 @@ public sealed class DiscoveryPreferenceService(
         if (preference is null)
         {
             preference = DiscoveryPreference.Create(source, externalId, title, isLiked, mediaType);
+            preference.AssignTo(currentMember.Id);
         }
         else
         {

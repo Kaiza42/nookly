@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Nookly.Domain.Media;
+using Nookly.Domain.Members;
 
 namespace Nookly.Infrastructure.Data.Configurations;
 
@@ -21,7 +22,8 @@ internal sealed class MediaItemConfiguration : IEntityTypeConfiguration<MediaIte
         builder.Property(item => item.CommunityRating).HasPrecision(4, 2);
         builder.Property(item => item.PersonalRating).HasPrecision(4, 2);
         builder.Property(item => item.PersonalNotes).HasMaxLength(4000);
+        builder.HasOne<Member>().WithMany().HasForeignKey(item => item.MemberId).OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasIndex(item => new { item.ExternalSource, item.ExternalId }).IsUnique();
+        builder.HasIndex(item => new { item.MemberId, item.ExternalSource, item.ExternalId }).IsUnique();
     }
 }

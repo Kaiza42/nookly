@@ -5,7 +5,7 @@ using Nookly.Infrastructure.Data;
 
 namespace Nookly.Infrastructure.Persistence;
 
-internal sealed class DiscoveryPreferenceRepository(NooklyDbContext dbContext)
+internal sealed class DiscoveryPreferenceRepository(NooklyDbContext dbContext, ICurrentMember currentMember)
     : IDiscoveryPreferenceRepository
 {
     public Task<DiscoveryPreference?> GetAsync(
@@ -13,7 +13,7 @@ internal sealed class DiscoveryPreferenceRepository(NooklyDbContext dbContext)
         string externalId,
         CancellationToken cancellationToken) =>
         dbContext.DiscoveryPreferences.SingleOrDefaultAsync(
-            item => item.ExternalSource == source && item.ExternalId == externalId,
+            item => item.MemberId == currentMember.Id && item.ExternalSource == source && item.ExternalId == externalId,
             cancellationToken);
 
     public async Task<IReadOnlySet<string>> GetDislikedIdsAsync(
@@ -21,7 +21,7 @@ internal sealed class DiscoveryPreferenceRepository(NooklyDbContext dbContext)
         CancellationToken cancellationToken)
     {
         var ids = await dbContext.DiscoveryPreferences
-            .Where(item => item.ExternalSource == source && !item.IsLiked)
+            .Where(item => item.MemberId == currentMember.Id && item.ExternalSource == source && !item.IsLiked)
             .Select(item => item.ExternalId)
             .ToArrayAsync(cancellationToken);
         return ids.ToHashSet(StringComparer.Ordinal);
@@ -32,14 +32,14 @@ internal sealed class DiscoveryPreferenceRepository(NooklyDbContext dbContext)
         CancellationToken cancellationToken) =>
         await dbContext.DiscoveryPreferences
             .AsNoTracking()
-            .Where(item => item.ExternalSource == source && item.IsLiked)
+            .Where(item => item.MemberId == currentMember.Id && item.ExternalSource == source && item.IsLiked)
             .OrderByDescending(item => item.UpdatedAtUtc)
             .ToListAsync(cancellationToken);
 
     public async Task<IReadOnlyList<DiscoveryPreference>> ListDislikedAsync(
         CancellationToken cancellationToken) =>
         await dbContext.DiscoveryPreferences
-            .Where(item => !item.IsLiked)
+            .Where(item => item.MemberId == currentMember.Id && !item.IsLiked)
             .OrderByDescending(item => item.UpdatedAtUtc)
             .ToListAsync(cancellationToken);
 

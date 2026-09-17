@@ -18,6 +18,7 @@ public sealed class MediaItem
     }
 
     public Guid Id { get; private set; }
+    public Guid? MemberId { get; private set; }
     public string Title { get; private set; } = string.Empty;
     public string? Description { get; private set; }
     public MediaType Type { get; private set; }
@@ -44,6 +45,8 @@ public sealed class MediaItem
 
         return new MediaItem(Guid.NewGuid(), title.Trim(), type, description?.Trim());
     }
+
+    public void AssignTo(Guid memberId) => MemberId = memberId;
 
     public void AttachExternalMetadata(
         string externalSource,

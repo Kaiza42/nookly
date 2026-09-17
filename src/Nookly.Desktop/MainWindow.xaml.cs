@@ -5,7 +5,8 @@ namespace Nookly.Desktop;
 
 public partial class MainWindow : Window
 {
-    public MainWindow(LibraryViewModel viewModel)
+    private readonly Services.SessionStore session;
+    public MainWindow(LibraryViewModel viewModel, Services.SessionStore session)
     {
         InitializeComponent();
         var workArea = SystemParameters.WorkArea;
@@ -14,7 +15,10 @@ public partial class MainWindow : Window
         Width = Math.Min(1120, workArea.Width);
         Height = Math.Min(720, workArea.Height);
         ViewModel = viewModel;
+        this.session = session;
         DataContext = viewModel;
+        MemberButton.Content = $"{session.Member?.DisplayName ?? "Membre"}  |  Deconnexion";
+        StaySignedInCheckBox.IsChecked = session.StaySignedIn;
     }
 
     public LibraryViewModel ViewModel { get; }
@@ -22,5 +26,19 @@ public partial class MainWindow : Window
     private async void OnLoaded(object sender, RoutedEventArgs e)
     {
         await ViewModel.LoadCommand.ExecuteAsync(null);
+    }
+
+    private void Logout_Click(object sender, RoutedEventArgs e)
+    {
+        if (MessageBox.Show("Voulez-vous vous deconnecter ?", "Deconnexion", MessageBoxButton.YesNo,
+                MessageBoxImage.Question) != MessageBoxResult.Yes) return;
+        session.ClearToken();
+        ((App)Application.Current).ShowLoginWindow();
+        Close();
+    }
+
+    private void StaySignedIn_Changed(object sender, RoutedEventArgs e)
+    {
+        if (IsLoaded) session.SetStaySignedIn(StaySignedInCheckBox.IsChecked == true);
     }
 }

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Nookly.Infrastructure.Data;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Nookly.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(NooklyDbContext))]
-    partial class NooklyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260917230425_AddMembers")]
+    partial class AddMembers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -174,22 +177,6 @@ namespace Nookly.Infrastructure.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("members", (string)null);
-                });
-
-            modelBuilder.Entity("Nookly.Domain.Discovery.DiscoveryPreference", b =>
-                {
-                    b.HasOne("Nookly.Domain.Members.Member", null)
-                        .WithMany()
-                        .HasForeignKey("MemberId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("Nookly.Domain.Media.MediaItem", b =>
-                {
-                    b.HasOne("Nookly.Domain.Members.Member", null)
-                        .WithMany()
-                        .HasForeignKey("MemberId")
-                        .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618
         }

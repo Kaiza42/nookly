@@ -3,7 +3,7 @@ using Nookly.Domain.Media;
 
 namespace Nookly.Application.Media;
 
-public sealed class MediaService(IMediaRepository repository) : IMediaService
+public sealed class MediaService(IMediaRepository repository, ICurrentMember currentMember) : IMediaService
 {
     public async Task<IReadOnlyList<MediaItemDto>> ListAsync(
         CancellationToken cancellationToken = default)
@@ -46,6 +46,7 @@ public sealed class MediaService(IMediaRepository repository) : IMediaService
         }
 
         var item = MediaItem.Create(request.Title, request.Type, request.Description);
+        item.AssignTo(currentMember.Id);
         item.AttachExternalMetadata(
             request.ExternalSource,
             request.ExternalId,

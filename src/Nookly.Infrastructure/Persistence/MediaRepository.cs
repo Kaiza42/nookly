@@ -5,13 +5,14 @@ using Nookly.Infrastructure.Data;
 
 namespace Nookly.Infrastructure.Persistence;
 
-internal sealed class MediaRepository(NooklyDbContext dbContext) : IMediaRepository
+internal sealed class MediaRepository(NooklyDbContext dbContext, ICurrentMember currentMember) : IMediaRepository
 {
     public async Task<IReadOnlyList<MediaItem>> ListAsync(
         CancellationToken cancellationToken = default)
     {
         return await dbContext.MediaItems
             .AsNoTracking()
+            .Where(item => item.MemberId == currentMember.Id)
             .OrderByDescending(item => item.CreatedAtUtc)
             .ToListAsync(cancellationToken);
     }
@@ -22,7 +23,7 @@ internal sealed class MediaRepository(NooklyDbContext dbContext) : IMediaReposit
     {
         return dbContext.MediaItems
             .AsNoTracking()
-            .SingleOrDefaultAsync(item => item.Id == id, cancellationToken);
+            .SingleOrDefaultAsync(item => item.Id == id && item.MemberId == currentMember.Id, cancellationToken);
     }
 
     public Task<bool> ExistsByExternalIdAsync(
@@ -31,7 +32,7 @@ internal sealed class MediaRepository(NooklyDbContext dbContext) : IMediaReposit
         CancellationToken cancellationToken = default)
     {
         return dbContext.MediaItems.AnyAsync(
-            item => item.ExternalSource == externalSource && item.ExternalId == externalId,
+            item => item.MemberId == currentMember.Id && item.ExternalSource == externalSource && item.ExternalId == externalId,
             cancellationToken);
     }
 
