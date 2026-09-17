@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Net.Http;
 using System.Globalization;
+using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nookly.Contracts.Media;
@@ -16,6 +17,7 @@ public partial class LibraryViewModel(
     private Guid? editingMediaId;
     private CancellationTokenSource? searchDebounceCancellation;
     private int searchVersion;
+    private CancellationTokenSource? detailsCancellation;
 
     public ObservableCollection<MediaListItemViewModel> Items { get; } = [];
     public ObservableCollection<MediaListItemViewModel> FilteredItems { get; } = [];
@@ -178,6 +180,24 @@ public partial class LibraryViewModel(
     [ObservableProperty]
     private MediaListItemViewModel? selectedLibraryItem;
 
+    [ObservableProperty]
+    private MediaDetailsViewModel? selectedMediaDetails;
+
+    [ObservableProperty]
+    private SeasonSummaryViewModel? selectedSeason;
+
+    [ObservableProperty]
+    private SeasonDetailsViewModel? selectedSeasonDetails;
+
+    [ObservableProperty]
+    private bool isLoadingDetails;
+
+    [ObservableProperty]
+    private bool hasDetailsError;
+
+    [ObservableProperty]
+    private string? detailsErrorMessage;
+
     public bool ShowEmptyState => !IsLoading && !HasError && !HasItems;
     public bool ShowNoDislikedPreferences => !HasDislikedPreferences;
     public bool ShowNoFilteredDislikedPreferences =>
@@ -249,24 +269,102 @@ public partial class LibraryViewModel(
     }
 
     [RelayCommand]
-    private void ShowSearchResult(MediaSearchResultViewModel item)
+    private async Task ShowSearchResultAsync(MediaSearchResultViewModel item)
     {
         SelectedSearchResult = item;
         SetPage(detail: true);
+        await LoadMediaDetailsAsync(item.Result.ExternalId, item.Result.Type);
     }
 
     [RelayCommand]
     private void BackToDiscover() => SetPage(discover: true);
 
     [RelayCommand]
-    private void ShowLibraryItem(MediaListItemViewModel item)
+    private async Task ShowLibraryItemAsync(MediaListItemViewModel item)
     {
         SelectedLibraryItem = item;
         SetPage(libraryDetail: true);
+        if (item.ExternalSource == "tmdb" && item.ExternalId is not null)
+        {
+            await LoadMediaDetailsAsync(item.ExternalId, item.Type);
+        }
+        else
+        {
+            SelectedMediaDetails = null;
+        }
     }
 
     [RelayCommand]
     private void BackToLibrary() => SetPage(library: true);
+
+    partial void OnSelectedSeasonChanged(SeasonSummaryViewModel? value)
+    {
+        if (value is not null && SelectedMediaDetails is not null)
+        {
+            _ = LoadSeasonDetailsAsync(SelectedMediaDetails.ExternalId, value.Number);
+        }
+    }
+
+    [RelayCommand]
+    private void OpenTrailer()
+    {
+        if (SelectedMediaDetails?.TrailerUrl is not { } trailerUrl) return;
+        Process.Start(new ProcessStartInfo(trailerUrl) { UseShellExecute = true });
+    }
+
+    private async Task LoadMediaDetailsAsync(string externalId, MediaType type)
+    {
+        detailsCancellation?.Cancel();
+        detailsCancellation = new CancellationTokenSource();
+        var cancellationToken = detailsCancellation.Token;
+        IsLoadingDetails = true;
+        HasDetailsError = false;
+        DetailsErrorMessage = null;
+        SelectedMediaDetails = null;
+        SelectedSeason = null;
+        SelectedSeasonDetails = null;
+        try
+        {
+            var details = await mediaApiClient.GetMediaDetailsAsync(externalId, type, cancellationToken);
+            SelectedMediaDetails = new MediaDetailsViewModel(details);
+            SelectedSeason = SelectedMediaDetails.Seasons.FirstOrDefault();
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (HttpRequestException)
+        {
+            HasDetailsError = true;
+            DetailsErrorMessage = "Impossible de charger les informations detaillees.";
+        }
+        finally
+        {
+            if (!cancellationToken.IsCancellationRequested) IsLoadingDetails = false;
+        }
+    }
+
+    private async Task LoadSeasonDetailsAsync(string externalId, int seasonNumber)
+    {
+        try
+        {
+            IsLoadingDetails = true;
+            SelectedSeasonDetails = null;
+            var season = await mediaApiClient.GetSeasonDetailsAsync(externalId, seasonNumber);
+            if (SelectedSeason?.Number == seasonNumber)
+            {
+                SelectedSeasonDetails = new SeasonDetailsViewModel(season);
+            }
+        }
+        catch (HttpRequestException)
+        {
+            HasDetailsError = true;
+            DetailsErrorMessage = "Impossible de charger cette saison.";
+        }
+        finally
+        {
+            IsLoadingDetails = false;
+        }
+    }
 
     [RelayCommand]
     private async Task ShowSettingsAsync()

@@ -17,6 +17,8 @@ public sealed class MediaListItemViewModel(MediaItemResponse mediaItem)
     public int? CurrentEpisode => mediaItem.CurrentEpisode;
     public decimal? CommunityRating => mediaItem.CommunityRating;
     public DateOnly? ReleaseDate => mediaItem.ReleaseDate;
+    public string? ExternalSource => mediaItem.ExternalSource;
+    public string? ExternalId => mediaItem.ExternalId;
     public bool SupportsEpisodeProgress => Type is MediaType.TvSeries or MediaType.Anime;
 
     public string TypeLabel => Type switch

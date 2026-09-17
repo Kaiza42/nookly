@@ -1,4 +1,5 @@
 using Nookly.Application.Search;
+using Nookly.Application.Details;
 
 namespace Nookly.Application.Abstractions;
 
@@ -19,5 +20,15 @@ public interface IExternalMediaSearch
     Task<string?> GetTitleAsync(
         string externalId,
         Nookly.Domain.Media.MediaType type,
+        CancellationToken cancellationToken = default);
+
+    Task<MediaDetails?> GetDetailsAsync(
+        string externalId,
+        Nookly.Domain.Media.MediaType type,
+        CancellationToken cancellationToken = default);
+
+    Task<SeasonDetails?> GetSeasonAsync(
+        string externalId,
+        int seasonNumber,
         CancellationToken cancellationToken = default);
 }

@@ -4,6 +4,7 @@ using Nookly.Application.Discovery;
 using Nookly.Contracts.Discovery;
 using Nookly.Contracts.Media;
 using Nookly.Contracts.Search;
+using Nookly.Contracts.Details;
 using ApplicationCreateMediaRequest = Nookly.Application.Media.CreateMediaRequest;
 using ApplicationUpdateMediaRequest = Nookly.Application.Media.UpdateMediaRequest;
 using ContractCreateMediaRequest = Nookly.Contracts.Media.CreateMediaRequest;
@@ -93,6 +94,62 @@ public static class MediaEndpoints
                 return Results.Problem(
                     "TMDB is temporarily unavailable.",
                     statusCode: StatusCodes.Status502BadGateway);
+            }
+        });
+
+        group.MapGet("/external/{type}/{externalId}", async (
+            ContractMediaType type,
+            string externalId,
+            IExternalMediaSearch search,
+            CancellationToken cancellationToken) =>
+        {
+            try
+            {
+                var details = await search.GetDetailsAsync(
+                    externalId,
+                    (Nookly.Domain.Media.MediaType)type,
+                    cancellationToken);
+                return details is null ? Results.NotFound() : Results.Ok(ToDetailsResponse(details));
+            }
+            catch (InvalidOperationException exception)
+            {
+                return Results.Problem(exception.Message, statusCode: StatusCodes.Status503ServiceUnavailable);
+            }
+            catch (HttpRequestException)
+            {
+                return Results.Problem("TMDB is temporarily unavailable.", statusCode: StatusCodes.Status502BadGateway);
+            }
+        });
+
+        group.MapGet("/external/{externalId}/seasons/{seasonNumber:int}", async (
+            string externalId,
+            int seasonNumber,
+            IExternalMediaSearch search,
+            CancellationToken cancellationToken) =>
+        {
+            if (seasonNumber < 1) return Results.BadRequest();
+            try
+            {
+                var season = await search.GetSeasonAsync(externalId, seasonNumber, cancellationToken);
+                return season is null ? Results.NotFound() : Results.Ok(new SeasonDetailsResponse(
+                    season.Number,
+                    season.Title,
+                    season.Description,
+                    season.PosterUrl,
+                    season.AirDate,
+                    season.CommunityRating,
+                    season.Episodes.Select(episode => new EpisodeResponse(
+                        episode.Number,
+                        episode.Title,
+                        episode.Description,
+                        episode.ImageUrl,
+                        episode.AirDate,
+                        episode.RuntimeMinutes,
+                        episode.CommunityRating)).ToArray()));
+            }
+            catch (HttpRequestException)
+            {
+                return Results.Problem("TMDB is temporarily unavailable.", statusCode: StatusCodes.Status502BadGateway);
             }
         });
 
@@ -236,4 +293,28 @@ public static class MediaEndpoints
         item.ReleaseDate,
         item.CreatedAtUtc,
         item.UpdatedAtUtc);
+
+    private static MediaDetailsResponse ToDetailsResponse(Nookly.Application.Details.MediaDetails details) => new(
+        details.ExternalId,
+        details.Title,
+        (ContractMediaType)details.Type,
+        details.Description,
+        details.PosterUrl,
+        details.BackdropUrl,
+        details.ReleaseDate,
+        details.AirStatus,
+        details.RuntimeMinutes,
+        details.CommunityRating,
+        details.Genres,
+        details.Directors,
+        details.Cast,
+        details.TrailerUrl,
+        details.Seasons.Select(season => new SeasonSummaryResponse(
+            season.Number,
+            season.Title,
+            season.Description,
+            season.PosterUrl,
+            season.AirDate,
+            season.EpisodeCount,
+            season.CommunityRating)).ToArray());
 }

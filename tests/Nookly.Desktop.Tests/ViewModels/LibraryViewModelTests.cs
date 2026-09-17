@@ -1,6 +1,7 @@
 using Nookly.Contracts.Media;
 using Nookly.Contracts.Search;
 using Nookly.Contracts.Discovery;
+using Nookly.Contracts.Details;
 using Nookly.Desktop.Services;
 using Nookly.Desktop.ViewModels;
 
@@ -77,7 +78,7 @@ public sealed class LibraryViewModelTests
         await viewModel.OpenDiscoverCommand.ExecuteAsync(null);
         await viewModel.SearchCommand.ExecuteAsync(null);
         var searchResult = Assert.Single(viewModel.SearchResults);
-        viewModel.ShowSearchResultCommand.Execute(searchResult);
+        await viewModel.ShowSearchResultCommand.ExecuteAsync(searchResult);
 
         Assert.True(viewModel.IsDetailPage);
         Assert.Equal("Dune", viewModel.SelectedSearchResult?.Title);
@@ -212,6 +213,31 @@ public sealed class LibraryViewModelTests
         Assert.True(viewModel.ShowNoFilteredDislikedPreferences);
     }
 
+    [Fact]
+    public async Task SeriesDetails_LoadFirstSeasonAndEpisodes()
+    {
+        var apiClient = new StubMediaApiClient
+        {
+            SearchResults =
+            [
+                new MediaSearchResultResponse(
+                    "tmdb", "30984", "Bleach", null, MediaType.Anime,
+                    null, 8.4m, new DateOnly(2004, 10, 5))
+            ],
+            Details = StubMediaApiClient.CreateSeriesDetails()
+        };
+        var viewModel = CreateViewModel(apiClient);
+        await viewModel.OpenDiscoverCommand.ExecuteAsync(null);
+
+        await viewModel.ShowSearchResultCommand.ExecuteAsync(Assert.Single(viewModel.SearchResults));
+        await WaitUntilAsync(() => viewModel.SelectedSeasonDetails is not null, TimeSpan.FromSeconds(2));
+
+        Assert.Equal("Bleach", viewModel.SelectedMediaDetails?.Title);
+        Assert.Equal("Saison 1", viewModel.SelectedSeasonDetails?.Title);
+        Assert.Equal("Le jour ou je suis devenu un Shinigami",
+            Assert.Single(viewModel.SelectedSeasonDetails!.Episodes).Title);
+    }
+
     private static LibraryViewModel CreateViewModel(StubMediaApiClient apiClient)
     {
         return new LibraryViewModel(apiClient, new ConfirmingDialogService());
@@ -234,6 +260,7 @@ public sealed class LibraryViewModelTests
         public SetDiscoveryPreferenceRequest? LastPreferenceRequest { get; private set; }
         public IReadOnlyList<DiscoveryPreferenceResponse> DislikedPreferences { get; init; } = [];
         public bool RestorePreferenceCalled { get; private set; }
+        public MediaDetailsResponse? Details { get; init; }
 
         public Task<IReadOnlyList<MediaItemResponse>> GetMediaAsync(
             CancellationToken cancellationToken = default)
@@ -252,6 +279,27 @@ public sealed class LibraryViewModelTests
             return SearchHandler?.Invoke(query ?? string.Empty, cancellationToken)
                    ?? Task.FromResult(SearchResults);
         }
+
+        public Task<MediaDetailsResponse> GetMediaDetailsAsync(
+            string externalId,
+            MediaType type,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult(Details ?? new MediaDetailsResponse(
+                externalId, "Dune", type, null, null, null, null, "Sorti", 155,
+                8m, [], [], [], null, []));
+
+        public Task<SeasonDetailsResponse> GetSeasonDetailsAsync(
+            string externalId,
+            int seasonNumber,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult(new SeasonDetailsResponse(
+                seasonNumber,
+                $"Saison {seasonNumber}",
+                "Premiere saison",
+                null,
+                new DateOnly(2004, 10, 5),
+                8.2m,
+                [new EpisodeResponse(1, "Le jour ou je suis devenu un Shinigami", "Ichigo rencontre Rukia.", null, new DateOnly(2004, 10, 5), 24, 8.1m)]));
 
         public Task<MediaItemResponse> CreateMediaAsync(
             CreateMediaRequest request,
@@ -338,6 +386,23 @@ public sealed class LibraryViewModelTests
                 now,
                 now);
         }
+
+        public static MediaDetailsResponse CreateSeriesDetails() => new(
+            "30984",
+            "Bleach",
+            MediaType.Anime,
+            "Ichigo devient Shinigami.",
+            null,
+            null,
+            new DateOnly(2004, 10, 5),
+            "Terminee",
+            24,
+            8.4m,
+            ["Animation", "Action"],
+            ["Noriyuki Abe"],
+            ["Masakazu Morita"],
+            null,
+            [new SeasonSummaryResponse(1, "Saison 1", "Premiere saison", null, new DateOnly(2004, 10, 5), 20, 8.2m)]);
     }
 
     private static async Task WaitUntilAsync(Func<bool> condition, TimeSpan timeout)

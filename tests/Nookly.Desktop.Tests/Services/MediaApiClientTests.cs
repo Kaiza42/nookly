@@ -123,6 +123,38 @@ public sealed class MediaApiClientTests
             handler.LastRequestUri?.OriginalString);
     }
 
+    [Fact]
+    public async Task GetMediaDetailsAsync_DeserializesRichDetails()
+    {
+        const string json = """
+            {
+              "externalId": "30984",
+              "title": "Bleach",
+              "type": "Anime",
+              "airStatus": "Terminee",
+              "runtimeMinutes": 24,
+              "genres": ["Animation", "Action"],
+              "directors": ["Noriyuki Abe"],
+              "cast": ["Masakazu Morita"],
+              "seasons": [{
+                "number": 1,
+                "title": "Saison 1",
+                "episodeCount": 20,
+                "communityRating": 8.2
+              }]
+            }
+            """;
+        var handler = new StubHttpMessageHandler(json);
+        using var httpClient = new HttpClient(handler) { BaseAddress = new Uri("http://localhost/") };
+        var client = new MediaApiClient(httpClient);
+
+        var details = await client.GetMediaDetailsAsync("30984", MediaType.Anime);
+
+        Assert.Equal("Bleach", details.Title);
+        Assert.Equal(20, Assert.Single(details.Seasons).EpisodeCount);
+        Assert.Equal("http://localhost/api/media/external/Anime/30984", handler.LastRequestUri?.OriginalString);
+    }
+
     private sealed class StubHttpMessageHandler(string content) : HttpMessageHandler
     {
         public HttpMethod? LastMethod { get; private set; }

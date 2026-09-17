@@ -5,6 +5,7 @@ using System.Text.Json.Serialization;
 using Nookly.Contracts.Media;
 using Nookly.Contracts.Search;
 using Nookly.Contracts.Discovery;
+using Nookly.Contracts.Details;
 
 namespace Nookly.Desktop.Services;
 
@@ -47,6 +48,32 @@ public sealed class MediaApiClient(HttpClient httpClient) : IMediaApiClient
                    JsonOptions,
                    cancellationToken)
                ?? [];
+    }
+
+    public async Task<MediaDetailsResponse> GetMediaDetailsAsync(
+        string externalId,
+        MediaType type,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.GetAsync(
+            $"api/media/external/{type}/{Uri.EscapeDataString(externalId)}",
+            cancellationToken);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<MediaDetailsResponse>(JsonOptions, cancellationToken)
+               ?? throw new InvalidOperationException("The API returned an empty response.");
+    }
+
+    public async Task<SeasonDetailsResponse> GetSeasonDetailsAsync(
+        string externalId,
+        int seasonNumber,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.GetAsync(
+            $"api/media/external/{Uri.EscapeDataString(externalId)}/seasons/{seasonNumber}",
+            cancellationToken);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<SeasonDetailsResponse>(JsonOptions, cancellationToken)
+               ?? throw new InvalidOperationException("The API returned an empty response.");
     }
 
     public async Task<MediaItemResponse> CreateMediaAsync(

@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Options;
 using Nookly.Application.Abstractions;
+using Nookly.Application.Details;
 using Nookly.Application.Search;
 using Nookly.Domain.Media;
 
@@ -25,6 +26,88 @@ public sealed class TmdbClient(HttpClient httpClient, IOptions<TmdbOptions> opti
             GetToken(),
             cancellationToken);
         return details?.Title ?? details?.Name;
+    }
+
+    public async Task<MediaDetails?> GetDetailsAsync(
+        string externalId,
+        MediaType type,
+        CancellationToken cancellationToken = default)
+    {
+        if (type == MediaType.Manga) return null;
+        var mediaKind = type == MediaType.Movie ? "movie" : "tv";
+        var details = await GetAsync<TmdbFullDetailsResponse>(
+            $"{mediaKind}/{externalId}?language=fr-FR&append_to_response=credits,videos",
+            GetToken(),
+            cancellationToken);
+        if (details is null) return null;
+
+        var directors = details.Credits?.Crew
+            .Where(person => person.Job == "Director")
+            .Select(person => person.Name)
+            .Concat(details.CreatedBy?.Select(person => person.Name) ?? [])
+            .Distinct(StringComparer.CurrentCultureIgnoreCase)
+            .Take(4)
+            .ToArray() ?? [];
+        var trailer = details.Videos?.Results.FirstOrDefault(video =>
+            video.Site == "YouTube" && video.Type == "Trailer" && video.Official)
+            ?? details.Videos?.Results.FirstOrDefault(video =>
+                video.Site == "YouTube" && video.Type == "Trailer");
+
+        return new MediaDetails(
+            externalId,
+            details.Title ?? details.Name ?? string.Empty,
+            type,
+            details.Overview,
+            ToImageUrl(details.PosterPath),
+            ToImageUrl(details.BackdropPath),
+            ParseDate(details.ReleaseDate ?? details.FirstAirDate),
+            TranslateStatus(details.Status),
+            details.Runtime ?? details.EpisodeRunTime?.FirstOrDefault(),
+            details.VoteAverage,
+            details.Genres?.Select(genre => genre.Name).ToArray() ?? [],
+            directors,
+            details.Credits?.Cast.Select(person => person.Name).Take(8).ToArray() ?? [],
+            trailer is null ? null : $"https://www.youtube.com/watch?v={trailer.Key}",
+            details.Seasons?
+                .Where(season => season.SeasonNumber > 0)
+                .Select(season => new SeasonSummary(
+                    season.SeasonNumber,
+                    season.Name,
+                    season.Overview,
+                    ToImageUrl(season.PosterPath),
+                    ParseDate(season.AirDate),
+                    season.EpisodeCount,
+                    season.VoteAverage))
+                .OrderBy(season => season.Number)
+                .ToArray() ?? []);
+    }
+
+    public async Task<SeasonDetails?> GetSeasonAsync(
+        string externalId,
+        int seasonNumber,
+        CancellationToken cancellationToken = default)
+    {
+        var season = await GetAsync<TmdbSeasonResponse>(
+            $"tv/{externalId}/season/{seasonNumber}?language=fr-FR",
+            GetToken(),
+            cancellationToken);
+        return season is null
+            ? null
+            : new SeasonDetails(
+                season.SeasonNumber,
+                season.Name,
+                season.Overview,
+                ToImageUrl(season.PosterPath),
+                ParseDate(season.AirDate),
+                season.VoteAverage,
+                season.Episodes.Select(episode => new EpisodeDetails(
+                    episode.EpisodeNumber,
+                    episode.Name,
+                    episode.Overview,
+                    ToImageUrl(episode.StillPath),
+                    ParseDate(episode.AirDate),
+                    episode.Runtime,
+                    episode.VoteAverage)).ToArray());
     }
 
     public async Task<IReadOnlyList<MediaSearchResult>> RecommendAsync(
@@ -229,6 +312,24 @@ public sealed class TmdbClient(HttpClient httpClient, IOptions<TmdbOptions> opti
             releaseDate);
     }
 
+    private static string? ToImageUrl(string? path) =>
+        string.IsNullOrWhiteSpace(path) ? null : $"{PosterBaseUrl}{path}";
+
+    private static DateOnly? ParseDate(string? value) =>
+        DateOnly.TryParse(value, out var date) ? date : null;
+
+    private static string? TranslateStatus(string? status) => status switch
+    {
+        "Returning Series" => "En diffusion",
+        "Ended" => "Terminee",
+        "Canceled" => "Annulee",
+        "In Production" => "En production",
+        "Released" => "Sorti",
+        "Post Production" => "Post-production",
+        "Planned" => "Planifie",
+        _ => status
+    };
+
     private static MediaType GetMediaType(TmdbSearchItem item, string mediaType)
     {
         var isJapaneseAnimation = (item.GenreIds?.Contains(16) ?? false) &&
@@ -259,6 +360,63 @@ public sealed class TmdbClient(HttpClient httpClient, IOptions<TmdbOptions> opti
     private sealed record TmdbDetailsResponse(
         [property: JsonPropertyName("title")] string? Title,
         [property: JsonPropertyName("name")] string? Name);
+
+    private sealed record TmdbFullDetailsResponse(
+        [property: JsonPropertyName("title")] string? Title,
+        [property: JsonPropertyName("name")] string? Name,
+        [property: JsonPropertyName("overview")] string? Overview,
+        [property: JsonPropertyName("poster_path")] string? PosterPath,
+        [property: JsonPropertyName("backdrop_path")] string? BackdropPath,
+        [property: JsonPropertyName("release_date")] string? ReleaseDate,
+        [property: JsonPropertyName("first_air_date")] string? FirstAirDate,
+        [property: JsonPropertyName("status")] string? Status,
+        [property: JsonPropertyName("runtime")] int? Runtime,
+        [property: JsonPropertyName("episode_run_time")] int[]? EpisodeRunTime,
+        [property: JsonPropertyName("vote_average")] decimal? VoteAverage,
+        [property: JsonPropertyName("genres")] TmdbGenre[]? Genres,
+        [property: JsonPropertyName("created_by")] TmdbPersonWithName[]? CreatedBy,
+        [property: JsonPropertyName("credits")] TmdbFullCredits? Credits,
+        [property: JsonPropertyName("videos")] TmdbVideos? Videos,
+        [property: JsonPropertyName("seasons")] TmdbSeasonSummary[]? Seasons);
+
+    private sealed record TmdbGenre([property: JsonPropertyName("name")] string Name);
+    private sealed record TmdbPersonWithName([property: JsonPropertyName("name")] string Name);
+    private sealed record TmdbFullCredits(
+        [property: JsonPropertyName("cast")] TmdbCastMember[] Cast,
+        [property: JsonPropertyName("crew")] TmdbCrewMember[] Crew);
+    private sealed record TmdbCrewMember(
+        [property: JsonPropertyName("name")] string Name,
+        [property: JsonPropertyName("job")] string Job);
+    private sealed record TmdbVideos([property: JsonPropertyName("results")] TmdbVideo[] Results);
+    private sealed record TmdbVideo(
+        [property: JsonPropertyName("key")] string Key,
+        [property: JsonPropertyName("site")] string Site,
+        [property: JsonPropertyName("type")] string Type,
+        [property: JsonPropertyName("official")] bool Official);
+    private sealed record TmdbSeasonSummary(
+        [property: JsonPropertyName("season_number")] int SeasonNumber,
+        [property: JsonPropertyName("name")] string Name,
+        [property: JsonPropertyName("overview")] string? Overview,
+        [property: JsonPropertyName("poster_path")] string? PosterPath,
+        [property: JsonPropertyName("air_date")] string? AirDate,
+        [property: JsonPropertyName("episode_count")] int EpisodeCount,
+        [property: JsonPropertyName("vote_average")] decimal? VoteAverage);
+    private sealed record TmdbSeasonResponse(
+        [property: JsonPropertyName("season_number")] int SeasonNumber,
+        [property: JsonPropertyName("name")] string Name,
+        [property: JsonPropertyName("overview")] string? Overview,
+        [property: JsonPropertyName("poster_path")] string? PosterPath,
+        [property: JsonPropertyName("air_date")] string? AirDate,
+        [property: JsonPropertyName("vote_average")] decimal? VoteAverage,
+        [property: JsonPropertyName("episodes")] TmdbEpisode[] Episodes);
+    private sealed record TmdbEpisode(
+        [property: JsonPropertyName("episode_number")] int EpisodeNumber,
+        [property: JsonPropertyName("name")] string Name,
+        [property: JsonPropertyName("overview")] string? Overview,
+        [property: JsonPropertyName("still_path")] string? StillPath,
+        [property: JsonPropertyName("air_date")] string? AirDate,
+        [property: JsonPropertyName("runtime")] int? Runtime,
+        [property: JsonPropertyName("vote_average")] decimal? VoteAverage);
 
     private sealed record TmdbSearchItem(
         [property: JsonPropertyName("id")] long Id,

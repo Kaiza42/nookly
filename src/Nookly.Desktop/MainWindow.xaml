@@ -25,6 +25,93 @@
             <Setter Property="BorderBrush" Value="#286C53" />
             <Setter Property="Cursor" Value="Hand" />
         </Style>
+        <DataTemplate x:Key="RichDetailsTemplate">
+            <StackPanel MaxWidth="850" HorizontalAlignment="Left">
+                <TextBlock Margin="0,14,0,0" Foreground="#69717D" TextWrapping="Wrap">
+                    <Run Text="{Binding ReleaseDateLabel, Mode=OneWay}" /><Run Text="  |  " />
+                    <Run Text="{Binding RuntimeLabel, Mode=OneWay}" /><Run Text="  |  " />
+                    <Run Text="{Binding StatusLabel, Mode=OneWay}" /><Run Text="  |  TMDB " />
+                    <Run Text="{Binding RatingLabel, Mode=OneWay}" />
+                </TextBlock>
+                <TextBlock Text="{Binding GenresLabel}" Margin="0,8,0,0" Foreground="#286C53"
+                           TextWrapping="Wrap" />
+                <TextBlock Margin="0,16,0,0" TextWrapping="Wrap">
+                    <Run Text="Realisation : " FontWeight="SemiBold" />
+                    <Run Text="{Binding DirectorsLabel, Mode=OneWay}" />
+                </TextBlock>
+                <TextBlock Margin="0,8,0,0" TextWrapping="Wrap">
+                    <Run Text="Distribution : " FontWeight="SemiBold" />
+                    <Run Text="{Binding CastLabel, Mode=OneWay}" />
+                </TextBlock>
+                <TextBlock Text="Synopsis" Margin="0,24,0,0" FontSize="16" FontWeight="SemiBold" />
+                <TextBlock Text="{Binding Description}" Margin="0,8,0,0" Foreground="#4D5967"
+                           LineHeight="21" TextWrapping="Wrap" />
+                <Button Content="Voir la bande-annonce" Command="{Binding DataContext.OpenTrailerCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                        Style="{StaticResource PrimaryButton}" HorizontalAlignment="Left" Margin="0,18,0,0"
+                        Visibility="{Binding HasTrailer, Converter={StaticResource BoolToVisibility}}" />
+                <StackPanel Margin="0,28,0,0"
+                            Visibility="{Binding HasSeasons, Converter={StaticResource BoolToVisibility}}">
+                    <TextBlock Text="Saisons et episodes" FontSize="19" FontWeight="SemiBold" />
+                    <ComboBox ItemsSource="{Binding Seasons}"
+                              SelectedItem="{Binding DataContext.SelectedSeason, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}"
+                              Height="34" Width="180" HorizontalAlignment="Left" Margin="0,12,0,0"
+                              VerticalContentAlignment="Center" />
+                    <ContentControl Content="{Binding DataContext.SelectedSeasonDetails, RelativeSource={RelativeSource AncestorType=Window}}"
+                                    Margin="0,14,0,0">
+                        <ContentControl.ContentTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Title}" FontSize="17" FontWeight="SemiBold" />
+                                    <TextBlock Text="{Binding MetaLabel}" Margin="0,5,0,0" Foreground="#69717D" />
+                                    <TextBlock Text="{Binding Description}" Margin="0,8,0,14" Foreground="#4D5967"
+                                               TextWrapping="Wrap" />
+                                    <ListBox ItemsSource="{Binding Episodes}" Height="440"
+                                             Background="Transparent" BorderThickness="0"
+                                             ScrollViewer.CanContentScroll="True"
+                                             VirtualizingPanel.IsVirtualizing="True"
+                                             VirtualizingPanel.VirtualizationMode="Recycling">
+                                        <ListBox.ItemContainerStyle>
+                                            <Style TargetType="ListBoxItem">
+                                                <Setter Property="Padding" Value="0" />
+                                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                                <Setter Property="Focusable" Value="False" />
+                                            </Style>
+                                        </ListBox.ItemContainerStyle>
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Background="White" BorderBrush="#E0E4E9" BorderThickness="1"
+                                                        CornerRadius="4" Padding="12" Margin="0,0,0,8">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="120" />
+                                                            <ColumnDefinition Width="*" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <Border Width="108" Height="61" Background="#E4E7EB" CornerRadius="3">
+                                                            <Image Source="{Binding ImageUrl}" Stretch="UniformToFill" />
+                                                        </Border>
+                                                        <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                                                            <TextBlock FontWeight="SemiBold" TextWrapping="Wrap">
+                                                                <Run Text="{Binding NumberLabel, Mode=OneWay}" /><Run Text=" - " />
+                                                                <Run Text="{Binding Title, Mode=OneWay}" />
+                                                            </TextBlock>
+                                                            <TextBlock Text="{Binding MetaLabel}" Margin="0,3,0,0"
+                                                                       Foreground="#69717D" FontSize="11" />
+                                                            <TextBlock Text="{Binding Description}" Margin="0,5,0,0"
+                                                                       Foreground="#4D5967" TextWrapping="Wrap"
+                                                                       MaxHeight="42" TextTrimming="CharacterEllipsis" />
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ContentControl.ContentTemplate>
+                    </ContentControl>
+                </StackPanel>
+            </StackPanel>
+        </DataTemplate>
     </Window.Resources>
 
     <Grid>
@@ -377,7 +464,8 @@
                 <Button Content="Retour aux resultats" Command="{Binding BackToDiscoverCommand}"
                         HorizontalAlignment="Left" Height="34" Padding="12,0"
                         Background="White" BorderBrush="#D7DBE1" />
-                <Grid Grid.Row="1" Margin="0,24,0,0">
+                <ScrollViewer Grid.Row="1" Margin="0,24,0,0" VerticalScrollBarVisibility="Auto">
+                <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="260" />
                         <ColumnDefinition Width="*" />
@@ -394,19 +482,20 @@
                             <Run Text="{Binding SelectedSearchResult.YearLabel, Mode=OneWay}" /><Run Text=" - Note TMDB " />
                             <Run Text="{Binding SelectedSearchResult.RatingLabel, Mode=OneWay}" />
                         </TextBlock>
-                        <TextBlock Text="{Binding SelectedSearchResult.CastLabel}" Margin="0,10,0,0"
-                                   Foreground="#4D5967" FontSize="14" TextWrapping="Wrap" />
-                        <TextBlock Text="Synopsis" Margin="0,30,0,0" FontSize="16" FontWeight="SemiBold" />
-                        <TextBlock Text="{Binding SelectedSearchResult.Description}" Margin="0,10,0,0"
-                                   MaxWidth="620" HorizontalAlignment="Left" Foreground="#4D5967"
-                                   FontSize="14" LineHeight="22" TextWrapping="Wrap" />
                         <Button Content="Ajouter a ma liste" Command="{Binding AddSearchResultCommand}"
                                 CommandParameter="{Binding SelectedSearchResult}"
-                                Style="{StaticResource PrimaryButton}" HorizontalAlignment="Left" Margin="0,34,0,0" />
+                                Style="{StaticResource PrimaryButton}" HorizontalAlignment="Left" Margin="0,18,0,0" />
+                        <TextBlock Text="Chargement des informations..." Margin="0,18,0,0" Foreground="#69717D"
+                                   Visibility="{Binding IsLoadingDetails, Converter={StaticResource BoolToVisibility}}" />
+                        <ContentControl Content="{Binding SelectedMediaDetails}"
+                                        ContentTemplate="{StaticResource RichDetailsTemplate}" />
                         <TextBlock Text="{Binding SearchErrorMessage}" Margin="0,12,0,0" Foreground="#8E2F2A"
                                    Visibility="{Binding HasSearchError, Converter={StaticResource BoolToVisibility}}" />
+                        <TextBlock Text="{Binding DetailsErrorMessage}" Margin="0,12,0,0" Foreground="#8E2F2A"
+                                   Visibility="{Binding HasDetailsError, Converter={StaticResource BoolToVisibility}}" />
                     </StackPanel>
                 </Grid>
+                </ScrollViewer>
             </Grid>
 
             <!-- Fiche d'un media deja present dans la bibliotheque. -->
@@ -445,9 +534,12 @@
                             <TextBlock Text="{Binding SelectedLibraryItem.ProgressLabel}" Margin="0,7,0,0"
                                        Foreground="#4D5967"
                                        Visibility="{Binding SelectedLibraryItem.SupportsEpisodeProgress, Converter={StaticResource BoolToVisibility}}" />
-                            <TextBlock Text="Synopsis" Margin="0,26,0,0" FontSize="16" FontWeight="SemiBold" />
-                            <TextBlock Text="{Binding SelectedLibraryItem.Description}" Margin="0,8,0,0"
-                                       Foreground="#4D5967" LineHeight="21" TextWrapping="Wrap" />
+                            <TextBlock Text="Chargement des informations..." Margin="0,18,0,0" Foreground="#69717D"
+                                       Visibility="{Binding IsLoadingDetails, Converter={StaticResource BoolToVisibility}}" />
+                            <ContentControl Content="{Binding SelectedMediaDetails}"
+                                            ContentTemplate="{StaticResource RichDetailsTemplate}" />
+                            <TextBlock Text="{Binding DetailsErrorMessage}" Margin="0,12,0,0" Foreground="#8E2F2A"
+                                       Visibility="{Binding HasDetailsError, Converter={StaticResource BoolToVisibility}}" />
                             <TextBlock Text="Mes informations" Margin="0,26,0,0" FontSize="16" FontWeight="SemiBold" />
                             <TextBlock Text="{Binding SelectedLibraryItem.RatingLabel, StringFormat=Ma note : {0}}"
                                        Margin="0,8,0,0" Foreground="#4D5967" />
