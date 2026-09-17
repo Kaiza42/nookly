@@ -11,4 +11,8 @@ public interface IExternalMediaSearch
         int? year = null,
         string? actor = null,
         CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<MediaSearchResult>> RecommendAsync(
+        IReadOnlyList<RecommendationSeed> seeds,
+        CancellationToken cancellationToken = default);
 }

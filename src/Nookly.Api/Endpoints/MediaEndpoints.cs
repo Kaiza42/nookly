@@ -33,6 +33,7 @@ public static class MediaEndpoints
             string? actor,
             IExternalMediaSearch search,
             DiscoveryPreferenceService preferences,
+            IMediaService mediaService,
             CancellationToken cancellationToken) =>
         {
             if (year is < 1900 or > 2100)
@@ -42,16 +43,36 @@ public static class MediaEndpoints
 
             try
             {
-                var results = await search.SearchAsync(
-                    query,
-                    type is null ? null : (Nookly.Domain.Media.MediaType)type,
-                    genreId,
-                    year,
-                    actor,
-                    cancellationToken);
+                var isUnfilteredDiscovery = string.IsNullOrWhiteSpace(query) && type is null &&
+                                            genreId is null && year is null &&
+                                            string.IsNullOrWhiteSpace(actor);
+                IReadOnlyList<Nookly.Application.Search.MediaSearchResult> results;
+                if (isUnfilteredDiscovery)
+                {
+                    var seeds = await preferences.GetRecommendationSeedsAsync("tmdb", cancellationToken);
+                    results = seeds.Count > 0
+                        ? await search.RecommendAsync(seeds, cancellationToken)
+                        : await search.SearchAsync(null, cancellationToken: cancellationToken);
+                }
+                else
+                {
+                    results = await search.SearchAsync(
+                        query,
+                        type is null ? null : (Nookly.Domain.Media.MediaType)type,
+                        genreId,
+                        year,
+                        actor,
+                        cancellationToken);
+                }
                 var dislikedIds = await preferences.GetDislikedIdsAsync("tmdb", cancellationToken);
+                var libraryItems = await mediaService.ListAsync(cancellationToken);
+                var libraryIds = libraryItems
+                    .Where(item => item.ExternalSource == "tmdb" && item.ExternalId is not null)
+                    .Select(item => item.ExternalId!)
+                    .ToHashSet(StringComparer.Ordinal);
                 return Results.Ok(results
-                    .Where(item => !dislikedIds.Contains(item.ExternalId))
+                    .Where(item => !dislikedIds.Contains(item.ExternalId) &&
+                                   !libraryIds.Contains(item.ExternalId))
                     .Select(item => new MediaSearchResultResponse(
                     item.ExternalSource,
                     item.ExternalId,
@@ -90,6 +111,7 @@ public static class MediaEndpoints
                 request.ExternalSource,
                 request.ExternalId,
                 request.IsLiked,
+                (Nookly.Domain.Media.MediaType)request.Type,
                 cancellationToken);
             return Results.NoContent();
         });

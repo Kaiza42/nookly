@@ -13,6 +13,33 @@ public sealed class TmdbClient(HttpClient httpClient, IOptions<TmdbOptions> opti
 {
     private const string PosterBaseUrl = "https://image.tmdb.org/t/p/w500";
 
+    public async Task<IReadOnlyList<MediaSearchResult>> RecommendAsync(
+        IReadOnlyList<RecommendationSeed> seeds,
+        CancellationToken cancellationToken = default)
+    {
+        var token = GetToken();
+        var requests = seeds
+            .Where(seed => seed.Type != MediaType.Manga)
+            .Select(async seed =>
+            {
+                var mediaKind = seed.Type == MediaType.Movie ? "movie" : "tv";
+                var payload = await GetAsync<TmdbSearchResponse>(
+                    $"{mediaKind}/{seed.ExternalId}/recommendations?language=fr-FR&page=1",
+                    token,
+                    cancellationToken);
+                return payload?.Results.Select(item => MapResult(item, mediaKind)) ?? [];
+            });
+
+        var recommendations = (await Task.WhenAll(requests))
+            .SelectMany(items => items)
+            .GroupBy(item => item.ExternalId)
+            .Select(group => group.First())
+            .OrderBy(_ => Random.Shared.Next())
+            .Take(12)
+            .ToArray();
+        return await AddCastAsync(recommendations, token, cancellationToken);
+    }
+
     public async Task<IReadOnlyList<MediaSearchResult>> SearchAsync(
         string? query,
         MediaType? type = null,
@@ -21,12 +48,7 @@ public sealed class TmdbClient(HttpClient httpClient, IOptions<TmdbOptions> opti
         string? actor = null,
         CancellationToken cancellationToken = default)
     {
-        var token = options.Value.ReadAccessToken;
-        if (string.IsNullOrWhiteSpace(token))
-        {
-            throw new InvalidOperationException(
-                "TMDB is not configured. Set Tmdb:ReadAccessToken in the API configuration.");
-        }
+        var token = GetToken();
 
         if (!string.IsNullOrWhiteSpace(query) && type is null && genreId is null && year is null &&
             string.IsNullOrWhiteSpace(actor))
@@ -98,6 +120,18 @@ public sealed class TmdbClient(HttpClient httpClient, IOptions<TmdbOptions> opti
             .Take(12)
             .ToArray();
         return await AddCastAsync(selectedResults, token, cancellationToken);
+    }
+
+    private string GetToken()
+    {
+        var token = options.Value.ReadAccessToken;
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            throw new InvalidOperationException(
+                "TMDB is not configured. Set Tmdb:ReadAccessToken in the API configuration.");
+        }
+
+        return token;
     }
 
     private async Task<IReadOnlyList<MediaSearchResult>> AddCastAsync(

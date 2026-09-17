@@ -242,10 +242,15 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-                <StackPanel>
-                    <TextBlock Text="Decouvrir" FontSize="28" FontWeight="SemiBold" />
-                    <TextBlock Text="Explore les films, series et animes du catalogue" Margin="0,5,0,0" Foreground="#69717D" />
-                </StackPanel>
+                <Grid>
+                    <StackPanel>
+                        <TextBlock Text="Decouvrir" FontSize="28" FontWeight="SemiBold" />
+                        <TextBlock Text="Explore les films, series et animes du catalogue" Margin="0,5,0,0" Foreground="#69717D" />
+                    </StackPanel>
+                    <Button Content="Nouvelle selection" Command="{Binding RefreshRecommendationsCommand}"
+                            HorizontalAlignment="Right" VerticalAlignment="Center"
+                            Height="34" Padding="12,0" Background="White" BorderBrush="#D7DBE1" />
+                </Grid>
                 <Grid Grid.Row="1" Margin="0,22,0,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />

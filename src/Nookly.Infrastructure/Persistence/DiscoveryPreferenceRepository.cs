@@ -27,6 +27,15 @@ internal sealed class DiscoveryPreferenceRepository(NooklyDbContext dbContext)
         return ids.ToHashSet(StringComparer.Ordinal);
     }
 
+    public async Task<IReadOnlyList<DiscoveryPreference>> GetLikedAsync(
+        string source,
+        CancellationToken cancellationToken) =>
+        await dbContext.DiscoveryPreferences
+            .AsNoTracking()
+            .Where(item => item.ExternalSource == source && item.IsLiked)
+            .OrderByDescending(item => item.UpdatedAtUtc)
+            .ToListAsync(cancellationToken);
+
     public async Task SaveAsync(DiscoveryPreference preference, CancellationToken cancellationToken)
     {
         if (preference.Id == 0) dbContext.DiscoveryPreferences.Add(preference);

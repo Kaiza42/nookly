@@ -212,6 +212,14 @@ public partial class LibraryViewModel(
     {
         CloseForm();
         SetPage(discover: true);
+        await LoadRecommendationsAsync();
+    }
+
+    [RelayCommand]
+    private Task RefreshRecommendationsAsync() => LoadRecommendationsAsync();
+
+    private async Task LoadRecommendationsAsync()
+    {
         searchDebounceCancellation?.Cancel();
         SearchQuery = string.Empty;
         ActorQuery = string.Empty;
@@ -381,7 +389,8 @@ public partial class LibraryViewModel(
             await mediaApiClient.SetDiscoveryPreferenceAsync(new SetDiscoveryPreferenceRequest(
                 item.Result.ExternalSource,
                 item.Result.ExternalId,
-                isLiked));
+                isLiked,
+                item.Result.Type));
             SearchResults.Remove(item);
             HasSearchResults = SearchResults.Count > 0;
         }
