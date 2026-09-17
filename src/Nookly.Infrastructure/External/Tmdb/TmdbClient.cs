@@ -13,6 +13,20 @@ public sealed class TmdbClient(HttpClient httpClient, IOptions<TmdbOptions> opti
 {
     private const string PosterBaseUrl = "https://image.tmdb.org/t/p/w500";
 
+    public async Task<string?> GetTitleAsync(
+        string externalId,
+        MediaType type,
+        CancellationToken cancellationToken = default)
+    {
+        if (type == MediaType.Manga) return null;
+        var mediaKind = type == MediaType.Movie ? "movie" : "tv";
+        var details = await GetAsync<TmdbDetailsResponse>(
+            $"{mediaKind}/{externalId}?language=fr-FR",
+            GetToken(),
+            cancellationToken);
+        return details?.Title ?? details?.Name;
+    }
+
     public async Task<IReadOnlyList<MediaSearchResult>> RecommendAsync(
         IReadOnlyList<RecommendationSeed> seeds,
         CancellationToken cancellationToken = default)
@@ -241,6 +255,10 @@ public sealed class TmdbClient(HttpClient httpClient, IOptions<TmdbOptions> opti
 
     private sealed record TmdbCastMember(
         [property: JsonPropertyName("name")] string Name);
+
+    private sealed record TmdbDetailsResponse(
+        [property: JsonPropertyName("title")] string? Title,
+        [property: JsonPropertyName("name")] string? Name);
 
     private sealed record TmdbSearchItem(
         [property: JsonPropertyName("id")] long Id,

@@ -15,4 +15,9 @@ public interface IExternalMediaSearch
     Task<IReadOnlyList<MediaSearchResult>> RecommendAsync(
         IReadOnlyList<RecommendationSeed> seeds,
         CancellationToken cancellationToken = default);
+
+    Task<string?> GetTitleAsync(
+        string externalId,
+        Nookly.Domain.Media.MediaType type,
+        CancellationToken cancellationToken = default);
 }

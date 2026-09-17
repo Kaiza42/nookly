@@ -5,7 +5,9 @@ using Nookly.Application.Search;
 
 namespace Nookly.Application.Discovery;
 
-public sealed class DiscoveryPreferenceService(IDiscoveryPreferenceRepository repository)
+public sealed class DiscoveryPreferenceService(
+    IDiscoveryPreferenceRepository repository,
+    IExternalMediaSearch externalMediaSearch)
 {
     public Task<IReadOnlySet<string>> GetDislikedIdsAsync(
         string source,
@@ -49,6 +51,27 @@ public sealed class DiscoveryPreferenceService(IDiscoveryPreferenceRepository re
         CancellationToken cancellationToken = default)
     {
         var preferences = await repository.ListDislikedAsync(cancellationToken);
+        foreach (var item in preferences.Where(item =>
+                     string.IsNullOrWhiteSpace(item.Title) && item.MediaType is not null))
+        {
+            try
+            {
+                var title = await externalMediaSearch.GetTitleAsync(
+                    item.ExternalId,
+                    item.MediaType!.Value,
+                    cancellationToken);
+                if (!string.IsNullOrWhiteSpace(title))
+                {
+                    item.Update(title, item.IsLiked, item.MediaType);
+                    await repository.SaveAsync(item, cancellationToken);
+                }
+            }
+            catch (HttpRequestException)
+            {
+                // Keep the identifier as a fallback when TMDB is unavailable.
+            }
+        }
+
         return preferences.Select(item => new DiscoveryPreferenceDto(
             item.ExternalSource,
             item.ExternalId,
