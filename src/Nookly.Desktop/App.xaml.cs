@@ -33,6 +33,7 @@ public partial class App : Application
         services.AddTransient<LibraryViewModel>();
         services.AddTransient<MainWindow>();
         services.AddTransient<LoginWindow>();
+        services.AddTransient<WelcomeWindow>();
 
         serviceProvider = services.BuildServiceProvider();
         var session = serviceProvider.GetRequiredService<SessionStore>();
@@ -49,6 +50,16 @@ public partial class App : Application
     }
 
     public void ShowLoginWindow() => serviceProvider!.GetRequiredService<LoginWindow>().Show();
+
+    public async Task ShowWelcomeThenMainAsync(string displayName)
+    {
+        var welcome = serviceProvider!.GetRequiredService<WelcomeWindow>();
+        welcome.SetDisplayName(displayName);
+        welcome.Show();
+        await Task.Delay(TimeSpan.FromSeconds(3));
+        ShowMainWindow();
+        welcome.Close();
+    }
 
     protected override void OnExit(ExitEventArgs e)
     {

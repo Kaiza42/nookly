@@ -32,7 +32,10 @@ public partial class LoginWindow : Window
             var response = isRegistering
                 ? await authentication.RegisterAsync(new RegisterRequest(EmailBox.Text, PasswordBox.Password, PseudoBox.Text, stay))
                 : await authentication.LoginAsync(new LoginRequest(EmailBox.Text, PasswordBox.Password, stay));
-            session.Set(response, stay); ((App)Application.Current).ShowMainWindow(); Close();
+            session.Set(response, stay);
+            var app = (App)Application.Current;
+            await app.ShowWelcomeThenMainAsync(response.Member.DisplayName);
+            Close();
         }
         catch (Exception exception) { ErrorText.Text = exception.Message; }
         finally { SubmitButton.IsEnabled = true; }
