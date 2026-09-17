@@ -187,6 +187,31 @@ public sealed class LibraryViewModelTests
         Assert.True(apiClient.RestorePreferenceCalled);
     }
 
+    [Fact]
+    public async Task Settings_SearchFiltersHiddenTitlesByTitleOrType()
+    {
+        var apiClient = new StubMediaApiClient
+        {
+            DislikedPreferences =
+            [
+                new DiscoveryPreferenceResponse("tmdb", "438631", "Dune", MediaType.Movie, false),
+                new DiscoveryPreferenceResponse("tmdb", "30984", "Bleach", MediaType.Anime, false)
+            ]
+        };
+        var viewModel = CreateViewModel(apiClient);
+        await viewModel.ShowSettingsCommand.ExecuteAsync(null);
+
+        viewModel.DislikedPreferencesSearchQuery = "Ble";
+        Assert.Equal("Bleach", Assert.Single(viewModel.FilteredDislikedPreferences).Title);
+
+        viewModel.DislikedPreferencesSearchQuery = "Film";
+        Assert.Equal("Dune", Assert.Single(viewModel.FilteredDislikedPreferences).Title);
+
+        viewModel.DislikedPreferencesSearchQuery = "inconnu";
+        Assert.Empty(viewModel.FilteredDislikedPreferences);
+        Assert.True(viewModel.ShowNoFilteredDislikedPreferences);
+    }
+
     private static LibraryViewModel CreateViewModel(StubMediaApiClient apiClient)
     {
         return new LibraryViewModel(apiClient, new ConfirmingDialogService());

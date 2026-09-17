@@ -21,6 +21,7 @@ public partial class LibraryViewModel(
     public ObservableCollection<MediaListItemViewModel> FilteredItems { get; } = [];
     public ObservableCollection<MediaSearchResultViewModel> SearchResults { get; } = [];
     public ObservableCollection<DiscoveryPreferenceViewModel> DislikedPreferences { get; } = [];
+    public ObservableCollection<DiscoveryPreferenceViewModel> FilteredDislikedPreferences { get; } = [];
 
     public IReadOnlyList<MediaTypeOption> MediaTypes { get; } =
     [
@@ -169,6 +170,9 @@ public partial class LibraryViewModel(
     private bool hasDislikedPreferences;
 
     [ObservableProperty]
+    private string dislikedPreferencesSearchQuery = string.Empty;
+
+    [ObservableProperty]
     private MediaSearchResultViewModel? selectedSearchResult;
 
     [ObservableProperty]
@@ -176,6 +180,8 @@ public partial class LibraryViewModel(
 
     public bool ShowEmptyState => !IsLoading && !HasError && !HasItems;
     public bool ShowNoDislikedPreferences => !HasDislikedPreferences;
+    public bool ShowNoFilteredDislikedPreferences =>
+        HasDislikedPreferences && FilteredDislikedPreferences.Count == 0;
     public bool HasFilteredItems => FilteredItems.Count > 0;
     public bool ShowNoLibraryResults => HasItems && !HasFilteredItems;
     private bool CanSaveMedia =>
@@ -189,6 +195,9 @@ public partial class LibraryViewModel(
     private bool CanAddSearchResult(MediaSearchResultViewModel? item) => !IsSearching && item is not null;
 
     partial void OnLibrarySearchQueryChanged(string value) => RefreshLibraryFilter();
+
+    partial void OnDislikedPreferencesSearchQueryChanged(string value) =>
+        RefreshDislikedPreferencesFilter();
 
     partial void OnSearchQueryChanged(string value)
     {
@@ -275,6 +284,7 @@ public partial class LibraryViewModel(
             await mediaApiClient.RestoreDiscoveryPreferenceAsync(item.ExternalSource, item.ExternalId);
             DislikedPreferences.Remove(item);
             HasDislikedPreferences = DislikedPreferences.Count > 0;
+            RefreshDislikedPreferencesFilter();
         }
         catch (HttpRequestException)
         {
@@ -295,6 +305,7 @@ public partial class LibraryViewModel(
             }
 
             HasDislikedPreferences = DislikedPreferences.Count > 0;
+            RefreshDislikedPreferencesFilter();
         }
         catch (HttpRequestException)
         {
@@ -662,6 +673,24 @@ public partial class LibraryViewModel(
 
         OnPropertyChanged(nameof(HasFilteredItems));
         OnPropertyChanged(nameof(ShowNoLibraryResults));
+    }
+
+    private void RefreshDislikedPreferencesFilter()
+    {
+        var query = DislikedPreferencesSearchQuery.Trim();
+        var filtered = string.IsNullOrEmpty(query)
+            ? DislikedPreferences
+            : DislikedPreferences.Where(item =>
+                item.Title.Contains(query, StringComparison.CurrentCultureIgnoreCase) ||
+                item.TypeLabel.Contains(query, StringComparison.CurrentCultureIgnoreCase));
+
+        FilteredDislikedPreferences.Clear();
+        foreach (var item in filtered)
+        {
+            FilteredDislikedPreferences.Add(item);
+        }
+
+        OnPropertyChanged(nameof(ShowNoFilteredDislikedPreferences));
     }
 
     private bool TryParseRating(out decimal? rating)

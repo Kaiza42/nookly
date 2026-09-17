@@ -478,13 +478,22 @@
                         <TextBlock Text="Decouverte" FontSize="18" FontWeight="SemiBold" />
                         <TextBlock Text="Gere les contenus retires de tes suggestions."
                                    Margin="0,5,0,12" Foreground="#69717D" />
+                        <TextBlock Text="Rechercher un titre masque" Margin="0,0,0,5"
+                                   Foreground="#4F5966" FontSize="12" />
+                        <TextBox Text="{Binding DislikedPreferencesSearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                                 Height="34" Padding="10,0" Margin="0,0,0,10"
+                                 VerticalContentAlignment="Center"
+                                 ToolTip="Rechercher un titre masque" />
                         <Border Padding="14" Background="White" BorderBrush="#D7DBE1"
                                 BorderThickness="1" CornerRadius="6">
                             <Grid>
                                 <TextBlock Text="Aucun titre masque."
                                            Foreground="#69717D" VerticalAlignment="Center"
                                            Visibility="{Binding ShowNoDislikedPreferences, Converter={StaticResource BoolToVisibility}}" />
-                                <ItemsControl ItemsSource="{Binding DislikedPreferences}"
+                                <TextBlock Text="Aucun titre ne correspond a cette recherche."
+                                           Foreground="#69717D" VerticalAlignment="Center"
+                                           Visibility="{Binding ShowNoFilteredDislikedPreferences, Converter={StaticResource BoolToVisibility}}" />
+                                <ItemsControl ItemsSource="{Binding FilteredDislikedPreferences}"
                                               Visibility="{Binding HasDislikedPreferences, Converter={StaticResource BoolToVisibility}}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
