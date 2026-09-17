@@ -86,6 +86,42 @@ public sealed class LibraryViewModelTests
         Assert.True(viewModel.ShowNoLibraryResults);
     }
 
+    [Fact]
+    public async Task CatalogSearch_CanSearchAgainAfterClearingAnInFlightQuery()
+    {
+        var firstSearchStarted = new TaskCompletionSource(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+        var apiClient = new StubMediaApiClient
+        {
+            SearchHandler = async (query, cancellationToken) =>
+            {
+                if (query == "Bleach")
+                {
+                    firstSearchStarted.SetResult();
+                    await Task.Delay(Timeout.Infinite, cancellationToken);
+                }
+
+                return
+                [
+                    new MediaSearchResultResponse(
+                        "tmdb", "438631", "Dune", null, MediaType.Movie,
+                        null, 7.8m, new DateOnly(2021, 9, 15))
+                ];
+            }
+        };
+        var viewModel = CreateViewModel(apiClient);
+
+        viewModel.SearchQuery = "Bleach";
+        await firstSearchStarted.Task.WaitAsync(TimeSpan.FromSeconds(2));
+        viewModel.SearchQuery = string.Empty;
+        viewModel.SearchQuery = "Dune";
+
+        await WaitUntilAsync(() => viewModel.HasSearchResults, TimeSpan.FromSeconds(2));
+
+        Assert.False(viewModel.IsSearching);
+        Assert.Equal("Dune", Assert.Single(viewModel.SearchResults).Title);
+    }
+
     private static LibraryViewModel CreateViewModel(StubMediaApiClient apiClient)
     {
         return new LibraryViewModel(apiClient, new ConfirmingDialogService());
@@ -101,6 +137,9 @@ public sealed class LibraryViewModelTests
 
         public bool DeleteCalled { get; private set; }
         public IReadOnlyList<MediaSearchResultResponse> SearchResults { get; init; } = [];
+        public Func<string, CancellationToken, Task<IReadOnlyList<MediaSearchResultResponse>>>?
+            SearchHandler
+        { get; init; }
         public CreateMediaRequest? LastCreateRequest { get; private set; }
 
         public Task<IReadOnlyList<MediaItemResponse>> GetMediaAsync(
@@ -113,7 +152,8 @@ public sealed class LibraryViewModelTests
             string query,
             CancellationToken cancellationToken = default)
         {
-            return Task.FromResult(SearchResults);
+            return SearchHandler?.Invoke(query, cancellationToken)
+                   ?? Task.FromResult(SearchResults);
         }
 
         public Task<MediaItemResponse> CreateMediaAsync(
@@ -162,6 +202,15 @@ public sealed class LibraryViewModelTests
                 null,
                 now,
                 now);
+        }
+    }
+
+    private static async Task WaitUntilAsync(Func<bool> condition, TimeSpan timeout)
+    {
+        using var cancellation = new CancellationTokenSource(timeout);
+        while (!condition())
+        {
+            await Task.Delay(20, cancellation.Token);
         }
     }
 

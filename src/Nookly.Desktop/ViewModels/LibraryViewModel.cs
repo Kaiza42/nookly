@@ -137,15 +137,15 @@ public partial class LibraryViewModel(
     partial void OnSearchQueryChanged(string value)
     {
         searchDebounceCancellation?.Cancel();
-        searchDebounceCancellation?.Dispose();
         var version = ++searchVersion;
+        IsSearching = false;
+        SearchResults.Clear();
+        HasSearchResults = false;
+        HasSearchError = false;
+        SearchErrorMessage = null;
 
         if (string.IsNullOrWhiteSpace(value))
         {
-            SearchResults.Clear();
-            HasSearchResults = false;
-            HasSearchError = false;
-            SearchErrorMessage = null;
             return;
         }
 
