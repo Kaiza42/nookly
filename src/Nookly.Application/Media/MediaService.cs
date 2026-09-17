@@ -68,12 +68,10 @@ public sealed class MediaService(IMediaRepository repository) : IMediaService
             return null;
         }
 
-        item.Update(
-            request.Title,
-            request.Type,
-            request.Description,
+        item.UpdatePersonalTracking(
             request.Status,
-            request.PersonalRating);
+            request.PersonalRating,
+            request.PersonalNotes);
         await repository.UpdateAsync(item, cancellationToken);
         return ToDto(item);
     }
@@ -99,6 +97,7 @@ public sealed class MediaService(IMediaRepository repository) : IMediaService
         item.Type,
         item.Status,
         item.PersonalRating,
+        item.PersonalNotes,
         item.ExternalSource,
         item.ExternalId,
         item.PosterUrl,

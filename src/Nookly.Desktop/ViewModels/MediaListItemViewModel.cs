@@ -10,6 +10,7 @@ public sealed class MediaListItemViewModel(MediaItemResponse mediaItem)
     public MediaType Type => mediaItem.Type;
     public MediaStatus Status => mediaItem.Status;
     public decimal? PersonalRating => mediaItem.PersonalRating;
+    public string? PersonalNotes => mediaItem.PersonalNotes;
 
     public string TypeLabel => Type switch
     {

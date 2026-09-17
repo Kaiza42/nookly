@@ -8,21 +8,22 @@ namespace Nookly.Desktop.Tests.ViewModels;
 public sealed class LibraryViewModelTests
 {
     [Fact]
-    public async Task SaveMediaCommand_UpdatesSelectedMediaAndRating()
+    public async Task SaveMediaCommand_UpdatesOnlyPersonalTracking()
     {
         var apiClient = new StubMediaApiClient();
         var viewModel = CreateViewModel(apiClient);
         await viewModel.LoadCommand.ExecuteAsync(null);
         var item = Assert.Single(viewModel.Items);
         viewModel.EditMediaCommand.Execute(item);
-        viewModel.NewTitle = "Dune: Part Two";
         viewModel.SelectedRating = viewModel.Ratings.Single(x => x.Value == 9m);
+        viewModel.NewPersonalNotes = "Mon avis personnel";
 
         await viewModel.SaveMediaCommand.ExecuteAsync(null);
 
         var updated = Assert.Single(viewModel.Items);
-        Assert.Equal("Dune: Part Two", updated.Title);
+        Assert.Equal("Dune", updated.Title);
         Assert.Equal(9m, updated.PersonalRating);
+        Assert.Equal("Mon avis personnel", updated.PersonalNotes);
     }
 
     [Fact]
@@ -170,7 +171,13 @@ public sealed class LibraryViewModelTests
             UpdateMediaRequest request,
             CancellationToken cancellationToken = default)
         {
-            item = CreateResponse(request.Title, request.Type, request.Status, request.PersonalRating, id);
+            item = CreateResponse(
+                item.Title,
+                item.Type,
+                request.Status,
+                request.PersonalRating,
+                id,
+                request.PersonalNotes);
             return Task.FromResult(item);
         }
 
@@ -185,7 +192,8 @@ public sealed class LibraryViewModelTests
             MediaType type,
             MediaStatus status,
             decimal? rating,
-            Guid? id = null)
+            Guid? id = null,
+            string? personalNotes = null)
         {
             var now = DateTimeOffset.UtcNow;
             return new MediaItemResponse(
@@ -195,6 +203,7 @@ public sealed class LibraryViewModelTests
                 type,
                 status,
                 rating,
+                personalNotes,
                 null,
                 null,
                 null,

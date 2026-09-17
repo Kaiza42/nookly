@@ -94,33 +94,38 @@
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="1.2*" />
+                            <ColumnDefinition Width="180" />
                             <ColumnDefinition Width="140" />
-                            <ColumnDefinition Width="1.5*" />
+                            <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.ColumnSpan="4" Text="Modifier le media" Margin="0,0,0,14"
+                        <TextBlock Grid.ColumnSpan="4" Text="Mes informations personnelles" Margin="0,0,0,14"
                                    FontSize="16" FontWeight="SemiBold" />
-                        <TextBox Grid.Row="1" Text="{Binding NewTitle, UpdateSourceTrigger=PropertyChanged}"
-                                 Height="36" Padding="10,7" Margin="0,0,12,0" />
-                        <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding MediaTypes}"
-                                  SelectedItem="{Binding SelectedMediaType}" DisplayMemberPath="Label"
-                                  Height="36" Margin="0,0,12,0" />
-                        <TextBox Grid.Row="1" Grid.Column="2"
-                                 Text="{Binding NewDescription, UpdateSourceTrigger=PropertyChanged}"
-                                 Height="36" Padding="10,7" Margin="0,0,12,0" />
-                        <StackPanel Grid.Row="1" Grid.Column="3" Orientation="Horizontal">
+                        <StackPanel Grid.Row="1" Margin="0,0,12,0">
+                            <TextBlock Text="Statut" Margin="0,0,0,6" Foreground="#4D5967" />
+                            <ComboBox ItemsSource="{Binding MediaStatuses}"
+                                      SelectedItem="{Binding SelectedMediaStatus}" DisplayMemberPath="Label"
+                                      Height="36" />
+                        </StackPanel>
+                        <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,12,0">
+                            <TextBlock Text="Ma note /10" Margin="0,0,0,6" Foreground="#4D5967" />
+                            <ComboBox ItemsSource="{Binding Ratings}"
+                                      SelectedItem="{Binding SelectedRating}" DisplayMemberPath="Label"
+                                      Height="36" />
+                        </StackPanel>
+                        <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,0,12,0">
+                            <TextBlock Text="Mes notes personnelles" Margin="0,0,0,6" Foreground="#4D5967" />
+                            <TextBox Text="{Binding NewPersonalNotes, UpdateSourceTrigger=PropertyChanged}"
+                                     MinHeight="64" MaxHeight="100" Padding="10,7"
+                                     AcceptsReturn="True" TextWrapping="Wrap"
+                                     VerticalScrollBarVisibility="Auto" />
+                        </StackPanel>
+                        <StackPanel Grid.Row="1" Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Bottom">
                             <Button Content="Annuler" Command="{Binding CancelEditCommand}"
                                     Height="36" Padding="13,0" Margin="0,0,8,0" />
                             <Button Content="Enregistrer" Command="{Binding SaveMediaCommand}"
                                     Style="{StaticResource PrimaryButton}" />
                         </StackPanel>
-                        <ComboBox Grid.Row="2" ItemsSource="{Binding MediaStatuses}"
-                                  SelectedItem="{Binding SelectedMediaStatus}" DisplayMemberPath="Label"
-                                  Height="36" Margin="0,12,12,0" />
-                        <ComboBox Grid.Row="2" Grid.Column="1" ItemsSource="{Binding Ratings}"
-                                  SelectedItem="{Binding SelectedRating}" DisplayMemberPath="Label"
-                                  Height="36" Margin="0,12,12,0" />
                     </Grid>
                 </Border>
 
@@ -162,6 +167,9 @@
                                             <TextBlock Text="{Binding Title}" FontSize="16" FontWeight="SemiBold" />
                                             <TextBlock Text="{Binding Description}" Margin="0,4,18,0"
                                                        Foreground="#747D89" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{Binding PersonalNotes}" Margin="0,5,18,0"
+                                                       Foreground="#286C53" FontStyle="Italic"
+                                                       TextTrimming="CharacterEllipsis" />
                                         </StackPanel>
                                         <TextBlock Grid.Column="1" Text="{Binding TypeLabel}" VerticalAlignment="Center" />
                                         <TextBlock Grid.Column="2" Text="{Binding StatusLabel}" VerticalAlignment="Center"

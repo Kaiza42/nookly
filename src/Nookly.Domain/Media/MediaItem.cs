@@ -27,6 +27,7 @@ public sealed class MediaItem
     public string? PosterUrl { get; private set; }
     public decimal? CommunityRating { get; private set; }
     public decimal? PersonalRating { get; private set; }
+    public string? PersonalNotes { get; private set; }
     public DateOnly? ReleaseDate { get; private set; }
     public DateTimeOffset CreatedAtUtc { get; private set; }
     public DateTimeOffset UpdatedAtUtc { get; private set; }
@@ -61,18 +62,11 @@ public sealed class MediaItem
         UpdatedAtUtc = DateTimeOffset.UtcNow;
     }
 
-    public void Update(
-        string title,
-        MediaType type,
-        string? description,
+    public void UpdatePersonalTracking(
         MediaStatus status,
-        decimal? personalRating)
+        decimal? personalRating,
+        string? personalNotes)
     {
-        if (string.IsNullOrWhiteSpace(title))
-        {
-            throw new ArgumentException("A title is required.", nameof(title));
-        }
-
         if (personalRating is < 0 or > 10)
         {
             throw new ArgumentOutOfRangeException(
@@ -80,11 +74,9 @@ public sealed class MediaItem
                 "The personal rating must be between 0 and 10.");
         }
 
-        Title = title.Trim();
-        Type = type;
-        Description = description?.Trim();
         Status = status;
         PersonalRating = personalRating;
+        PersonalNotes = string.IsNullOrWhiteSpace(personalNotes) ? null : personalNotes.Trim();
         UpdatedAtUtc = DateTimeOffset.UtcNow;
     }
 }

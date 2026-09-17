@@ -9,6 +9,7 @@ public sealed record MediaItemDto(
     MediaType Type,
     MediaStatus Status,
     decimal? PersonalRating,
+    string? PersonalNotes,
     string? ExternalSource,
     string? ExternalId,
     string? PosterUrl,

@@ -24,15 +24,18 @@ public sealed class MediaItemTests
     }
 
     [Fact]
-    public void Update_WithValidRating_UpdatesEditableFields()
+    public void UpdatePersonalTracking_UpdatesOnlyPersonalFields()
     {
-        var item = MediaItem.Create("Dune", MediaType.Movie);
+        var item = MediaItem.Create("Dune", MediaType.Movie, "Science fiction");
 
-        item.Update("Dune: Part Two", MediaType.Movie, "Updated", MediaStatus.Completed, 9m);
+        item.UpdatePersonalTracking(MediaStatus.Completed, 9m, "Excellent film");
 
-        Assert.Equal("Dune: Part Two", item.Title);
+        Assert.Equal("Dune", item.Title);
+        Assert.Equal(MediaType.Movie, item.Type);
+        Assert.Equal("Science fiction", item.Description);
         Assert.Equal(MediaStatus.Completed, item.Status);
         Assert.Equal(9m, item.PersonalRating);
+        Assert.Equal("Excellent film", item.PersonalNotes);
     }
 
     [Theory]
@@ -43,6 +46,6 @@ public sealed class MediaItemTests
         var item = MediaItem.Create("Dune", MediaType.Movie);
 
         Assert.Throws<ArgumentOutOfRangeException>(() =>
-            item.Update("Dune", MediaType.Movie, null, MediaStatus.Planned, rating));
+            item.UpdatePersonalTracking(MediaStatus.Planned, rating, null));
     }
 }

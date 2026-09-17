@@ -20,6 +20,7 @@ internal sealed class MediaItemConfiguration : IEntityTypeConfiguration<MediaIte
         builder.Property(item => item.PosterUrl).HasMaxLength(2000);
         builder.Property(item => item.CommunityRating).HasPrecision(4, 2);
         builder.Property(item => item.PersonalRating).HasPrecision(4, 2);
+        builder.Property(item => item.PersonalNotes).HasMaxLength(4000);
 
         builder.HasIndex(item => new { item.ExternalSource, item.ExternalId }).IsUnique();
     }

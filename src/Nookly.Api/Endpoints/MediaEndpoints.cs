@@ -109,11 +109,9 @@ public static class MediaEndpoints
             try
             {
                 var command = new ApplicationUpdateMediaRequest(
-                    request.Title,
-                    (Nookly.Domain.Media.MediaType)request.Type,
-                    request.Description,
                     (Nookly.Domain.Media.MediaStatus)request.Status,
-                    request.PersonalRating);
+                    request.PersonalRating,
+                    request.PersonalNotes);
                 var mediaItem = await service.UpdateAsync(id, command, cancellationToken);
                 return mediaItem is null ? Results.NotFound() : Results.Ok(ToResponse(mediaItem));
             }
@@ -142,6 +140,7 @@ public static class MediaEndpoints
         (ContractMediaType)item.Type,
         (ContractMediaStatus)item.Status,
         item.PersonalRating,
+        item.PersonalNotes,
         item.ExternalSource,
         item.ExternalId,
         item.PosterUrl,

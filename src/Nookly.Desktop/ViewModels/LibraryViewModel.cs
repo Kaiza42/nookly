@@ -62,21 +62,13 @@ public partial class LibraryViewModel(
     private bool isEditMode;
 
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(SaveMediaCommand))]
-    private string newTitle = string.Empty;
-
-    [ObservableProperty]
-    private string? newDescription;
-
-    [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(SaveMediaCommand))]
-    private MediaTypeOption? selectedMediaType;
-
-    [ObservableProperty]
     private MediaStatusOption? selectedMediaStatus;
 
     [ObservableProperty]
     private RatingOption? selectedRating;
+
+    [ObservableProperty]
+    private string? newPersonalNotes;
 
     [ObservableProperty]
     private bool hasFormError;
@@ -124,8 +116,6 @@ public partial class LibraryViewModel(
         !IsLoading &&
         IsEditMode &&
         editingMediaId is not null &&
-        !string.IsNullOrWhiteSpace(NewTitle) &&
-        SelectedMediaType is not null &&
         SelectedMediaStatus is not null;
 
     private bool CanDeleteMedia(MediaListItemViewModel? item) => !IsLoading && item is not null;
@@ -300,11 +290,9 @@ public partial class LibraryViewModel(
     {
         editingMediaId = item.Id;
         IsEditMode = true;
-        NewTitle = item.Title;
-        NewDescription = item.Description;
-        SelectedMediaType = MediaTypes.Single(option => option.Value == item.Type);
         SelectedMediaStatus = MediaStatuses.Single(option => option.Value == item.Status);
         SelectedRating = Ratings.Single(option => option.Value == item.PersonalRating);
+        NewPersonalNotes = item.PersonalNotes;
         HasFormError = false;
         FormErrorMessage = null;
         IsCreatePanelOpen = true;
@@ -313,7 +301,7 @@ public partial class LibraryViewModel(
     [RelayCommand(CanExecute = nameof(CanSaveMedia))]
     private async Task SaveMediaAsync()
     {
-        if (SelectedMediaType is null || SelectedMediaStatus is null)
+        if (SelectedMediaStatus is null)
         {
             return;
         }
@@ -330,11 +318,9 @@ public partial class LibraryViewModel(
             }
 
             var request = new UpdateMediaRequest(
-                NewTitle,
-                SelectedMediaType.Value,
-                NewDescription,
                 SelectedMediaStatus.Value,
-                SelectedRating?.Value);
+                SelectedRating?.Value,
+                NewPersonalNotes);
             var saved = await mediaApiClient.UpdateMediaAsync(id, request);
 
             var existing = Items.First(item => item.Id == id);
@@ -438,11 +424,9 @@ public partial class LibraryViewModel(
     {
         editingMediaId = null;
         IsEditMode = false;
-        NewTitle = string.Empty;
-        NewDescription = null;
-        SelectedMediaType = MediaTypes[0];
         SelectedMediaStatus = MediaStatuses[0];
         SelectedRating = Ratings[0];
+        NewPersonalNotes = null;
         HasFormError = false;
         FormErrorMessage = null;
     }
