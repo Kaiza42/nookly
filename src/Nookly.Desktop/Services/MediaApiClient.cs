@@ -39,6 +39,32 @@ public sealed class MediaApiClient(HttpClient httpClient) : IMediaApiClient
                ?? throw new InvalidOperationException("The API returned an empty response.");
     }
 
+    public async Task<MediaItemResponse> UpdateMediaAsync(
+        Guid id,
+        UpdateMediaRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.PutAsJsonAsync(
+            $"api/media/{id}",
+            request,
+            JsonOptions,
+            cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadFromJsonAsync<MediaItemResponse>(
+                   JsonOptions,
+                   cancellationToken)
+               ?? throw new InvalidOperationException("The API returned an empty response.");
+    }
+
+    public async Task DeleteMediaAsync(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.DeleteAsync($"api/media/{id}", cancellationToken);
+        response.EnsureSuccessStatusCode();
+    }
+
     private static JsonSerializerOptions CreateJsonOptions()
     {
         var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);

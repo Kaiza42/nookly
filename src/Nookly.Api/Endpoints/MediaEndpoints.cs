@@ -1,7 +1,9 @@
 using Nookly.Application.Media;
 using Nookly.Contracts.Media;
 using ApplicationCreateMediaRequest = Nookly.Application.Media.CreateMediaRequest;
+using ApplicationUpdateMediaRequest = Nookly.Application.Media.UpdateMediaRequest;
 using ContractCreateMediaRequest = Nookly.Contracts.Media.CreateMediaRequest;
+using ContractUpdateMediaRequest = Nookly.Contracts.Media.UpdateMediaRequest;
 using ContractMediaStatus = Nookly.Contracts.Media.MediaStatus;
 using ContractMediaType = Nookly.Contracts.Media.MediaType;
 
@@ -52,6 +54,38 @@ public static class MediaEndpoints
             }
         });
 
+        group.MapPut("/{id:guid}", async (
+            Guid id,
+            ContractUpdateMediaRequest request,
+            IMediaService service,
+            CancellationToken cancellationToken) =>
+        {
+            try
+            {
+                var command = new ApplicationUpdateMediaRequest(
+                    request.Title,
+                    (Nookly.Domain.Media.MediaType)request.Type,
+                    request.Description,
+                    (Nookly.Domain.Media.MediaStatus)request.Status,
+                    request.PersonalRating);
+                var mediaItem = await service.UpdateAsync(id, command, cancellationToken);
+                return mediaItem is null ? Results.NotFound() : Results.Ok(ToResponse(mediaItem));
+            }
+            catch (ArgumentException exception)
+            {
+                return Results.BadRequest(new { error = exception.Message });
+            }
+        });
+
+        group.MapDelete("/{id:guid}", async (
+            Guid id,
+            IMediaService service,
+            CancellationToken cancellationToken) =>
+        {
+            var deleted = await service.DeleteAsync(id, cancellationToken);
+            return deleted ? Results.NoContent() : Results.NotFound();
+        });
+
         return endpoints;
     }
 
@@ -61,5 +95,7 @@ public static class MediaEndpoints
         item.Description,
         (ContractMediaType)item.Type,
         (ContractMediaStatus)item.Status,
-        item.CreatedAtUtc);
+        item.PersonalRating,
+        item.CreatedAtUtc,
+        item.UpdatedAtUtc);
 }

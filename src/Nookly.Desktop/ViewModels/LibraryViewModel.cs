@@ -7,8 +7,12 @@ using Nookly.Desktop.Services;
 
 namespace Nookly.Desktop.ViewModels;
 
-public partial class LibraryViewModel(IMediaApiClient mediaApiClient) : ObservableObject
+public partial class LibraryViewModel(
+    IMediaApiClient mediaApiClient,
+    IUserDialogService userDialogService) : ObservableObject
 {
+    private Guid? editingMediaId;
+
     public ObservableCollection<MediaListItemViewModel> Items { get; } = [];
 
     public IReadOnlyList<MediaTypeOption> MediaTypes { get; } =
@@ -19,9 +23,21 @@ public partial class LibraryViewModel(IMediaApiClient mediaApiClient) : Observab
         new("Manga", MediaType.Manga)
     ];
 
+    public IReadOnlyList<MediaStatusOption> MediaStatuses { get; } =
+    [
+        new("A decouvrir", MediaStatus.Planned),
+        new("En cours", MediaStatus.InProgress),
+        new("Termine", MediaStatus.Completed),
+        new("En pause", MediaStatus.OnHold),
+        new("Abandonne", MediaStatus.Dropped)
+    ];
+
+    public IReadOnlyList<RatingOption> Ratings { get; } = CreateRatingOptions();
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowEmptyState))]
-    [NotifyCanExecuteChangedFor(nameof(AddMediaCommand))]
+    [NotifyCanExecuteChangedFor(nameof(SaveMediaCommand))]
+    [NotifyCanExecuteChangedFor(nameof(DeleteMediaCommand))]
     private bool isLoading;
 
     [ObservableProperty]
@@ -39,15 +55,26 @@ public partial class LibraryViewModel(IMediaApiClient mediaApiClient) : Observab
     private bool isCreatePanelOpen;
 
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(AddMediaCommand))]
+    [NotifyPropertyChangedFor(nameof(FormTitle))]
+    [NotifyPropertyChangedFor(nameof(SaveButtonLabel))]
+    private bool isEditMode;
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(SaveMediaCommand))]
     private string newTitle = string.Empty;
 
     [ObservableProperty]
     private string? newDescription;
 
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(AddMediaCommand))]
+    [NotifyCanExecuteChangedFor(nameof(SaveMediaCommand))]
     private MediaTypeOption? selectedMediaType;
+
+    [ObservableProperty]
+    private MediaStatusOption? selectedMediaStatus;
+
+    [ObservableProperty]
+    private RatingOption? selectedRating;
 
     [ObservableProperty]
     private bool hasFormError;
@@ -56,29 +83,49 @@ public partial class LibraryViewModel(IMediaApiClient mediaApiClient) : Observab
     private string? formErrorMessage;
 
     public bool ShowEmptyState => !IsLoading && !HasError && !HasItems;
+    public string FormTitle => IsEditMode ? "Modifier le media" : "Ajouter un media";
+    public string SaveButtonLabel => IsEditMode ? "Enregistrer" : "Ajouter";
 
-    private bool CanAddMedia =>
+    private bool CanSaveMedia =>
         !IsLoading &&
         !string.IsNullOrWhiteSpace(NewTitle) &&
-        SelectedMediaType is not null;
+        SelectedMediaType is not null &&
+        SelectedMediaStatus is not null;
+
+    private bool CanDeleteMedia(MediaListItemViewModel? item) => !IsLoading && item is not null;
 
     [RelayCommand]
     private void ToggleCreatePanel()
     {
-        IsCreatePanelOpen = !IsCreatePanelOpen;
-        HasFormError = false;
-        FormErrorMessage = null;
-
-        if (IsCreatePanelOpen && SelectedMediaType is null)
+        if (IsCreatePanelOpen && !IsEditMode)
         {
-            SelectedMediaType = MediaTypes[0];
+            CloseForm();
+            return;
         }
+
+        ResetForm();
+        IsCreatePanelOpen = true;
     }
 
-    [RelayCommand(CanExecute = nameof(CanAddMedia))]
-    private async Task AddMediaAsync()
+    [RelayCommand]
+    private void EditMedia(MediaListItemViewModel item)
     {
-        if (SelectedMediaType is null)
+        editingMediaId = item.Id;
+        IsEditMode = true;
+        NewTitle = item.Title;
+        NewDescription = item.Description;
+        SelectedMediaType = MediaTypes.Single(option => option.Value == item.Type);
+        SelectedMediaStatus = MediaStatuses.Single(option => option.Value == item.Status);
+        SelectedRating = Ratings.Single(option => option.Value == item.PersonalRating);
+        HasFormError = false;
+        FormErrorMessage = null;
+        IsCreatePanelOpen = true;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanSaveMedia))]
+    private async Task SaveMediaAsync()
+    {
+        if (SelectedMediaType is null || SelectedMediaStatus is null)
         {
             return;
         }
@@ -89,27 +136,74 @@ public partial class LibraryViewModel(IMediaApiClient mediaApiClient) : Observab
 
         try
         {
-            var request = new CreateMediaRequest(
-                NewTitle,
-                SelectedMediaType.Value,
-                NewDescription);
-            var created = await mediaApiClient.CreateMediaAsync(request);
+            MediaItemResponse saved;
+            if (IsEditMode && editingMediaId is Guid id)
+            {
+                var request = new UpdateMediaRequest(
+                    NewTitle,
+                    SelectedMediaType.Value,
+                    NewDescription,
+                    SelectedMediaStatus.Value,
+                    SelectedRating?.Value);
+                saved = await mediaApiClient.UpdateMediaAsync(id, request);
 
-            Items.Insert(0, new MediaListItemViewModel(created));
-            HasItems = true;
-            NewTitle = string.Empty;
-            NewDescription = null;
-            IsCreatePanelOpen = false;
+                var existing = Items.First(item => item.Id == id);
+                var index = Items.IndexOf(existing);
+                Items[index] = new MediaListItemViewModel(saved);
+            }
+            else
+            {
+                var request = new CreateMediaRequest(
+                    NewTitle,
+                    SelectedMediaType.Value,
+                    NewDescription);
+                saved = await mediaApiClient.CreateMediaAsync(request);
+                Items.Insert(0, new MediaListItemViewModel(saved));
+            }
+
+            HasItems = Items.Count > 0;
+            CloseForm();
         }
         catch (HttpRequestException)
         {
             HasFormError = true;
-            FormErrorMessage = "Impossible d'ajouter ce media. Verifie que l'API est demarree.";
+            FormErrorMessage = "Impossible d'enregistrer ce media. Verifie que l'API est demarree.";
         }
         catch (TaskCanceledException)
         {
             HasFormError = true;
-            FormErrorMessage = "L'ajout a pris trop de temps. Reessaie dans un instant.";
+            FormErrorMessage = "L'enregistrement a pris trop de temps. Reessaie dans un instant.";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    [RelayCommand(CanExecute = nameof(CanDeleteMedia))]
+    private async Task DeleteMediaAsync(MediaListItemViewModel item)
+    {
+        if (!userDialogService.ConfirmDelete(item.Title))
+        {
+            return;
+        }
+
+        IsLoading = true;
+        try
+        {
+            await mediaApiClient.DeleteMediaAsync(item.Id);
+            Items.Remove(item);
+            HasItems = Items.Count > 0;
+
+            if (editingMediaId == item.Id)
+            {
+                CloseForm();
+            }
+        }
+        catch (HttpRequestException)
+        {
+            HasError = true;
+            ErrorMessage = "Impossible de supprimer ce media.";
         }
         finally
         {
@@ -155,5 +249,35 @@ public partial class LibraryViewModel(IMediaApiClient mediaApiClient) : Observab
         {
             IsLoading = false;
         }
+    }
+
+    private void ResetForm()
+    {
+        editingMediaId = null;
+        IsEditMode = false;
+        NewTitle = string.Empty;
+        NewDescription = null;
+        SelectedMediaType = MediaTypes[0];
+        SelectedMediaStatus = MediaStatuses[0];
+        SelectedRating = Ratings[0];
+        HasFormError = false;
+        FormErrorMessage = null;
+    }
+
+    private void CloseForm()
+    {
+        ResetForm();
+        IsCreatePanelOpen = false;
+    }
+
+    private static IReadOnlyList<RatingOption> CreateRatingOptions()
+    {
+        var ratings = new List<RatingOption> { new("Sans note", null) };
+        ratings.AddRange(Enumerable.Range(0, 21).Select(value =>
+        {
+            var rating = value / 2m;
+            return new RatingOption($"{rating:0.#}/10", rating);
+        }));
+        return ratings;
     }
 }

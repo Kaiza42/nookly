@@ -29,11 +29,48 @@ public sealed class MediaService(IMediaRepository repository) : IMediaService
         return ToDto(item);
     }
 
+    public async Task<MediaItemDto?> UpdateAsync(
+        Guid id,
+        UpdateMediaRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var item = await repository.GetByIdAsync(id, cancellationToken);
+        if (item is null)
+        {
+            return null;
+        }
+
+        item.Update(
+            request.Title,
+            request.Type,
+            request.Description,
+            request.Status,
+            request.PersonalRating);
+        await repository.UpdateAsync(item, cancellationToken);
+        return ToDto(item);
+    }
+
+    public async Task<bool> DeleteAsync(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        var item = await repository.GetByIdAsync(id, cancellationToken);
+        if (item is null)
+        {
+            return false;
+        }
+
+        await repository.DeleteAsync(item, cancellationToken);
+        return true;
+    }
+
     private static MediaItemDto ToDto(MediaItem item) => new(
         item.Id,
         item.Title,
         item.Description,
         item.Type,
         item.Status,
-        item.CreatedAtUtc);
+        item.PersonalRating,
+        item.CreatedAtUtc,
+        item.UpdatedAtUtc);
 }

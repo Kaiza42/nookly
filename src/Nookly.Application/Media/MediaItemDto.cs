@@ -8,4 +8,6 @@ public sealed record MediaItemDto(
     string? Description,
     MediaType Type,
     MediaStatus Status,
-    DateTimeOffset CreatedAtUtc);
+    decimal? PersonalRating,
+    DateTimeOffset CreatedAtUtc,
+    DateTimeOffset UpdatedAtUtc);

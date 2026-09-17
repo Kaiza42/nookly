@@ -22,6 +22,7 @@ public partial class App : Application
             client.BaseAddress = new Uri(apiBaseAddress);
             client.Timeout = TimeSpan.FromSeconds(10);
         });
+        services.AddSingleton<IUserDialogService, UserDialogService>();
         services.AddTransient<LibraryViewModel>();
         services.AddTransient<MainWindow>();
 

@@ -22,4 +22,27 @@ public sealed class MediaItemTests
     {
         Assert.Throws<ArgumentException>(() => MediaItem.Create(title, MediaType.Movie));
     }
+
+    [Fact]
+    public void Update_WithValidRating_UpdatesEditableFields()
+    {
+        var item = MediaItem.Create("Dune", MediaType.Movie);
+
+        item.Update("Dune: Part Two", MediaType.Movie, "Updated", MediaStatus.Completed, 9m);
+
+        Assert.Equal("Dune: Part Two", item.Title);
+        Assert.Equal(MediaStatus.Completed, item.Status);
+        Assert.Equal(9m, item.PersonalRating);
+    }
+
+    [Theory]
+    [InlineData(-0.5)]
+    [InlineData(10.5)]
+    public void Update_WithRatingOutsideRange_Throws(decimal rating)
+    {
+        var item = MediaItem.Create("Dune", MediaType.Movie);
+
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            item.Update("Dune", MediaType.Movie, null, MediaStatus.Planned, rating));
+    }
 }

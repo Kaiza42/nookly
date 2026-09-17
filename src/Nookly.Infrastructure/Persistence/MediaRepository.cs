@@ -32,4 +32,20 @@ internal sealed class MediaRepository(NooklyDbContext dbContext) : IMediaReposit
         dbContext.MediaItems.Add(mediaItem);
         await dbContext.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task UpdateAsync(
+        MediaItem mediaItem,
+        CancellationToken cancellationToken = default)
+    {
+        dbContext.MediaItems.Update(mediaItem);
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task DeleteAsync(
+        MediaItem mediaItem,
+        CancellationToken cancellationToken = default)
+    {
+        dbContext.MediaItems.Remove(mediaItem);
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
 }

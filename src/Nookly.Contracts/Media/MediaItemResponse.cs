@@ -6,4 +6,6 @@ public sealed record MediaItemResponse(
     string? Description,
     MediaType Type,
     MediaStatus Status,
-    DateTimeOffset CreatedAtUtc);
+    decimal? PersonalRating,
+    DateTimeOffset CreatedAtUtc,
+    DateTimeOffset UpdatedAtUtc);

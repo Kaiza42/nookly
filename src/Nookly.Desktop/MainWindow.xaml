@@ -128,6 +128,8 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="1.2*" />
@@ -136,7 +138,14 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <StackPanel Margin="0,0,12,0">
+                    <TextBlock Grid.ColumnSpan="4"
+                               Text="{Binding FormTitle}"
+                               Margin="0,0,0,14"
+                               Foreground="#20242B"
+                               FontSize="16"
+                               FontWeight="SemiBold" />
+
+                    <StackPanel Grid.Row="1" Margin="0,0,12,0">
                         <TextBlock Text="Titre"
                                    Margin="0,0,0,6"
                                    Foreground="#4D5967"
@@ -147,7 +156,7 @@
                                  BorderBrush="#C9CED6" />
                     </StackPanel>
 
-                    <StackPanel Grid.Column="1" Margin="0,0,12,0">
+                    <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,12,0">
                         <TextBlock Text="Type"
                                    Margin="0,0,0,6"
                                    Foreground="#4D5967"
@@ -160,7 +169,7 @@
                                   BorderBrush="#C9CED6" />
                     </StackPanel>
 
-                    <StackPanel Grid.Column="2" Margin="0,0,12,0">
+                    <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,0,12,0">
                         <TextBlock Text="Description"
                                    Margin="0,0,0,6"
                                    Foreground="#4D5967"
@@ -171,7 +180,8 @@
                                  BorderBrush="#C9CED6" />
                     </StackPanel>
 
-                    <StackPanel Grid.Column="3"
+                    <StackPanel Grid.Row="1"
+                                Grid.Column="3"
                                 Margin="0,18,0,0"
                                 Orientation="Horizontal">
                         <Button Content="Annuler"
@@ -182,8 +192,8 @@
                                 Background="White"
                                 BorderBrush="#C9CED6"
                                 Cursor="Hand" />
-                        <Button Content="Enregistrer"
-                                Command="{Binding AddMediaCommand}"
+                        <Button Content="{Binding SaveButtonLabel}"
+                                Command="{Binding SaveMediaCommand}"
                                 Height="36"
                                 Padding="15,0"
                                 Background="#286C53"
@@ -192,7 +202,33 @@
                                 Cursor="Hand" />
                     </StackPanel>
 
-                    <TextBlock Grid.Row="1"
+                    <StackPanel Grid.Row="2" Margin="0,12,12,0">
+                        <TextBlock Text="Statut"
+                                   Margin="0,0,0,6"
+                                   Foreground="#4D5967"
+                                   FontSize="12" />
+                        <ComboBox ItemsSource="{Binding MediaStatuses}"
+                                  SelectedItem="{Binding SelectedMediaStatus}"
+                                  DisplayMemberPath="Label"
+                                  Height="36"
+                                  Padding="8,5"
+                                  BorderBrush="#C9CED6" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,12,12,0">
+                        <TextBlock Text="Note personnelle"
+                                   Margin="0,0,0,6"
+                                   Foreground="#4D5967"
+                                   FontSize="12" />
+                        <ComboBox ItemsSource="{Binding Ratings}"
+                                  SelectedItem="{Binding SelectedRating}"
+                                  DisplayMemberPath="Label"
+                                  Height="36"
+                                  Padding="8,5"
+                                  BorderBrush="#C9CED6" />
+                    </StackPanel>
+
+                    <TextBlock Grid.Row="3"
                                Grid.ColumnSpan="4"
                                Text="{Binding FormErrorMessage}"
                                Margin="0,12,0,0"
@@ -258,9 +294,11 @@
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="110" />
-                                        <ColumnDefinition Width="120" />
                                         <ColumnDefinition Width="90" />
+                                        <ColumnDefinition Width="100" />
+                                        <ColumnDefinition Width="80" />
+                                        <ColumnDefinition Width="80" />
+                                        <ColumnDefinition Width="170" />
                                     </Grid.ColumnDefinitions>
 
                                     <StackPanel>
@@ -284,10 +322,37 @@
                                                Foreground="#286C53"
                                                FontWeight="SemiBold" />
                                     <TextBlock Grid.Column="3"
+                                               Text="{Binding RatingLabel}"
+                                               VerticalAlignment="Center"
+                                               Foreground="#4D5967"
+                                               FontWeight="SemiBold" />
+                                    <TextBlock Grid.Column="4"
                                                Text="{Binding AddedDateLabel}"
                                                VerticalAlignment="Center"
                                                HorizontalAlignment="Right"
                                                Foreground="#7A838F" />
+                                    <StackPanel Grid.Column="5"
+                                                Orientation="Horizontal"
+                                                HorizontalAlignment="Right">
+                                        <Button Content="Modifier"
+                                                Command="{Binding DataContext.EditMediaCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                CommandParameter="{Binding}"
+                                                Height="30"
+                                                Padding="10,0"
+                                                Margin="0,0,6,0"
+                                                Background="White"
+                                                BorderBrush="#C9CED6"
+                                                Cursor="Hand" />
+                                        <Button Content="Supprimer"
+                                                Command="{Binding DataContext.DeleteMediaCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                CommandParameter="{Binding}"
+                                                Height="30"
+                                                Padding="10,0"
+                                                Background="#FFF1F0"
+                                                Foreground="#8E2F2A"
+                                                BorderBrush="#E6A39E"
+                                                Cursor="Hand" />
+                                    </StackPanel>
                                 </Grid>
                             </Border>
                         </DataTemplate>
