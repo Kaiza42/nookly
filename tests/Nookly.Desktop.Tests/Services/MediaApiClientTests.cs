@@ -59,13 +59,19 @@ public sealed class MediaApiClientTests
         var client = new MediaApiClient(httpClient);
 
         var result = await client.CreateMediaAsync(
-            new CreateMediaRequest("Berserk", MediaType.Manga, "Manga"));
+            new CreateMediaRequest(
+                "Berserk",
+                MediaType.Anime,
+                "Anime",
+                "tmdb",
+                "12345"));
 
         Assert.Equal(HttpMethod.Post, handler.LastMethod);
         Assert.Equal("http://localhost/api/media", handler.LastRequestUri?.ToString());
-        Assert.Contains("\"type\":\"Manga\"", handler.LastRequestBody);
+        Assert.Contains("\"type\":\"Anime\"", handler.LastRequestBody);
         Assert.Equal("Berserk", result.Title);
         Assert.Equal(MediaType.Manga, result.Type);
+        Assert.Contains("\"externalSource\":\"tmdb\"", handler.LastRequestBody);
     }
 
     [Fact]

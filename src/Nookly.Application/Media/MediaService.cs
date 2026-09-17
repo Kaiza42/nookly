@@ -24,28 +24,34 @@ public sealed class MediaService(IMediaRepository repository) : IMediaService
         CreateMediaRequest request,
         CancellationToken cancellationToken = default)
     {
-        if (request.ExternalSource is not null && request.ExternalId is not null)
+        if (string.IsNullOrWhiteSpace(request.ExternalSource) ||
+            string.IsNullOrWhiteSpace(request.ExternalId))
         {
-            var exists = await repository.ExistsByExternalIdAsync(
-                request.ExternalSource,
-                request.ExternalId,
-                cancellationToken);
-            if (exists)
-            {
-                throw new DuplicateMediaException("This media is already in the library.");
-            }
+            throw new ArgumentException(
+                "A media must come from an external catalog search.");
+        }
+
+        if (!string.Equals(request.ExternalSource, "tmdb", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException("This external catalog is not supported.");
+        }
+
+        var exists = await repository.ExistsByExternalIdAsync(
+            request.ExternalSource,
+            request.ExternalId,
+            cancellationToken);
+        if (exists)
+        {
+            throw new DuplicateMediaException("This media is already in the library.");
         }
 
         var item = MediaItem.Create(request.Title, request.Type, request.Description);
-        if (request.ExternalSource is not null && request.ExternalId is not null)
-        {
-            item.AttachExternalMetadata(
-                request.ExternalSource,
-                request.ExternalId,
-                request.PosterUrl,
-                request.CommunityRating,
-                request.ReleaseDate);
-        }
+        item.AttachExternalMetadata(
+            request.ExternalSource,
+            request.ExternalId,
+            request.PosterUrl,
+            request.CommunityRating,
+            request.ReleaseDate);
 
         await repository.AddAsync(item, cancellationToken);
         return ToDto(item);

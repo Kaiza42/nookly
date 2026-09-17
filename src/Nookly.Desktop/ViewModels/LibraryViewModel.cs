@@ -56,8 +56,6 @@ public partial class LibraryViewModel(
     private bool isCreatePanelOpen;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(FormTitle))]
-    [NotifyPropertyChangedFor(nameof(SaveButtonLabel))]
     private bool isEditMode;
 
     [ObservableProperty]
@@ -102,11 +100,10 @@ public partial class LibraryViewModel(
     private string? searchErrorMessage;
 
     public bool ShowEmptyState => !IsLoading && !HasError && !HasItems;
-    public string FormTitle => IsEditMode ? "Modifier le media" : "Ajouter un media";
-    public string SaveButtonLabel => IsEditMode ? "Enregistrer" : "Ajouter";
-
     private bool CanSaveMedia =>
         !IsLoading &&
+        IsEditMode &&
+        editingMediaId is not null &&
         !string.IsNullOrWhiteSpace(NewTitle) &&
         SelectedMediaType is not null &&
         SelectedMediaStatus is not null;
@@ -135,7 +132,7 @@ public partial class LibraryViewModel(
             if (!HasSearchResults)
             {
                 HasSearchError = true;
-                SearchErrorMessage = "Aucun film ou serie trouve.";
+                SearchErrorMessage = "Aucun film, serie ou anime trouve.";
             }
         }
         catch (HttpRequestException)
@@ -193,17 +190,7 @@ public partial class LibraryViewModel(
     }
 
     [RelayCommand]
-    private void ToggleCreatePanel()
-    {
-        if (IsCreatePanelOpen && !IsEditMode)
-        {
-            CloseForm();
-            return;
-        }
-
-        ResetForm();
-        IsCreatePanelOpen = true;
-    }
+    private void CancelEdit() => CloseForm();
 
     [RelayCommand]
     private void EditMedia(MediaListItemViewModel item)
@@ -234,30 +221,22 @@ public partial class LibraryViewModel(
 
         try
         {
-            MediaItemResponse saved;
-            if (IsEditMode && editingMediaId is Guid id)
+            if (editingMediaId is not Guid id)
             {
-                var request = new UpdateMediaRequest(
-                    NewTitle,
-                    SelectedMediaType.Value,
-                    NewDescription,
-                    SelectedMediaStatus.Value,
-                    SelectedRating?.Value);
-                saved = await mediaApiClient.UpdateMediaAsync(id, request);
+                return;
+            }
 
-                var existing = Items.First(item => item.Id == id);
-                var index = Items.IndexOf(existing);
-                Items[index] = new MediaListItemViewModel(saved);
-            }
-            else
-            {
-                var request = new CreateMediaRequest(
-                    NewTitle,
-                    SelectedMediaType.Value,
-                    NewDescription);
-                saved = await mediaApiClient.CreateMediaAsync(request);
-                Items.Insert(0, new MediaListItemViewModel(saved));
-            }
+            var request = new UpdateMediaRequest(
+                NewTitle,
+                SelectedMediaType.Value,
+                NewDescription,
+                SelectedMediaStatus.Value,
+                SelectedRating?.Value);
+            var saved = await mediaApiClient.UpdateMediaAsync(id, request);
+
+            var existing = Items.First(item => item.Id == id);
+            var index = Items.IndexOf(existing);
+            Items[index] = new MediaListItemViewModel(saved);
 
             HasItems = Items.Count > 0;
             CloseForm();

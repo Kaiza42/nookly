@@ -9,7 +9,13 @@ public sealed class MediaSearchResultViewModel(MediaSearchResultResponse result)
     public string Title => result.Title;
     public string? Description => result.Description;
     public string? PosterUrl => result.PosterUrl;
-    public string TypeLabel => result.Type == MediaType.Movie ? "Film" : "Serie";
+    public string TypeLabel => result.Type switch
+    {
+        MediaType.Movie => "Film",
+        MediaType.TvSeries => "Serie",
+        MediaType.Anime => "Anime",
+        _ => result.Type.ToString()
+    };
     public string YearLabel => result.ReleaseDate?.Year.ToString() ?? "Date inconnue";
     public string RatingLabel => result.CommunityRating is null
         ? "Non note"

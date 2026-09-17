@@ -8,24 +8,6 @@ namespace Nookly.Desktop.Tests.ViewModels;
 public sealed class LibraryViewModelTests
 {
     [Fact]
-    public async Task SaveMediaCommand_AddsCreatedMediaAndClosesForm()
-    {
-        var apiClient = new StubMediaApiClient();
-        var viewModel = CreateViewModel(apiClient);
-        viewModel.ToggleCreatePanelCommand.Execute(null);
-        viewModel.NewTitle = "Berserk";
-        viewModel.NewDescription = "Manga";
-        viewModel.SelectedMediaType = viewModel.MediaTypes.Single(x => x.Value == MediaType.Manga);
-
-        await viewModel.SaveMediaCommand.ExecuteAsync(null);
-
-        var item = Assert.Single(viewModel.Items);
-        Assert.Equal("Berserk", item.Title);
-        Assert.True(viewModel.HasItems);
-        Assert.False(viewModel.IsCreatePanelOpen);
-    }
-
-    [Fact]
     public async Task SaveMediaCommand_UpdatesSelectedMediaAndRating()
     {
         var apiClient = new StubMediaApiClient();

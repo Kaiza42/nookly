@@ -60,10 +60,23 @@ public sealed class TmdbClient(HttpClient httpClient, IOptions<TmdbOptions> opti
             item.Id.ToString(),
             item.Title ?? item.Name ?? string.Empty,
             item.Overview,
-            item.MediaType == "movie" ? MediaType.Movie : MediaType.TvSeries,
+            GetMediaType(item),
             item.PosterPath is null ? null : $"{PosterBaseUrl}{item.PosterPath}",
             item.VoteAverage,
             releaseDate);
+    }
+
+    private static MediaType GetMediaType(TmdbSearchItem item)
+    {
+        var isJapaneseAnimation = (item.GenreIds?.Contains(16) ?? false) &&
+                                  (item.OriginalLanguage == "ja" ||
+                                   (item.OriginCountry?.Contains("JP") ?? false));
+        if (isJapaneseAnimation)
+        {
+            return MediaType.Anime;
+        }
+
+        return item.MediaType == "movie" ? MediaType.Movie : MediaType.TvSeries;
     }
 
     private sealed record TmdbSearchResponse(
@@ -76,6 +89,9 @@ public sealed class TmdbClient(HttpClient httpClient, IOptions<TmdbOptions> opti
         [property: JsonPropertyName("name")] string? Name,
         [property: JsonPropertyName("overview")] string? Overview,
         [property: JsonPropertyName("poster_path")] string? PosterPath,
+        [property: JsonPropertyName("genre_ids")] int[]? GenreIds,
+        [property: JsonPropertyName("original_language")] string? OriginalLanguage,
+        [property: JsonPropertyName("origin_country")] string[]? OriginCountry,
         [property: JsonPropertyName("vote_average")] decimal? VoteAverage,
         [property: JsonPropertyName("release_date")] string? ReleaseDate,
         [property: JsonPropertyName("first_air_date")] string? FirstAirDate);
