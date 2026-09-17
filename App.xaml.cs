@@ -10,4 +10,3 @@ namespace Nookly.App;
 public partial class App : Application
 {
 }
-
