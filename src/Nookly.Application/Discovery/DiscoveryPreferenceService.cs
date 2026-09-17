@@ -53,33 +53,44 @@ public sealed class DiscoveryPreferenceService(
         CancellationToken cancellationToken = default)
     {
         var preferences = await repository.ListDislikedAsync(cancellationToken);
-        foreach (var item in preferences.Where(item =>
-                     string.IsNullOrWhiteSpace(item.Title) && item.MediaType is not null))
+        var results = new List<DiscoveryPreferenceDto>(preferences.Count);
+        foreach (var item in preferences)
         {
+            Nookly.Application.Details.MediaDetails? details = null;
             try
             {
-                var title = await externalMediaSearch.GetTitleAsync(
-                    item.ExternalId,
-                    item.MediaType!.Value,
-                    cancellationToken);
-                if (!string.IsNullOrWhiteSpace(title))
+                if (item.MediaType is not null)
                 {
-                    item.Update(title, item.IsLiked, item.MediaType);
-                    await repository.SaveAsync(item, cancellationToken);
+                    details = await externalMediaSearch.GetDetailsAsync(
+                        item.ExternalId,
+                        item.MediaType.Value,
+                        cancellationToken);
+                    if (details is not null && details.Title != item.Title)
+                    {
+                        item.Update(details.Title, item.IsLiked, item.MediaType);
+                        await repository.SaveAsync(item, cancellationToken);
+                    }
                 }
             }
             catch (HttpRequestException)
             {
-                // Keep the identifier as a fallback when TMDB is unavailable.
+                // The saved preference remains usable when TMDB is unavailable.
             }
+
+            results.Add(new DiscoveryPreferenceDto(
+                item.ExternalSource,
+                item.ExternalId,
+                string.IsNullOrWhiteSpace(item.Title) ? item.ExternalId : item.Title,
+                item.MediaType,
+                item.IsLiked,
+                details?.Description,
+                details?.PosterUrl,
+                details?.CommunityRating,
+                details?.ReleaseDate,
+                details?.Cast));
         }
 
-        return preferences.Select(item => new DiscoveryPreferenceDto(
-            item.ExternalSource,
-            item.ExternalId,
-            string.IsNullOrWhiteSpace(item.Title) ? item.ExternalId : item.Title,
-            item.MediaType,
-            item.IsLiked)).ToArray();
+        return results;
     }
 
     public async Task<bool> RestoreAsync(

@@ -7,4 +7,9 @@ public sealed record DiscoveryPreferenceResponse(
     string ExternalId,
     string Title,
     MediaType? Type,
-    bool IsLiked);
+    bool IsLiked,
+    string? Description = null,
+    string? PosterUrl = null,
+    decimal? CommunityRating = null,
+    DateOnly? ReleaseDate = null,
+    IReadOnlyList<string>? Cast = null);

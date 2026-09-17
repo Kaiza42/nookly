@@ -184,7 +184,12 @@ public static class MediaEndpoints
                 item.ExternalId,
                 item.Title,
                 item.MediaType is null ? null : (ContractMediaType)item.MediaType,
-                item.IsLiked)));
+                item.IsLiked,
+                item.Description,
+                item.PosterUrl,
+                item.CommunityRating,
+                item.ReleaseDate,
+                item.Cast)));
         });
 
         group.MapDelete("/preferences/{source}/{externalId}", async (
