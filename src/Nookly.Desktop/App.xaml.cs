@@ -5,7 +5,7 @@ using Nookly.Desktop.ViewModels;
 
 namespace Nookly.Desktop;
 
-public partial class App : Application
+public partial class App : System.Windows.Application
 {
     private ServiceProvider? serviceProvider;
 

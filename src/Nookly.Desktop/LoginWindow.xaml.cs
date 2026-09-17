@@ -33,7 +33,7 @@ public partial class LoginWindow : Window
                 ? await authentication.RegisterAsync(new RegisterRequest(EmailBox.Text, PasswordBox.Password, PseudoBox.Text, stay))
                 : await authentication.LoginAsync(new LoginRequest(EmailBox.Text, PasswordBox.Password, stay));
             session.Set(response, stay);
-            var app = (App)Application.Current;
+            var app = (App)System.Windows.Application.Current;
             await app.ShowWelcomeThenMainAsync(response.Member.DisplayName);
             Close();
         }

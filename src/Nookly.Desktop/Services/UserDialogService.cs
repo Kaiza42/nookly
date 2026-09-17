@@ -6,7 +6,7 @@ public sealed class UserDialogService : IUserDialogService
 {
     public bool ConfirmDelete(string title)
     {
-        var result = MessageBox.Show(
+        var result = System.Windows.MessageBox.Show(
             $"Supprimer '{title}' de la bibliotheque ?",
             "Confirmer la suppression",
             MessageBoxButton.YesNo,
