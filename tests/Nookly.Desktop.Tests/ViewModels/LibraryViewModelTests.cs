@@ -55,13 +55,35 @@ public sealed class LibraryViewModelTests
         var viewModel = CreateViewModel(apiClient);
         viewModel.SearchQuery = "Dune";
 
+        viewModel.OpenDiscoverCommand.Execute(null);
         await viewModel.SearchCommand.ExecuteAsync(null);
-        await viewModel.AddSearchResultCommand.ExecuteAsync(Assert.Single(viewModel.SearchResults));
+        var searchResult = Assert.Single(viewModel.SearchResults);
+        viewModel.ShowSearchResultCommand.Execute(searchResult);
+
+        Assert.True(viewModel.IsDetailPage);
+        Assert.Equal("Dune", viewModel.SelectedSearchResult?.Title);
+
+        await viewModel.AddSearchResultCommand.ExecuteAsync(searchResult);
 
         Assert.Contains(viewModel.Items, item => item.Title == "Dune");
+        Assert.True(viewModel.IsLibraryPage);
         Assert.NotNull(apiClient.LastCreateRequest);
         Assert.Equal("tmdb", apiClient.LastCreateRequest.ExternalSource);
         Assert.Equal("438631", apiClient.LastCreateRequest.ExternalId);
+    }
+
+    [Fact]
+    public async Task LibrarySearch_FiltersOnlyExistingItems()
+    {
+        var viewModel = CreateViewModel(new StubMediaApiClient());
+        await viewModel.LoadCommand.ExecuteAsync(null);
+
+        viewModel.LibrarySearchQuery = "Dun";
+        Assert.Single(viewModel.FilteredItems);
+
+        viewModel.LibrarySearchQuery = "Bleach";
+        Assert.Empty(viewModel.FilteredItems);
+        Assert.True(viewModel.ShowNoLibraryResults);
     }
 
     private static LibraryViewModel CreateViewModel(StubMediaApiClient apiClient)

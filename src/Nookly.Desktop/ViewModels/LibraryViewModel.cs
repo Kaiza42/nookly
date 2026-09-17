@@ -12,8 +12,11 @@ public partial class LibraryViewModel(
     IUserDialogService userDialogService) : ObservableObject
 {
     private Guid? editingMediaId;
+    private CancellationTokenSource? searchDebounceCancellation;
+    private int searchVersion;
 
     public ObservableCollection<MediaListItemViewModel> Items { get; } = [];
+    public ObservableCollection<MediaListItemViewModel> FilteredItems { get; } = [];
     public ObservableCollection<MediaSearchResultViewModel> SearchResults { get; } = [];
 
     public IReadOnlyList<MediaTypeOption> MediaTypes { get; } =
@@ -82,6 +85,9 @@ public partial class LibraryViewModel(
     private string? formErrorMessage;
 
     [ObservableProperty]
+    private string librarySearchQuery = string.Empty;
+
+    [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SearchCommand))]
     private string searchQuery = string.Empty;
 
@@ -99,7 +105,21 @@ public partial class LibraryViewModel(
     [ObservableProperty]
     private string? searchErrorMessage;
 
+    [ObservableProperty]
+    private bool isLibraryPage = true;
+
+    [ObservableProperty]
+    private bool isDiscoverPage;
+
+    [ObservableProperty]
+    private bool isDetailPage;
+
+    [ObservableProperty]
+    private MediaSearchResultViewModel? selectedSearchResult;
+
     public bool ShowEmptyState => !IsLoading && !HasError && !HasItems;
+    public bool HasFilteredItems => FilteredItems.Count > 0;
+    public bool ShowNoLibraryResults => HasItems && !HasFilteredItems;
     private bool CanSaveMedia =>
         !IsLoading &&
         IsEditMode &&
@@ -112,16 +132,96 @@ public partial class LibraryViewModel(
     private bool CanSearch => !IsSearching && !string.IsNullOrWhiteSpace(SearchQuery);
     private bool CanAddSearchResult(MediaSearchResultViewModel? item) => !IsSearching && item is not null;
 
+    partial void OnLibrarySearchQueryChanged(string value) => RefreshLibraryFilter();
+
+    partial void OnSearchQueryChanged(string value)
+    {
+        searchDebounceCancellation?.Cancel();
+        searchDebounceCancellation?.Dispose();
+        var version = ++searchVersion;
+
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            SearchResults.Clear();
+            HasSearchResults = false;
+            HasSearchError = false;
+            SearchErrorMessage = null;
+            return;
+        }
+
+        searchDebounceCancellation = new CancellationTokenSource();
+        _ = SearchAfterDelayAsync(value.Trim(), version, searchDebounceCancellation.Token);
+    }
+
+    [RelayCommand]
+    private void ShowLibrary()
+    {
+        CloseForm();
+        SetPage(library: true);
+    }
+
+    [RelayCommand]
+    private void OpenDiscover()
+    {
+        CloseForm();
+        SetPage(discover: true);
+    }
+
+    [RelayCommand]
+    private void ShowSearchResult(MediaSearchResultViewModel item)
+    {
+        SelectedSearchResult = item;
+        SetPage(detail: true);
+    }
+
+    [RelayCommand]
+    private void BackToDiscover() => SetPage(discover: true);
+
     [RelayCommand(CanExecute = nameof(CanSearch))]
     private async Task SearchAsync()
     {
+        searchDebounceCancellation?.Cancel();
+        var version = ++searchVersion;
+        await ExecuteSearchAsync(SearchQuery.Trim(), version, CancellationToken.None);
+    }
+
+    private async Task SearchAfterDelayAsync(
+        string query,
+        int version,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            await Task.Delay(350, cancellationToken);
+            await ExecuteSearchAsync(query, version, cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+        }
+    }
+
+    private async Task ExecuteSearchAsync(
+        string query,
+        int version,
+        CancellationToken cancellationToken)
+    {
+        if (version != searchVersion)
+        {
+            return;
+        }
+
         IsSearching = true;
         HasSearchError = false;
         SearchErrorMessage = null;
 
         try
         {
-            var results = await mediaApiClient.SearchMediaAsync(SearchQuery.Trim());
+            var results = await mediaApiClient.SearchMediaAsync(query, cancellationToken);
+            if (version != searchVersion)
+            {
+                return;
+            }
+
             SearchResults.Clear();
             foreach (var result in results)
             {
@@ -135,19 +235,22 @@ public partial class LibraryViewModel(
                 SearchErrorMessage = "Aucun film, serie ou anime trouve.";
             }
         }
-        catch (HttpRequestException)
+        catch (HttpRequestException) when (version == searchVersion)
         {
             HasSearchError = true;
             SearchErrorMessage = "La recherche est indisponible. Verifie la configuration TMDB de l'API.";
         }
-        catch (TaskCanceledException)
+        catch (TaskCanceledException) when (!cancellationToken.IsCancellationRequested && version == searchVersion)
         {
             HasSearchError = true;
             SearchErrorMessage = "La recherche a pris trop de temps.";
         }
         finally
         {
-            IsSearching = false;
+            if (version == searchVersion)
+            {
+                IsSearching = false;
+            }
         }
     }
 
@@ -173,8 +276,8 @@ public partial class LibraryViewModel(
             var saved = await mediaApiClient.CreateMediaAsync(request);
             Items.Insert(0, new MediaListItemViewModel(saved));
             HasItems = true;
-            SearchResults.Remove(item);
-            HasSearchResults = SearchResults.Count > 0;
+            RefreshLibraryFilter();
+            SetPage(library: true);
         }
         catch (HttpRequestException exception)
         {
@@ -239,6 +342,7 @@ public partial class LibraryViewModel(
             Items[index] = new MediaListItemViewModel(saved);
 
             HasItems = Items.Count > 0;
+            RefreshLibraryFilter();
             CloseForm();
         }
         catch (HttpRequestException)
@@ -271,6 +375,7 @@ public partial class LibraryViewModel(
             await mediaApiClient.DeleteMediaAsync(item.Id);
             Items.Remove(item);
             HasItems = Items.Count > 0;
+            RefreshLibraryFilter();
 
             if (editingMediaId == item.Id)
             {
@@ -311,6 +416,7 @@ public partial class LibraryViewModel(
             }
 
             HasItems = Items.Count > 0;
+            RefreshLibraryFilter();
         }
         catch (HttpRequestException)
         {
@@ -345,6 +451,31 @@ public partial class LibraryViewModel(
     {
         ResetForm();
         IsCreatePanelOpen = false;
+    }
+
+    private void SetPage(bool library = false, bool discover = false, bool detail = false)
+    {
+        IsLibraryPage = library;
+        IsDiscoverPage = discover;
+        IsDetailPage = detail;
+    }
+
+    private void RefreshLibraryFilter()
+    {
+        var query = LibrarySearchQuery.Trim();
+        var filtered = string.IsNullOrEmpty(query)
+            ? Items
+            : Items.Where(item =>
+                item.Title.Contains(query, StringComparison.CurrentCultureIgnoreCase));
+
+        FilteredItems.Clear();
+        foreach (var item in filtered)
+        {
+            FilteredItems.Add(item);
+        }
+
+        OnPropertyChanged(nameof(HasFilteredItems));
+        OnPropertyChanged(nameof(ShowNoLibraryResults));
     }
 
     private static IReadOnlyList<RatingOption> CreateRatingOptions()
