@@ -73,7 +73,7 @@ public sealed class LibraryViewModelTests
         var viewModel = CreateViewModel(apiClient);
         viewModel.SearchQuery = "Dune";
 
-        viewModel.OpenDiscoverCommand.Execute(null);
+        await viewModel.OpenDiscoverCommand.ExecuteAsync(null);
         await viewModel.SearchCommand.ExecuteAsync(null);
         var searchResult = Assert.Single(viewModel.SearchResults);
         viewModel.ShowSearchResultCommand.Execute(searchResult);

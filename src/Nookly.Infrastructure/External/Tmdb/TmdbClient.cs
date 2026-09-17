@@ -55,13 +55,16 @@ public sealed class TmdbClient(HttpClient httpClient, IOptions<TmdbOptions> opti
             MediaType.TvSeries or MediaType.Anime => new[] { "tv" },
             _ => new[] { "movie", "tv" }
         };
+        var isRandomDiscovery = string.IsNullOrWhiteSpace(query) && type is null &&
+                                genreId is null && year is null && actorId is null;
+        var page = isRandomDiscovery ? Random.Shared.Next(1, 11) : 1;
 
         var results = new List<MediaSearchResult>();
         foreach (var mediaKind in mediaKinds)
         {
             var parameters = new List<string>
             {
-                "include_adult=false", "language=fr-FR", "page=1", "sort_by=popularity.desc"
+                "include_adult=false", "language=fr-FR", $"page={page}", "sort_by=popularity.desc"
             };
             var genres = new List<int>();
             if (genreId is not null) genres.Add(MapGenreId(genreId.Value, mediaKind));
@@ -82,10 +85,15 @@ public sealed class TmdbClient(HttpClient httpClient, IOptions<TmdbOptions> opti
         }
 
         var titleQuery = query?.Trim();
-        return results
+        var filteredResults = results
             .Where(result => string.IsNullOrWhiteSpace(titleQuery) ||
-                             result.Title.Contains(titleQuery, StringComparison.CurrentCultureIgnoreCase))
-            .OrderByDescending(result => result.CommunityRating)
+                             result.Title.Contains(titleQuery, StringComparison.CurrentCultureIgnoreCase));
+        if (isRandomDiscovery)
+        {
+            filteredResults = filteredResults.OrderBy(_ => Random.Shared.Next());
+        }
+
+        return filteredResults
             .Take(30)
             .ToArray();
     }

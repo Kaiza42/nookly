@@ -207,10 +207,18 @@ public partial class LibraryViewModel(
     }
 
     [RelayCommand]
-    private void OpenDiscover()
+    private async Task OpenDiscoverAsync()
     {
         CloseForm();
         SetPage(discover: true);
+        searchDebounceCancellation?.Cancel();
+        SearchQuery = string.Empty;
+        ActorQuery = string.Empty;
+        DiscoveryYear = string.Empty;
+        SelectedDiscoveryType = DiscoveryMediaTypes[0];
+        SelectedDiscoveryGenre = DiscoveryGenres[0];
+        var version = ++searchVersion;
+        await ExecuteSearchAsync(string.Empty, version, CancellationToken.None);
     }
 
     [RelayCommand]

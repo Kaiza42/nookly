@@ -250,25 +250,41 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <TextBox Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
-                             Height="42" Padding="12,9" BorderBrush="#C9CED6" ToolTip="Rechercher sur TMDB" />
+                    <StackPanel>
+                        <TextBlock Text="Titre" Margin="0,0,0,6" Foreground="#4D5967" />
+                        <TextBox Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                                 Height="42" Padding="12,9" BorderBrush="#C9CED6" ToolTip="Rechercher sur TMDB" />
+                    </StackPanel>
                     <Button Grid.Column="1" Content="Rechercher" Command="{Binding SearchCommand}"
-                            Style="{StaticResource PrimaryButton}" Height="42" Margin="10,0,0,0" />
+                            Style="{StaticResource PrimaryButton}" Height="42" Margin="10,25,0,0" />
                 </Grid>
-                <WrapPanel Grid.Row="2" Margin="0,12,0,0">
-                    <ComboBox ItemsSource="{Binding DiscoveryMediaTypes}"
-                              SelectedIndex="0" SelectedItem="{Binding SelectedDiscoveryType}"
-                              DisplayMemberPath="Label" Width="170" Height="38" Margin="0,0,10,8" />
-                    <ComboBox ItemsSource="{Binding DiscoveryGenres}"
-                              SelectedIndex="0" SelectedItem="{Binding SelectedDiscoveryGenre}"
-                              DisplayMemberPath="Label" Width="170" Height="38" Margin="0,0,10,8" />
-                    <TextBox Text="{Binding DiscoveryYear, UpdateSourceTrigger=PropertyChanged}"
-                             Width="110" Height="38" Padding="9,7" Margin="0,0,10,8"
-                             ToolTip="Annee, par exemple 2024" />
-                    <TextBox Text="{Binding ActorQuery, UpdateSourceTrigger=PropertyChanged}"
-                             Width="220" Height="38" Padding="9,7" Margin="0,0,0,8"
-                             ToolTip="Nom d'un acteur ou d'une actrice" />
-                </WrapPanel>
+                <Border Grid.Row="2" Margin="0,14,0,0" Padding="14,12" Background="White"
+                        BorderBrush="#D7DBE1" BorderThickness="1" CornerRadius="6">
+                    <WrapPanel>
+                        <StackPanel Width="170" Margin="0,0,12,0">
+                            <TextBlock Text="Type" Margin="0,0,0,6" Foreground="#4D5967" />
+                            <ComboBox ItemsSource="{Binding DiscoveryMediaTypes}"
+                                      SelectedItem="{Binding SelectedDiscoveryType}"
+                                      DisplayMemberPath="Label" Height="38" />
+                        </StackPanel>
+                        <StackPanel Width="170" Margin="0,0,12,0">
+                            <TextBlock Text="Genre" Margin="0,0,0,6" Foreground="#4D5967" />
+                            <ComboBox ItemsSource="{Binding DiscoveryGenres}"
+                                      SelectedItem="{Binding SelectedDiscoveryGenre}"
+                                      DisplayMemberPath="Label" Height="38" />
+                        </StackPanel>
+                        <StackPanel Width="110" Margin="0,0,12,0">
+                            <TextBlock Text="Annee" Margin="0,0,0,6" Foreground="#4D5967" />
+                            <TextBox Text="{Binding DiscoveryYear, UpdateSourceTrigger=PropertyChanged}"
+                                     Height="38" Padding="9,7" ToolTip="Par exemple 2024" />
+                        </StackPanel>
+                        <StackPanel Width="220">
+                            <TextBlock Text="Acteur ou actrice" Margin="0,0,0,6" Foreground="#4D5967" />
+                            <TextBox Text="{Binding ActorQuery, UpdateSourceTrigger=PropertyChanged}"
+                                     Height="38" Padding="9,7" />
+                        </StackPanel>
+                    </WrapPanel>
+                </Border>
                 <StackPanel Grid.Row="3">
                     <ProgressBar Height="3" Margin="0,12,0,0" IsIndeterminate="True"
                                  Visibility="{Binding IsSearching, Converter={StaticResource BoolToVisibility}}" />
