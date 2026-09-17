@@ -241,9 +241,9 @@
                                         <StackPanel Grid.Column="1" Margin="14,2,20,0">
                                             <TextBlock Text="{Binding Title}" FontSize="16" FontWeight="SemiBold" />
                                             <TextBlock Margin="0,5,0,0" Foreground="#69717D">
-                                                <Run Text="{Binding TypeLabel}" /><Run Text=" - " />
-                                                <Run Text="{Binding YearLabel}" /><Run Text=" - " />
-                                                <Run Text="{Binding RatingLabel}" />
+                                                <Run Text="{Binding TypeLabel, Mode=OneWay}" /><Run Text=" - " />
+                                                <Run Text="{Binding YearLabel, Mode=OneWay}" /><Run Text=" - " />
+                                                <Run Text="{Binding RatingLabel, Mode=OneWay}" />
                                             </TextBlock>
                                             <TextBlock Text="{Binding Description}" Margin="0,7,0,0"
                                                        Foreground="#747D89" TextTrimming="CharacterEllipsis" />
@@ -280,9 +280,9 @@
                         <TextBlock Text="{Binding SelectedSearchResult.Title}" FontSize="30"
                                    FontWeight="SemiBold" TextWrapping="Wrap" />
                         <TextBlock Margin="0,10,0,0" Foreground="#69717D" FontSize="15">
-                            <Run Text="{Binding SelectedSearchResult.TypeLabel}" /><Run Text=" - " />
-                            <Run Text="{Binding SelectedSearchResult.YearLabel}" /><Run Text=" - Note TMDB " />
-                            <Run Text="{Binding SelectedSearchResult.RatingLabel}" />
+                            <Run Text="{Binding SelectedSearchResult.TypeLabel, Mode=OneWay}" /><Run Text=" - " />
+                            <Run Text="{Binding SelectedSearchResult.YearLabel, Mode=OneWay}" /><Run Text=" - Note TMDB " />
+                            <Run Text="{Binding SelectedSearchResult.RatingLabel, Mode=OneWay}" />
                         </TextBlock>
                         <TextBlock Text="Synopsis" Margin="0,30,0,0" FontSize="16" FontWeight="SemiBold" />
                         <TextBlock Text="{Binding SelectedSearchResult.Description}" Margin="0,10,0,0"
