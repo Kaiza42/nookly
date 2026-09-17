@@ -40,3 +40,29 @@ dotnet test Nookly.sln --no-build
 ```
 
 The PostgreSQL credentials in `compose.yaml` and `appsettings.Development.json` are for local development only.
+
+## Continuous integration
+
+GitHub Actions validates every push and pull request targeting `main` on a Windows runner. The workflow checks formatting, builds with warnings treated as errors, runs the complete test suite with coverage, and verifies that the Entity Framework model has no missing migration.
+
+## Releases
+
+Create and push a semantic version tag to publish a release:
+
+```powershell
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+The release workflow produces:
+
+- `Nookly-Desktop-win-x64.zip`: self-contained Windows desktop application
+- `Nookly-Api-linux-x64.zip`: framework-dependent Linux API
+- `ghcr.io/kaiza42/nookly-api`: versioned API container image
+
+The deployed API requires these environment variables:
+
+```text
+ConnectionStrings__Database=Host=postgres;Port=5432;Database=nookly;Username=nookly;Password=change-me
+Tmdb__ReadAccessToken=your-token
+```
