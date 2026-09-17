@@ -71,6 +71,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
@@ -91,21 +92,118 @@
                                FontSize="14" />
                 </StackPanel>
 
-                <Button Grid.Column="1"
-                        Content="Actualiser"
-                        Command="{Binding LoadCommand}"
-                        IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBooleanConverter}}"
-                        MinWidth="110"
-                        Height="38"
-                        Padding="16,0"
-                        Background="#FFFFFF"
-                        Foreground="#20242B"
-                        BorderBrush="#D7DBE1"
-                        Cursor="Hand" />
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button Content="+ Ajouter"
+                            Command="{Binding ToggleCreatePanelCommand}"
+                            MinWidth="100"
+                            Height="38"
+                            Padding="16,0"
+                            Margin="0,0,8,0"
+                            Background="#286C53"
+                            Foreground="White"
+                            BorderBrush="#286C53"
+                            Cursor="Hand" />
+                    <Button Content="Actualiser"
+                            Command="{Binding LoadCommand}"
+                            IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBooleanConverter}}"
+                            MinWidth="110"
+                            Height="38"
+                            Padding="16,0"
+                            Background="#FFFFFF"
+                            Foreground="#20242B"
+                            BorderBrush="#D7DBE1"
+                            Cursor="Hand" />
+                </StackPanel>
             </Grid>
 
             <Border Grid.Row="1"
                     Margin="0,22,0,0"
+                    Padding="18"
+                    Background="White"
+                    BorderBrush="#D7DBE1"
+                    BorderThickness="1"
+                    CornerRadius="6"
+                    Visibility="{Binding IsCreatePanelOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1.2*" />
+                        <ColumnDefinition Width="140" />
+                        <ColumnDefinition Width="1.5*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Margin="0,0,12,0">
+                        <TextBlock Text="Titre"
+                                   Margin="0,0,0,6"
+                                   Foreground="#4D5967"
+                                   FontSize="12" />
+                        <TextBox Text="{Binding NewTitle, UpdateSourceTrigger=PropertyChanged}"
+                                 Height="36"
+                                 Padding="10,7"
+                                 BorderBrush="#C9CED6" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Margin="0,0,12,0">
+                        <TextBlock Text="Type"
+                                   Margin="0,0,0,6"
+                                   Foreground="#4D5967"
+                                   FontSize="12" />
+                        <ComboBox ItemsSource="{Binding MediaTypes}"
+                                  SelectedItem="{Binding SelectedMediaType}"
+                                  DisplayMemberPath="Label"
+                                  Height="36"
+                                  Padding="8,5"
+                                  BorderBrush="#C9CED6" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2" Margin="0,0,12,0">
+                        <TextBlock Text="Description"
+                                   Margin="0,0,0,6"
+                                   Foreground="#4D5967"
+                                   FontSize="12" />
+                        <TextBox Text="{Binding NewDescription, UpdateSourceTrigger=PropertyChanged}"
+                                 Height="36"
+                                 Padding="10,7"
+                                 BorderBrush="#C9CED6" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="3"
+                                Margin="0,18,0,0"
+                                Orientation="Horizontal">
+                        <Button Content="Annuler"
+                                Command="{Binding ToggleCreatePanelCommand}"
+                                Height="36"
+                                Padding="13,0"
+                                Margin="0,0,8,0"
+                                Background="White"
+                                BorderBrush="#C9CED6"
+                                Cursor="Hand" />
+                        <Button Content="Enregistrer"
+                                Command="{Binding AddMediaCommand}"
+                                Height="36"
+                                Padding="15,0"
+                                Background="#286C53"
+                                Foreground="White"
+                                BorderBrush="#286C53"
+                                Cursor="Hand" />
+                    </StackPanel>
+
+                    <TextBlock Grid.Row="1"
+                               Grid.ColumnSpan="4"
+                               Text="{Binding FormErrorMessage}"
+                               Margin="0,12,0,0"
+                               Foreground="#8E2F2A"
+                               TextWrapping="Wrap"
+                               Visibility="{Binding HasFormError, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                </Grid>
+            </Border>
+
+            <Border Grid.Row="2"
+                    Margin="0,14,0,0"
                     Padding="14,11"
                     Background="#FFF1F0"
                     BorderBrush="#E6A39E"
@@ -116,7 +214,7 @@
                            TextWrapping="Wrap" />
             </Border>
 
-            <Grid Grid.Row="2" Margin="0,22,0,0">
+            <Grid Grid.Row="3" Margin="0,22,0,0">
                 <ProgressBar Height="3"
                              VerticalAlignment="Top"
                              IsIndeterminate="True"

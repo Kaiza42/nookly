@@ -38,18 +38,58 @@ public sealed class MediaApiClientTests
         Assert.Equal(MediaStatus.Planned, item.Status);
     }
 
+    [Fact]
+    public async Task CreateMediaAsync_SendsRequestAndDeserializesCreatedMedia()
+    {
+        const string json = """
+            {
+              "id": "5deaa2bf-e83a-4c00-a6db-275d4d06a49d",
+              "title": "Berserk",
+              "description": "Manga",
+              "type": "Manga",
+              "status": "Planned",
+              "createdAtUtc": "2026-09-17T07:00:00+00:00"
+            }
+            """;
+        var handler = new StubHttpMessageHandler(json);
+        using var httpClient = new HttpClient(handler)
+        {
+            BaseAddress = new Uri("http://localhost/")
+        };
+        var client = new MediaApiClient(httpClient);
+
+        var result = await client.CreateMediaAsync(
+            new CreateMediaRequest("Berserk", MediaType.Manga, "Manga"));
+
+        Assert.Equal(HttpMethod.Post, handler.LastMethod);
+        Assert.Equal("http://localhost/api/media", handler.LastRequestUri?.ToString());
+        Assert.Contains("\"type\":\"Manga\"", handler.LastRequestBody);
+        Assert.Equal("Berserk", result.Title);
+        Assert.Equal(MediaType.Manga, result.Type);
+    }
+
     private sealed class StubHttpMessageHandler(string content) : HttpMessageHandler
     {
-        protected override Task<HttpResponseMessage> SendAsync(
+        public HttpMethod? LastMethod { get; private set; }
+        public Uri? LastRequestUri { get; private set; }
+        public string? LastRequestBody { get; private set; }
+
+        protected override async Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
+            LastMethod = request.Method;
+            LastRequestUri = request.RequestUri;
+            LastRequestBody = request.Content is null
+                ? null
+                : await request.Content.ReadAsStringAsync(cancellationToken);
+
             var response = new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content = new StringContent(content, Encoding.UTF8, "application/json")
             };
 
-            return Task.FromResult(response);
+            return response;
         }
     }
 }
