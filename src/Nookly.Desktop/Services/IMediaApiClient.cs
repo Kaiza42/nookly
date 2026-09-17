@@ -9,7 +9,11 @@ public interface IMediaApiClient
         CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<MediaSearchResultResponse>> SearchMediaAsync(
-        string query,
+        string? query,
+        MediaType? type = null,
+        int? genreId = null,
+        int? year = null,
+        string? actor = null,
         CancellationToken cancellationToken = default);
 
     Task<MediaItemResponse> CreateMediaAsync(

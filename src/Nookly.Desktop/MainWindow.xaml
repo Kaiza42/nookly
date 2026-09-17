@@ -43,10 +43,15 @@
                 <TextBlock Text="Nookly" Margin="26,0" VerticalAlignment="Center"
                            Foreground="White" FontSize="24" FontWeight="SemiBold" />
                 <StackPanel Grid.Row="1">
-                    <Button Content="Bibliotheque" Command="{Binding ShowLibraryCommand}"
-                            Style="{StaticResource NavButton}" />
-                    <Button Content="Ajouter un media" Command="{Binding OpenDiscoverCommand}"
-                            Style="{StaticResource NavButton}" />
+                    <Expander Header="Divertissement" IsExpanded="True" Margin="12,8,12,0"
+                              Foreground="White" FontWeight="SemiBold">
+                        <StackPanel Margin="0,6,0,0">
+                            <Button Content="Bibliotheque" Command="{Binding ShowLibraryCommand}"
+                                    Style="{StaticResource NavButton}" Margin="0,2" />
+                            <Button Content="Decouvrir" Command="{Binding OpenDiscoverCommand}"
+                                    Style="{StaticResource NavButton}" Margin="0,2" />
+                        </StackPanel>
+                    </Expander>
                 </StackPanel>
                 <TextBlock Grid.Row="2" Text="Espace personnel" Margin="26,0"
                            VerticalAlignment="Center" Foreground="#7F8997" FontSize="12" />
@@ -233,11 +238,12 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <StackPanel>
-                    <TextBlock Text="Ajouter un media" FontSize="28" FontWeight="SemiBold" />
-                    <TextBlock Text="Recherche un titre dans le catalogue" Margin="0,5,0,0" Foreground="#69717D" />
+                    <TextBlock Text="Decouvrir" FontSize="28" FontWeight="SemiBold" />
+                    <TextBlock Text="Explore les films, series et animes du catalogue" Margin="0,5,0,0" Foreground="#69717D" />
                 </StackPanel>
                 <Grid Grid.Row="1" Margin="0,22,0,0">
                     <Grid.ColumnDefinitions>
@@ -249,13 +255,27 @@
                     <Button Grid.Column="1" Content="Rechercher" Command="{Binding SearchCommand}"
                             Style="{StaticResource PrimaryButton}" Height="42" Margin="10,0,0,0" />
                 </Grid>
-                <StackPanel Grid.Row="2">
+                <WrapPanel Grid.Row="2" Margin="0,12,0,0">
+                    <ComboBox ItemsSource="{Binding DiscoveryMediaTypes}"
+                              SelectedIndex="0" SelectedItem="{Binding SelectedDiscoveryType}"
+                              DisplayMemberPath="Label" Width="170" Height="38" Margin="0,0,10,8" />
+                    <ComboBox ItemsSource="{Binding DiscoveryGenres}"
+                              SelectedIndex="0" SelectedItem="{Binding SelectedDiscoveryGenre}"
+                              DisplayMemberPath="Label" Width="170" Height="38" Margin="0,0,10,8" />
+                    <TextBox Text="{Binding DiscoveryYear, UpdateSourceTrigger=PropertyChanged}"
+                             Width="110" Height="38" Padding="9,7" Margin="0,0,10,8"
+                             ToolTip="Annee, par exemple 2024" />
+                    <TextBox Text="{Binding ActorQuery, UpdateSourceTrigger=PropertyChanged}"
+                             Width="220" Height="38" Padding="9,7" Margin="0,0,0,8"
+                             ToolTip="Nom d'un acteur ou d'une actrice" />
+                </WrapPanel>
+                <StackPanel Grid.Row="3">
                     <ProgressBar Height="3" Margin="0,12,0,0" IsIndeterminate="True"
                                  Visibility="{Binding IsSearching, Converter={StaticResource BoolToVisibility}}" />
                     <TextBlock Text="{Binding SearchErrorMessage}" Margin="0,12,0,0" Foreground="#8E2F2A"
                                Visibility="{Binding HasSearchError, Converter={StaticResource BoolToVisibility}}" />
                 </StackPanel>
-                <ListView Grid.Row="3" ItemsSource="{Binding SearchResults}" Margin="0,18,0,0"
+                <ListView Grid.Row="4" ItemsSource="{Binding SearchResults}" Margin="0,18,0,0"
                           Visibility="{Binding HasSearchResults, Converter={StaticResource BoolToVisibility}}"
                           Background="Transparent" BorderThickness="0">
                     <ListView.ItemContainerStyle>

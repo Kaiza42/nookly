@@ -24,18 +24,28 @@ public static class MediaEndpoints
         });
 
         group.MapGet("/search", async (
-            string query,
+            string? query,
+            ContractMediaType? type,
+            int? genreId,
+            int? year,
+            string? actor,
             IExternalMediaSearch search,
             CancellationToken cancellationToken) =>
         {
-            if (string.IsNullOrWhiteSpace(query))
+            if (year is < 1900 or > 2100)
             {
-                return Results.BadRequest(new { error = "A search query is required." });
+                return Results.BadRequest(new { error = "The year is invalid." });
             }
 
             try
             {
-                var results = await search.SearchAsync(query, cancellationToken);
+                var results = await search.SearchAsync(
+                    query,
+                    type is null ? null : (Nookly.Domain.Media.MediaType)type,
+                    genreId,
+                    year,
+                    actor,
+                    cancellationToken);
                 return Results.Ok(results.Select(item => new MediaSearchResultResponse(
                     item.ExternalSource,
                     item.ExternalId,

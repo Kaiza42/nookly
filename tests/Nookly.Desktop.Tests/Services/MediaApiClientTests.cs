@@ -104,6 +104,23 @@ public sealed class MediaApiClientTests
             handler.LastRequestUri?.OriginalString);
     }
 
+    [Fact]
+    public async Task SearchMediaAsync_SendsDiscoveryFilters()
+    {
+        var handler = new StubHttpMessageHandler("[]");
+        using var httpClient = new HttpClient(handler)
+        {
+            BaseAddress = new Uri("http://localhost/")
+        };
+        var client = new MediaApiClient(httpClient);
+
+        await client.SearchMediaAsync(null, MediaType.Movie, 18, 1999, "Tom Hanks");
+
+        Assert.Equal(
+            "http://localhost/api/media/search?type=Movie&genreId=18&year=1999&actor=Tom%20Hanks",
+            handler.LastRequestUri?.OriginalString);
+    }
+
     private sealed class StubHttpMessageHandler(string content) : HttpMessageHandler
     {
         public HttpMethod? LastMethod { get; private set; }

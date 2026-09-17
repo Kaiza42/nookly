@@ -14,14 +14,13 @@ public sealed class TmdbClient(HttpClient httpClient, IOptions<TmdbOptions> opti
     private const string PosterBaseUrl = "https://image.tmdb.org/t/p/w500";
 
     public async Task<IReadOnlyList<MediaSearchResult>> SearchAsync(
-        string query,
+        string? query,
+        MediaType? type = null,
+        int? genreId = null,
+        int? year = null,
+        string? actor = null,
         CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(query))
-        {
-            return [];
-        }
-
         var token = options.Value.ReadAccessToken;
         if (string.IsNullOrWhiteSpace(token))
         {
@@ -29,28 +28,104 @@ public sealed class TmdbClient(HttpClient httpClient, IOptions<TmdbOptions> opti
                 "TMDB is not configured. Set Tmdb:ReadAccessToken in the API configuration.");
         }
 
-        var uri = $"search/multi?query={Uri.EscapeDataString(query.Trim())}" +
-                  "&include_adult=false&language=fr-FR&page=1";
-        using var request = new HttpRequestMessage(HttpMethod.Get, uri);
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        if (!string.IsNullOrWhiteSpace(query) && type is null && genreId is null && year is null &&
+            string.IsNullOrWhiteSpace(actor))
+        {
+            var payload = await GetAsync<TmdbSearchResponse>(
+                $"search/multi?query={Uri.EscapeDataString(query.Trim())}&include_adult=false&language=fr-FR&page=1",
+                token,
+                cancellationToken);
+            return payload?.Results
+                .Where(result => result.MediaType is "movie" or "tv")
+                .Select(item => MapResult(item, item.MediaType!))
+                .Where(result => !string.IsNullOrWhiteSpace(result.Title))
+                .Take(20)
+                .ToArray() ?? [];
+        }
 
-        using var response = await httpClient.SendAsync(request, cancellationToken);
-        response.EnsureSuccessStatusCode();
+        var actorId = await ResolveActorIdAsync(actor, token, cancellationToken);
+        if (!string.IsNullOrWhiteSpace(actor) && actorId is null)
+        {
+            return [];
+        }
 
-        var payload = await response.Content.ReadFromJsonAsync<TmdbSearchResponse>(
-            cancellationToken: cancellationToken);
+        var mediaKinds = type switch
+        {
+            MediaType.Movie => new[] { "movie" },
+            MediaType.TvSeries or MediaType.Anime => new[] { "tv" },
+            _ => new[] { "movie", "tv" }
+        };
 
-        return payload?.Results
-            .Where(result => result.MediaType is "movie" or "tv")
-            .Select(MapResult)
-            .Where(result => !string.IsNullOrWhiteSpace(result.Title))
-            .Take(20)
-            .ToArray() ?? [];
+        var results = new List<MediaSearchResult>();
+        foreach (var mediaKind in mediaKinds)
+        {
+            var parameters = new List<string>
+            {
+                "include_adult=false", "language=fr-FR", "page=1", "sort_by=popularity.desc"
+            };
+            var genres = new List<int>();
+            if (genreId is not null) genres.Add(MapGenreId(genreId.Value, mediaKind));
+            if (year is not null) parameters.Add(mediaKind == "movie" ? $"primary_release_year={year}" : $"first_air_date_year={year}");
+            if (actorId is not null) parameters.Add($"with_cast={actorId}");
+            if (type == MediaType.Anime)
+            {
+                if (!genres.Contains(16)) genres.Add(16);
+                parameters.Add("with_original_language=ja");
+            }
+            if (genres.Count > 0) parameters.Add($"with_genres={string.Join(',', genres)}");
+
+            var payload = await GetAsync<TmdbSearchResponse>(
+                $"discover/{mediaKind}?{string.Join('&', parameters)}",
+                token,
+                cancellationToken);
+            results.AddRange(payload?.Results.Select(item => MapResult(item, mediaKind)) ?? []);
+        }
+
+        var titleQuery = query?.Trim();
+        return results
+            .Where(result => string.IsNullOrWhiteSpace(titleQuery) ||
+                             result.Title.Contains(titleQuery, StringComparison.CurrentCultureIgnoreCase))
+            .OrderByDescending(result => result.CommunityRating)
+            .Take(30)
+            .ToArray();
     }
 
-    private static MediaSearchResult MapResult(TmdbSearchItem item)
+    private async Task<long?> ResolveActorIdAsync(
+        string? actor,
+        string token,
+        CancellationToken cancellationToken)
     {
-        var releaseDateText = item.MediaType == "movie" ? item.ReleaseDate : item.FirstAirDate;
+        if (string.IsNullOrWhiteSpace(actor)) return null;
+        var payload = await GetAsync<TmdbPersonSearchResponse>(
+            $"search/person?query={Uri.EscapeDataString(actor.Trim())}&include_adult=false&language=fr-FR&page=1",
+            token,
+            cancellationToken);
+        return payload?.Results.FirstOrDefault()?.Id;
+    }
+
+    private static int MapGenreId(int genreId, string mediaKind)
+    {
+        if (mediaKind == "movie") return genreId;
+        return genreId switch
+        {
+            28 or 12 => 10759,
+            14 or 878 => 10765,
+            _ => genreId
+        };
+    }
+
+    private async Task<T?> GetAsync<T>(string uri, string token, CancellationToken cancellationToken)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, uri);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        using var response = await httpClient.SendAsync(request, cancellationToken);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<T>(cancellationToken: cancellationToken);
+    }
+
+    private static MediaSearchResult MapResult(TmdbSearchItem item, string mediaType)
+    {
+        var releaseDateText = mediaType == "movie" ? item.ReleaseDate : item.FirstAirDate;
         DateOnly? releaseDate = DateOnly.TryParse(releaseDateText, out var parsedDate)
             ? parsedDate
             : null;
@@ -60,13 +135,13 @@ public sealed class TmdbClient(HttpClient httpClient, IOptions<TmdbOptions> opti
             item.Id.ToString(),
             item.Title ?? item.Name ?? string.Empty,
             item.Overview,
-            GetMediaType(item),
+            GetMediaType(item, mediaType),
             item.PosterPath is null ? null : $"{PosterBaseUrl}{item.PosterPath}",
             item.VoteAverage,
             releaseDate);
     }
 
-    private static MediaType GetMediaType(TmdbSearchItem item)
+    private static MediaType GetMediaType(TmdbSearchItem item, string mediaType)
     {
         var isJapaneseAnimation = (item.GenreIds?.Contains(16) ?? false) &&
                                   (item.OriginalLanguage == "ja" ||
@@ -76,15 +151,20 @@ public sealed class TmdbClient(HttpClient httpClient, IOptions<TmdbOptions> opti
             return MediaType.Anime;
         }
 
-        return item.MediaType == "movie" ? MediaType.Movie : MediaType.TvSeries;
+        return mediaType == "movie" ? MediaType.Movie : MediaType.TvSeries;
     }
 
     private sealed record TmdbSearchResponse(
         [property: JsonPropertyName("results")] TmdbSearchItem[] Results);
 
+    private sealed record TmdbPersonSearchResponse(
+        [property: JsonPropertyName("results")] TmdbPerson[] Results);
+
+    private sealed record TmdbPerson([property: JsonPropertyName("id")] long Id);
+
     private sealed record TmdbSearchItem(
         [property: JsonPropertyName("id")] long Id,
-        [property: JsonPropertyName("media_type")] string MediaType,
+        [property: JsonPropertyName("media_type")] string? MediaType,
         [property: JsonPropertyName("title")] string? Title,
         [property: JsonPropertyName("name")] string? Name,
         [property: JsonPropertyName("overview")] string? Overview,

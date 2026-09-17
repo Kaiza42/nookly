@@ -37,6 +37,31 @@ public partial class LibraryViewModel(
         new("Abandonne", MediaStatus.Dropped)
     ];
 
+    public IReadOnlyList<DiscoveryTypeOption> DiscoveryMediaTypes { get; } =
+    [
+        new("Tous les types", null),
+        new("Films", MediaType.Movie),
+        new("Series", MediaType.TvSeries),
+        new("Animes", MediaType.Anime)
+    ];
+
+    public IReadOnlyList<GenreOption> DiscoveryGenres { get; } =
+    [
+        new("Tous les genres", null),
+        new("Action", 28),
+        new("Animation", 16),
+        new("Aventure", 12),
+        new("Comedie", 35),
+        new("Crime", 80),
+        new("Documentaire", 99),
+        new("Drame", 18),
+        new("Fantastique", 14),
+        new("Horreur", 27),
+        new("Romance", 10749),
+        new("Science-fiction", 878),
+        new("Thriller", 53)
+    ];
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowEmptyState))]
     [NotifyCanExecuteChangedFor(nameof(SaveMediaCommand))]
@@ -97,6 +122,18 @@ public partial class LibraryViewModel(
     private string searchQuery = string.Empty;
 
     [ObservableProperty]
+    private DiscoveryTypeOption? selectedDiscoveryType;
+
+    [ObservableProperty]
+    private GenreOption? selectedDiscoveryGenre;
+
+    [ObservableProperty]
+    private string discoveryYear = string.Empty;
+
+    [ObservableProperty]
+    private string actorQuery = string.Empty;
+
+    [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SearchCommand))]
     [NotifyCanExecuteChangedFor(nameof(AddSearchResultCommand))]
     private bool isSearching;
@@ -138,7 +175,7 @@ public partial class LibraryViewModel(
         SelectedMediaStatus is not null;
 
     private bool CanDeleteMedia(MediaListItemViewModel? item) => !IsLoading && item is not null;
-    private bool CanSearch => !IsSearching && !string.IsNullOrWhiteSpace(SearchQuery);
+    private bool CanSearch => !IsSearching;
     private bool CanAddSearchResult(MediaSearchResultViewModel? item) => !IsSearching && item is not null;
 
     partial void OnLibrarySearchQueryChanged(string value) => RefreshLibraryFilter();
@@ -235,7 +272,14 @@ public partial class LibraryViewModel(
 
         try
         {
-            var results = await mediaApiClient.SearchMediaAsync(query, cancellationToken);
+            int? year = int.TryParse(DiscoveryYear, out var parsedYear) ? parsedYear : null;
+            var results = await mediaApiClient.SearchMediaAsync(
+                query,
+                SelectedDiscoveryType?.Value,
+                SelectedDiscoveryGenre?.Value,
+                year,
+                ActorQuery,
+                cancellationToken);
             if (version != searchVersion)
             {
                 return;
