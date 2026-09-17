@@ -110,10 +110,34 @@ public static class MediaEndpoints
             await preferences.SaveAsync(
                 request.ExternalSource,
                 request.ExternalId,
+                request.Title,
                 request.IsLiked,
                 (Nookly.Domain.Media.MediaType)request.Type,
                 cancellationToken);
             return Results.NoContent();
+        });
+
+        group.MapGet("/preferences/disliked", async (
+            DiscoveryPreferenceService preferences,
+            CancellationToken cancellationToken) =>
+        {
+            var items = await preferences.ListDislikedAsync(cancellationToken);
+            return Results.Ok(items.Select(item => new DiscoveryPreferenceResponse(
+                item.ExternalSource,
+                item.ExternalId,
+                item.Title,
+                item.MediaType is null ? null : (ContractMediaType)item.MediaType,
+                item.IsLiked)));
+        });
+
+        group.MapDelete("/preferences/{source}/{externalId}", async (
+            string source,
+            string externalId,
+            DiscoveryPreferenceService preferences,
+            CancellationToken cancellationToken) =>
+        {
+            var restored = await preferences.RestoreAsync(source, externalId, cancellationToken);
+            return restored ? Results.NoContent() : Results.NotFound();
         });
 
         group.MapGet("/{id:guid}", async (

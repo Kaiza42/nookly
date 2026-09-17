@@ -20,6 +20,7 @@ public partial class LibraryViewModel(
     public ObservableCollection<MediaListItemViewModel> Items { get; } = [];
     public ObservableCollection<MediaListItemViewModel> FilteredItems { get; } = [];
     public ObservableCollection<MediaSearchResultViewModel> SearchResults { get; } = [];
+    public ObservableCollection<DiscoveryPreferenceViewModel> DislikedPreferences { get; } = [];
 
     public IReadOnlyList<MediaTypeOption> MediaTypes { get; } =
     [
@@ -161,6 +162,12 @@ public partial class LibraryViewModel(
     private bool isLibraryDetailPage;
 
     [ObservableProperty]
+    private bool isSettingsPage;
+
+    [ObservableProperty]
+    private bool hasDislikedPreferences;
+
+    [ObservableProperty]
     private MediaSearchResultViewModel? selectedSearchResult;
 
     [ObservableProperty]
@@ -249,6 +256,50 @@ public partial class LibraryViewModel(
 
     [RelayCommand]
     private void BackToLibrary() => SetPage(library: true);
+
+    [RelayCommand]
+    private async Task ShowSettingsAsync()
+    {
+        CloseForm();
+        SetPage(settings: true);
+        await LoadDislikedPreferencesAsync();
+    }
+
+    [RelayCommand]
+    private async Task RestoreDiscoveryPreferenceAsync(DiscoveryPreferenceViewModel item)
+    {
+        try
+        {
+            await mediaApiClient.RestoreDiscoveryPreferenceAsync(item.ExternalSource, item.ExternalId);
+            DislikedPreferences.Remove(item);
+            HasDislikedPreferences = DislikedPreferences.Count > 0;
+        }
+        catch (HttpRequestException)
+        {
+            HasError = true;
+            ErrorMessage = "Impossible de restaurer ce titre.";
+        }
+    }
+
+    private async Task LoadDislikedPreferencesAsync()
+    {
+        try
+        {
+            var preferences = await mediaApiClient.GetDislikedPreferencesAsync();
+            DislikedPreferences.Clear();
+            foreach (var preference in preferences)
+            {
+                DislikedPreferences.Add(new DiscoveryPreferenceViewModel(preference));
+            }
+
+            HasDislikedPreferences = DislikedPreferences.Count > 0;
+        }
+        catch (HttpRequestException)
+        {
+            HasError = true;
+            ErrorMessage = "Impossible de charger les parametres.";
+        }
+    }
 
     [RelayCommand(CanExecute = nameof(CanSearch))]
     private async Task SearchAsync()
@@ -389,6 +440,7 @@ public partial class LibraryViewModel(
             await mediaApiClient.SetDiscoveryPreferenceAsync(new SetDiscoveryPreferenceRequest(
                 item.Result.ExternalSource,
                 item.Result.ExternalId,
+                item.Result.Title,
                 isLiked,
                 item.Result.Type));
             SearchResults.Remove(item);
@@ -582,12 +634,14 @@ public partial class LibraryViewModel(
         bool library = false,
         bool discover = false,
         bool detail = false,
-        bool libraryDetail = false)
+        bool libraryDetail = false,
+        bool settings = false)
     {
         IsLibraryPage = library;
         IsDiscoverPage = discover;
         IsDetailPage = detail;
         IsLibraryDetailPage = libraryDetail;
+        IsSettingsPage = settings;
     }
 
     private void RefreshLibraryFilter()

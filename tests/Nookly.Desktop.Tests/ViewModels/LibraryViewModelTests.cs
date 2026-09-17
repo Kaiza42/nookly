@@ -165,6 +165,28 @@ public sealed class LibraryViewModelTests
         Assert.Equal("438631", apiClient.LastPreferenceRequest.ExternalId);
     }
 
+    [Fact]
+    public async Task Settings_CanRestoreAnAccidentallyDislikedTitle()
+    {
+        var apiClient = new StubMediaApiClient
+        {
+            DislikedPreferences =
+            [
+                new DiscoveryPreferenceResponse("tmdb", "438631", "Dune", MediaType.Movie, false)
+            ]
+        };
+        var viewModel = CreateViewModel(apiClient);
+
+        await viewModel.ShowSettingsCommand.ExecuteAsync(null);
+        var preference = Assert.Single(viewModel.DislikedPreferences);
+        await viewModel.RestoreDiscoveryPreferenceCommand.ExecuteAsync(preference);
+
+        Assert.True(viewModel.IsSettingsPage);
+        Assert.Empty(viewModel.DislikedPreferences);
+        Assert.False(viewModel.HasDislikedPreferences);
+        Assert.True(apiClient.RestorePreferenceCalled);
+    }
+
     private static LibraryViewModel CreateViewModel(StubMediaApiClient apiClient)
     {
         return new LibraryViewModel(apiClient, new ConfirmingDialogService());
@@ -185,6 +207,8 @@ public sealed class LibraryViewModelTests
         { get; init; }
         public CreateMediaRequest? LastCreateRequest { get; private set; }
         public SetDiscoveryPreferenceRequest? LastPreferenceRequest { get; private set; }
+        public IReadOnlyList<DiscoveryPreferenceResponse> DislikedPreferences { get; init; } = [];
+        public bool RestorePreferenceCalled { get; private set; }
 
         public Task<IReadOnlyList<MediaItemResponse>> GetMediaAsync(
             CancellationToken cancellationToken = default)
@@ -218,6 +242,19 @@ public sealed class LibraryViewModelTests
             CancellationToken cancellationToken = default)
         {
             LastPreferenceRequest = request;
+            return Task.CompletedTask;
+        }
+
+        public Task<IReadOnlyList<DiscoveryPreferenceResponse>> GetDislikedPreferencesAsync(
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult(DislikedPreferences);
+
+        public Task RestoreDiscoveryPreferenceAsync(
+            string source,
+            string externalId,
+            CancellationToken cancellationToken = default)
+        {
+            RestorePreferenceCalled = true;
             return Task.CompletedTask;
         }
 

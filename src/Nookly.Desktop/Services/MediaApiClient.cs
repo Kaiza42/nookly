@@ -78,6 +78,29 @@ public sealed class MediaApiClient(HttpClient httpClient) : IMediaApiClient
         response.EnsureSuccessStatusCode();
     }
 
+    public async Task<IReadOnlyList<DiscoveryPreferenceResponse>> GetDislikedPreferencesAsync(
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.GetAsync(
+            "api/media/preferences/disliked",
+            cancellationToken);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<DiscoveryPreferenceResponse[]>(
+                   JsonOptions,
+                   cancellationToken) ?? [];
+    }
+
+    public async Task RestoreDiscoveryPreferenceAsync(
+        string source,
+        string externalId,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.DeleteAsync(
+            $"api/media/preferences/{Uri.EscapeDataString(source)}/{Uri.EscapeDataString(externalId)}",
+            cancellationToken);
+        response.EnsureSuccessStatusCode();
+    }
+
     public async Task<MediaItemResponse> UpdateMediaAsync(
         Guid id,
         UpdateMediaRequest request,

@@ -52,6 +52,8 @@
                                     Style="{StaticResource NavButton}" Margin="0,2" />
                         </StackPanel>
                     </Expander>
+                    <Button Content="Parametres" Command="{Binding ShowSettingsCommand}"
+                            Style="{StaticResource NavButton}" />
                 </StackPanel>
                 <TextBlock Grid.Row="2" Text="Espace personnel" Margin="26,0"
                            VerticalAlignment="Center" Foreground="#7F8997" FontSize="12" />
@@ -247,9 +249,11 @@
                         <TextBlock Text="Decouvrir" FontSize="28" FontWeight="SemiBold" />
                         <TextBlock Text="Explore les films, series et animes du catalogue" Margin="0,5,0,0" Foreground="#69717D" />
                     </StackPanel>
-                    <Button Content="Nouvelle selection" Command="{Binding RefreshRecommendationsCommand}"
+                    <Button Content="⚄" Command="{Binding RefreshRecommendationsCommand}"
+                            ToolTip="Nouvelle selection"
                             HorizontalAlignment="Right" VerticalAlignment="Center"
-                            Height="34" Padding="12,0" Background="White" BorderBrush="#D7DBE1" />
+                            Width="34" Height="34" Padding="0" FontSize="18" FontFamily="Segoe UI Symbol"
+                            Background="White" BorderBrush="#D7DBE1" />
                 </Grid>
                 <Grid Grid.Row="1" Margin="0,22,0,0">
                     <Grid.ColumnDefinitions>
@@ -455,6 +459,55 @@
                                     Style="{StaticResource PrimaryButton}" HorizontalAlignment="Left" Margin="0,26,0,0" />
                         </StackPanel>
                     </Grid>
+                </ScrollViewer>
+            </Grid>
+
+            <!-- Parametres generaux de Nookly, independants des futurs modules. -->
+            <Grid Visibility="{Binding IsSettingsPage, Converter={StaticResource BoolToVisibility}}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <StackPanel>
+                    <TextBlock Text="Parametres" FontSize="28" FontWeight="SemiBold" />
+                    <TextBlock Text="Personnalise le comportement de Nookly" Margin="0,5,0,0"
+                               Foreground="#69717D" />
+                </StackPanel>
+                <ScrollViewer Grid.Row="1" Margin="0,24,0,0" VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="Decouverte" FontSize="18" FontWeight="SemiBold" />
+                        <TextBlock Text="Gere les contenus retires de tes suggestions."
+                                   Margin="0,5,0,12" Foreground="#69717D" />
+                        <Border Padding="14" Background="White" BorderBrush="#D7DBE1"
+                                BorderThickness="1" CornerRadius="6">
+                            <Grid>
+                                <TextBlock Text="Aucun titre masque."
+                                           Foreground="#69717D" VerticalAlignment="Center"
+                                           Visibility="{Binding HasDislikedPreferences, Converter={StaticResource InverseBoolean}}" />
+                                <ItemsControl ItemsSource="{Binding DislikedPreferences}"
+                                              Visibility="{Binding HasDislikedPreferences, Converter={StaticResource BoolToVisibility}}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Margin="0,4">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                                                    <TextBlock Text="{Binding TypeLabel}" Margin="0,3,0,0"
+                                                               Foreground="#69717D" FontSize="11" />
+                                                </StackPanel>
+                                                <Button Grid.Column="1" Content="Restaurer"
+                                                        Command="{Binding DataContext.RestoreDiscoveryPreferenceCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                        CommandParameter="{Binding}" Height="30" Padding="10,0" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
                 </ScrollViewer>
             </Grid>
         </Grid>

@@ -25,6 +25,14 @@ public interface IMediaApiClient
         SetDiscoveryPreferenceRequest request,
         CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyList<DiscoveryPreferenceResponse>> GetDislikedPreferencesAsync(
+        CancellationToken cancellationToken = default);
+
+    Task RestoreDiscoveryPreferenceAsync(
+        string source,
+        string externalId,
+        CancellationToken cancellationToken = default);
+
     Task<MediaItemResponse> UpdateMediaAsync(
         Guid id,
         UpdateMediaRequest request,
