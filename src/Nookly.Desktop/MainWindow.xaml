@@ -165,7 +165,8 @@
                                Visibility="{Binding ShowNoLibraryResults, Converter={StaticResource BoolToVisibility}}" />
                     <ListView ItemsSource="{Binding FilteredItems}"
                               Visibility="{Binding HasFilteredItems, Converter={StaticResource BoolToVisibility}}"
-                              Background="Transparent" BorderThickness="0"
+                              Background="Transparent" BorderThickness="0" MaxWidth="920"
+                              HorizontalAlignment="Stretch"
                               ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                         <ListView.ItemContainerStyle>
                             <Style TargetType="ListViewItem">
@@ -301,7 +302,8 @@
                 </StackPanel>
                 <ListView Grid.Row="4" ItemsSource="{Binding SearchResults}" Margin="0,18,0,0"
                           Visibility="{Binding HasSearchResults, Converter={StaticResource BoolToVisibility}}"
-                          Background="Transparent" BorderThickness="0">
+                          Background="Transparent" BorderThickness="0" MaxWidth="920"
+                          HorizontalAlignment="Stretch">
                     <ListView.ItemContainerStyle>
                         <Style TargetType="ListViewItem">
                             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
