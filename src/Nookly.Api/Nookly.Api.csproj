@@ -17,6 +17,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Nookly.Application\Nookly.Application.csproj" />
     <ProjectReference Include="..\Nookly.Infrastructure\Nookly.Infrastructure.csproj" />
+    <ProjectReference Include="..\Nookly.Contracts\Nookly.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

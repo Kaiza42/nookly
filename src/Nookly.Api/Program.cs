@@ -15,8 +15,11 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+else
+{
+    app.UseHttpsRedirection();
+}
 
-app.UseHttpsRedirection();
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 app.MapMediaEndpoints();
 
