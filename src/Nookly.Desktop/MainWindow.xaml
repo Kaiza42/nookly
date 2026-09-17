@@ -266,26 +266,30 @@
                                        FontSize="10" VerticalAlignment="Center" />
                             <ComboBox ItemsSource="{Binding DiscoveryMediaTypes}"
                                       SelectedItem="{Binding SelectedDiscoveryType}"
-                                      DisplayMemberPath="Label" Width="130" Height="22" Padding="4,0" />
+                                      DisplayMemberPath="Label" Width="130" Height="22" Padding="4,0"
+                                      HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,12,0">
                             <TextBlock Text="Genre" Margin="0,0,6,0" Foreground="#4D5967"
                                        FontSize="10" VerticalAlignment="Center" />
                             <ComboBox ItemsSource="{Binding DiscoveryGenres}"
                                       SelectedItem="{Binding SelectedDiscoveryGenre}"
-                                      DisplayMemberPath="Label" Width="130" Height="22" Padding="4,0" />
+                                      DisplayMemberPath="Label" Width="130" Height="22" Padding="4,0"
+                                      HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,12,0">
                             <TextBlock Text="Annee" Margin="0,0,6,0" Foreground="#4D5967"
                                        FontSize="10" VerticalAlignment="Center" />
                             <TextBox Text="{Binding DiscoveryYear, UpdateSourceTrigger=PropertyChanged}"
-                                     Width="70" Height="22" Padding="5,1" ToolTip="Par exemple 2024" />
+                                     Width="70" Height="22" Padding="5,1" TextAlignment="Center"
+                                     VerticalContentAlignment="Center" ToolTip="Par exemple 2024" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="Acteur" Margin="0,0,6,0" Foreground="#4D5967"
                                        FontSize="10" VerticalAlignment="Center" />
                             <TextBox Text="{Binding ActorQuery, UpdateSourceTrigger=PropertyChanged}"
-                                     Width="160" Height="22" Padding="5,1" />
+                                     Width="160" Height="22" Padding="5,1" TextAlignment="Center"
+                                     VerticalContentAlignment="Center" />
                         </StackPanel>
                     </WrapPanel>
                 </Border>
