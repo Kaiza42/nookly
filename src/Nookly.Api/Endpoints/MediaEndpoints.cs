@@ -111,7 +111,10 @@ public static class MediaEndpoints
                 var command = new ApplicationUpdateMediaRequest(
                     (Nookly.Domain.Media.MediaStatus)request.Status,
                     request.PersonalRating,
-                    request.PersonalNotes);
+                    request.PersonalNotes,
+                    request.IsFavorite,
+                    request.CurrentSeason,
+                    request.CurrentEpisode);
                 var mediaItem = await service.UpdateAsync(id, command, cancellationToken);
                 return mediaItem is null ? Results.NotFound() : Results.Ok(ToResponse(mediaItem));
             }
@@ -141,6 +144,9 @@ public static class MediaEndpoints
         (ContractMediaStatus)item.Status,
         item.PersonalRating,
         item.PersonalNotes,
+        item.IsFavorite,
+        item.CurrentSeason,
+        item.CurrentEpisode,
         item.ExternalSource,
         item.ExternalId,
         item.PosterUrl,

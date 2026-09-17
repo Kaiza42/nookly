@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Net.Http;
+using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nookly.Contracts.Media;
@@ -36,8 +37,6 @@ public partial class LibraryViewModel(
         new("Abandonne", MediaStatus.Dropped)
     ];
 
-    public IReadOnlyList<RatingOption> Ratings { get; } = CreateRatingOptions();
-
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowEmptyState))]
     [NotifyCanExecuteChangedFor(nameof(SaveMediaCommand))]
@@ -67,7 +66,19 @@ public partial class LibraryViewModel(
     private MediaStatusOption? selectedMediaStatus;
 
     [ObservableProperty]
-    private RatingOption? selectedRating;
+    private string personalRatingText = string.Empty;
+
+    [ObservableProperty]
+    private bool isFavorite;
+
+    [ObservableProperty]
+    private string currentSeasonText = string.Empty;
+
+    [ObservableProperty]
+    private string currentEpisodeText = string.Empty;
+
+    [ObservableProperty]
+    private bool editingSupportsEpisodeProgress;
 
     [ObservableProperty]
     private string? newPersonalNotes;
@@ -109,7 +120,13 @@ public partial class LibraryViewModel(
     private bool isDetailPage;
 
     [ObservableProperty]
+    private bool isLibraryDetailPage;
+
+    [ObservableProperty]
     private MediaSearchResultViewModel? selectedSearchResult;
+
+    [ObservableProperty]
+    private MediaListItemViewModel? selectedLibraryItem;
 
     public bool ShowEmptyState => !IsLoading && !HasError && !HasItems;
     public bool HasFilteredItems => FilteredItems.Count > 0;
@@ -168,6 +185,16 @@ public partial class LibraryViewModel(
 
     [RelayCommand]
     private void BackToDiscover() => SetPage(discover: true);
+
+    [RelayCommand]
+    private void ShowLibraryItem(MediaListItemViewModel item)
+    {
+        SelectedLibraryItem = item;
+        SetPage(libraryDetail: true);
+    }
+
+    [RelayCommand]
+    private void BackToLibrary() => SetPage(library: true);
 
     [RelayCommand(CanExecute = nameof(CanSearch))]
     private async Task SearchAsync()
@@ -290,11 +317,16 @@ public partial class LibraryViewModel(
     [RelayCommand]
     private void EditMedia(MediaListItemViewModel item)
     {
+        SetPage(library: true);
         editingMediaId = item.Id;
         IsEditMode = true;
         SelectedMediaStatus = MediaStatuses.Single(option => option.Value == item.Status);
-        SelectedRating = Ratings.Single(option => option.Value == item.PersonalRating);
+        PersonalRatingText = item.PersonalRating?.ToString("0.##", CultureInfo.CurrentCulture) ?? string.Empty;
         NewPersonalNotes = item.PersonalNotes;
+        IsFavorite = item.IsFavorite;
+        CurrentSeasonText = item.CurrentSeason?.ToString(CultureInfo.CurrentCulture) ?? string.Empty;
+        CurrentEpisodeText = item.CurrentEpisode?.ToString(CultureInfo.CurrentCulture) ?? string.Empty;
+        EditingSupportsEpisodeProgress = item.SupportsEpisodeProgress;
         HasFormError = false;
         FormErrorMessage = null;
         IsCreatePanelOpen = true;
@@ -319,15 +351,28 @@ public partial class LibraryViewModel(
                 return;
             }
 
+            if (!TryParseRating(out var rating) ||
+                !TryParseOptionalPositiveInt(CurrentSeasonText, out var season) ||
+                !TryParseOptionalPositiveInt(CurrentEpisodeText, out var episode))
+            {
+                HasFormError = true;
+                FormErrorMessage = "La note doit être comprise entre 0 et 10, et la progression doit contenir des nombres positifs.";
+                return;
+            }
+
             var request = new UpdateMediaRequest(
                 SelectedMediaStatus.Value,
-                SelectedRating?.Value,
-                NewPersonalNotes);
+                rating,
+                NewPersonalNotes,
+                IsFavorite,
+                season,
+                episode);
             var saved = await mediaApiClient.UpdateMediaAsync(id, request);
 
             var existing = Items.First(item => item.Id == id);
             var index = Items.IndexOf(existing);
             Items[index] = new MediaListItemViewModel(saved);
+            SelectedLibraryItem = Items[index];
 
             HasItems = Items.Count > 0;
             RefreshLibraryFilter();
@@ -427,8 +472,12 @@ public partial class LibraryViewModel(
         editingMediaId = null;
         IsEditMode = false;
         SelectedMediaStatus = MediaStatuses[0];
-        SelectedRating = Ratings[0];
+        PersonalRatingText = string.Empty;
         NewPersonalNotes = null;
+        IsFavorite = false;
+        CurrentSeasonText = string.Empty;
+        CurrentEpisodeText = string.Empty;
+        EditingSupportsEpisodeProgress = false;
         HasFormError = false;
         FormErrorMessage = null;
     }
@@ -439,11 +488,16 @@ public partial class LibraryViewModel(
         IsCreatePanelOpen = false;
     }
 
-    private void SetPage(bool library = false, bool discover = false, bool detail = false)
+    private void SetPage(
+        bool library = false,
+        bool discover = false,
+        bool detail = false,
+        bool libraryDetail = false)
     {
         IsLibraryPage = library;
         IsDiscoverPage = discover;
         IsDetailPage = detail;
+        IsLibraryDetailPage = libraryDetail;
     }
 
     private void RefreshLibraryFilter()
@@ -464,14 +518,39 @@ public partial class LibraryViewModel(
         OnPropertyChanged(nameof(ShowNoLibraryResults));
     }
 
-    private static IReadOnlyList<RatingOption> CreateRatingOptions()
+    private bool TryParseRating(out decimal? rating)
     {
-        var ratings = new List<RatingOption> { new("Sans note", null) };
-        ratings.AddRange(Enumerable.Range(0, 21).Select(value =>
+        rating = null;
+        if (string.IsNullOrWhiteSpace(PersonalRatingText))
         {
-            var rating = value / 2m;
-            return new RatingOption($"{rating:0.#}/10", rating);
-        }));
-        return ratings;
+            return true;
+        }
+
+        var normalized = PersonalRatingText.Trim().Replace(',', '.');
+        if (!decimal.TryParse(normalized, NumberStyles.Number, CultureInfo.InvariantCulture, out var value) ||
+            value is < 0 or > 10)
+        {
+            return false;
+        }
+
+        rating = value;
+        return true;
+    }
+
+    private static bool TryParseOptionalPositiveInt(string text, out int? value)
+    {
+        value = null;
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return true;
+        }
+
+        if (!int.TryParse(text.Trim(), out var parsed) || parsed < 0)
+        {
+            return false;
+        }
+
+        value = parsed;
+        return true;
     }
 }

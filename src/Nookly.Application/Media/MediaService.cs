@@ -71,7 +71,10 @@ public sealed class MediaService(IMediaRepository repository) : IMediaService
         item.UpdatePersonalTracking(
             request.Status,
             request.PersonalRating,
-            request.PersonalNotes);
+            request.PersonalNotes,
+            request.IsFavorite,
+            request.CurrentSeason,
+            request.CurrentEpisode);
         await repository.UpdateAsync(item, cancellationToken);
         return ToDto(item);
     }
@@ -98,6 +101,9 @@ public sealed class MediaService(IMediaRepository repository) : IMediaService
         item.Status,
         item.PersonalRating,
         item.PersonalNotes,
+        item.IsFavorite,
+        item.CurrentSeason,
+        item.CurrentEpisode,
         item.ExternalSource,
         item.ExternalId,
         item.PosterUrl,

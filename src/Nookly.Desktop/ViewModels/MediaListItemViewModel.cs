@@ -12,6 +12,12 @@ public sealed class MediaListItemViewModel(MediaItemResponse mediaItem)
     public decimal? PersonalRating => mediaItem.PersonalRating;
     public string? PersonalNotes => mediaItem.PersonalNotes;
     public string? PosterUrl => mediaItem.PosterUrl;
+    public bool IsFavorite => mediaItem.IsFavorite;
+    public int? CurrentSeason => mediaItem.CurrentSeason;
+    public int? CurrentEpisode => mediaItem.CurrentEpisode;
+    public decimal? CommunityRating => mediaItem.CommunityRating;
+    public DateOnly? ReleaseDate => mediaItem.ReleaseDate;
+    public bool SupportsEpisodeProgress => Type is MediaType.TvSeries or MediaType.Anime;
 
     public string TypeLabel => Type switch
     {
@@ -37,4 +43,11 @@ public sealed class MediaListItemViewModel(MediaItemResponse mediaItem)
         : $"{PersonalRating:0.#}/10";
 
     public string AddedDateLabel => mediaItem.CreatedAtUtc.LocalDateTime.ToString("dd/MM/yyyy");
+    public string ReleaseDateLabel => ReleaseDate?.ToString("dd/MM/yyyy") ?? "Date inconnue";
+    public string CommunityRatingLabel => CommunityRating is null
+        ? "Non noté"
+        : $"{CommunityRating:0.0}/10";
+    public string ProgressLabel => SupportsEpisodeProgress && (CurrentSeason is not null || CurrentEpisode is not null)
+        ? $"Saison {CurrentSeason ?? 0}, épisode {CurrentEpisode ?? 0}"
+        : "Progression non renseignée";
 }

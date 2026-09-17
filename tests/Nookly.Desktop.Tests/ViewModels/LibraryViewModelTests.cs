@@ -16,8 +16,9 @@ public sealed class LibraryViewModelTests
         var item = Assert.Single(viewModel.Items);
         viewModel.EditMediaCommand.Execute(item);
         Assert.True(viewModel.SaveMediaCommand.CanExecute(null));
-        viewModel.SelectedRating = viewModel.Ratings.Single(x => x.Value == 9m);
+        viewModel.PersonalRatingText = "9";
         viewModel.NewPersonalNotes = "Mon avis personnel";
+        viewModel.IsFavorite = true;
 
         await viewModel.SaveMediaCommand.ExecuteAsync(null);
 
@@ -25,6 +26,21 @@ public sealed class LibraryViewModelTests
         Assert.Equal("Dune", updated.Title);
         Assert.Equal(9m, updated.PersonalRating);
         Assert.Equal("Mon avis personnel", updated.PersonalNotes);
+        Assert.True(updated.IsFavorite);
+    }
+
+    [Fact]
+    public async Task SaveMediaCommand_AcceptsCommaDecimalRating()
+    {
+        var viewModel = CreateViewModel(new StubMediaApiClient());
+        await viewModel.LoadCommand.ExecuteAsync(null);
+        viewModel.EditMediaCommand.Execute(Assert.Single(viewModel.Items));
+        viewModel.PersonalRatingText = "8,75";
+
+        await viewModel.SaveMediaCommand.ExecuteAsync(null);
+
+        Assert.Equal(8.75m, Assert.Single(viewModel.Items).PersonalRating);
+        Assert.False(viewModel.HasFormError);
     }
 
     [Fact]
@@ -178,7 +194,10 @@ public sealed class LibraryViewModelTests
                 request.Status,
                 request.PersonalRating,
                 id,
-                request.PersonalNotes);
+                request.PersonalNotes,
+                request.IsFavorite,
+                request.CurrentSeason,
+                request.CurrentEpisode);
             return Task.FromResult(item);
         }
 
@@ -194,7 +213,10 @@ public sealed class LibraryViewModelTests
             MediaStatus status,
             decimal? rating,
             Guid? id = null,
-            string? personalNotes = null)
+            string? personalNotes = null,
+            bool isFavorite = false,
+            int? currentSeason = null,
+            int? currentEpisode = null)
         {
             var now = DateTimeOffset.UtcNow;
             return new MediaItemResponse(
@@ -205,6 +227,9 @@ public sealed class LibraryViewModelTests
                 status,
                 rating,
                 personalNotes,
+                isFavorite,
+                currentSeason,
+                currentEpisode,
                 null,
                 null,
                 null,

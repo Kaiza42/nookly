@@ -109,9 +109,9 @@
                         </StackPanel>
                         <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,12,0">
                             <TextBlock Text="Ma note /10" Margin="0,0,0,6" Foreground="#4D5967" />
-                            <ComboBox ItemsSource="{Binding Ratings}"
-                                      SelectedItem="{Binding SelectedRating}" DisplayMemberPath="Label"
-                                      Height="36" />
+                            <TextBox Text="{Binding PersonalRatingText, UpdateSourceTrigger=PropertyChanged}"
+                                     Height="36" Padding="9,7" ToolTip="Nombre entre 0 et 10, par exemple 8,5" />
+                            <CheckBox Content="Favori" IsChecked="{Binding IsFavorite}" Margin="0,10,0,0" />
                         </StackPanel>
                         <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,0,12,0">
                             <TextBlock Text="Mes notes personnelles" Margin="0,0,0,6" Foreground="#4D5967" />
@@ -126,6 +126,23 @@
                             <Button Content="Enregistrer" Command="{Binding SaveMediaCommand}"
                                     Style="{StaticResource PrimaryButton}" />
                         </StackPanel>
+                        <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,14,12,0"
+                                    Visibility="{Binding EditingSupportsEpisodeProgress, Converter={StaticResource BoolToVisibility}}">
+                            <StackPanel Width="120" Margin="0,0,12,0">
+                                <TextBlock Text="Saison actuelle" Margin="0,0,0,6" Foreground="#4D5967" />
+                                <TextBox Text="{Binding CurrentSeasonText, UpdateSourceTrigger=PropertyChanged}"
+                                         Height="34" Padding="8,6" />
+                            </StackPanel>
+                            <StackPanel Width="120">
+                                <TextBlock Text="Episode actuel" Margin="0,0,0,6" Foreground="#4D5967" />
+                                <TextBox Text="{Binding CurrentEpisodeText, UpdateSourceTrigger=PropertyChanged}"
+                                         Height="34" Padding="8,6" />
+                            </StackPanel>
+                        </StackPanel>
+                        <TextBlock Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2"
+                                   Text="{Binding FormErrorMessage}" Margin="0,14,0,0"
+                                   Foreground="#A43630" TextWrapping="Wrap"
+                                   Visibility="{Binding HasFormError, Converter={StaticResource BoolToVisibility}}" />
                     </Grid>
                 </Border>
 
@@ -191,6 +208,9 @@
                                         </Grid>
                                         <StackPanel Grid.Column="2" Orientation="Horizontal"
                                                     HorizontalAlignment="Right" VerticalAlignment="Center">
+                                            <Button Content="Voir"
+                                                    Command="{Binding DataContext.ShowLibraryItemCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    CommandParameter="{Binding}" Height="30" Padding="10,0" Margin="0,0,6,0" />
                                             <Button Content="Modifier"
                                                     Command="{Binding DataContext.EditMediaCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                                     CommandParameter="{Binding}" Height="30" Padding="10,0" Margin="0,0,6,0" />
@@ -318,6 +338,59 @@
                                    Visibility="{Binding HasSearchError, Converter={StaticResource BoolToVisibility}}" />
                     </StackPanel>
                 </Grid>
+            </Grid>
+
+            <!-- Fiche d'un media deja present dans la bibliotheque. -->
+            <Grid Visibility="{Binding IsLibraryDetailPage, Converter={StaticResource BoolToVisibility}}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Button Content="Retour a la bibliotheque" Command="{Binding BackToLibraryCommand}"
+                        HorizontalAlignment="Left" Height="34" Padding="12,0"
+                        Background="White" BorderBrush="#D7DBE1" />
+                <ScrollViewer Grid.Row="1" Margin="0,22,0,0" VerticalScrollBarVisibility="Auto">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="240" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Border Width="220" Height="330" VerticalAlignment="Top" HorizontalAlignment="Left"
+                                Background="#E4E7EB" CornerRadius="6">
+                            <Image Source="{Binding SelectedLibraryItem.PosterUrl}" Stretch="UniformToFill" />
+                        </Border>
+                        <StackPanel Grid.Column="1" Margin="26,0,0,24" MaxWidth="700" HorizontalAlignment="Left">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding SelectedLibraryItem.Title}" FontSize="30"
+                                           FontWeight="SemiBold" TextWrapping="Wrap" />
+                                <TextBlock Text="  Favori" Margin="14,9,0,0" Foreground="#B26A00" FontWeight="SemiBold"
+                                           Visibility="{Binding SelectedLibraryItem.IsFavorite, Converter={StaticResource BoolToVisibility}}" />
+                            </StackPanel>
+                            <TextBlock Margin="0,10,0,0" Foreground="#69717D" FontSize="14">
+                                <Run Text="{Binding SelectedLibraryItem.TypeLabel, Mode=OneWay}" /><Run Text="  |  " />
+                                <Run Text="{Binding SelectedLibraryItem.ReleaseDateLabel, Mode=OneWay}" /><Run Text="  |  TMDB " />
+                                <Run Text="{Binding SelectedLibraryItem.CommunityRatingLabel, Mode=OneWay}" />
+                            </TextBlock>
+                            <TextBlock Text="{Binding SelectedLibraryItem.StatusLabel}" Margin="0,18,0,0"
+                                       Foreground="#286C53" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding SelectedLibraryItem.ProgressLabel}" Margin="0,7,0,0"
+                                       Foreground="#4D5967"
+                                       Visibility="{Binding SelectedLibraryItem.SupportsEpisodeProgress, Converter={StaticResource BoolToVisibility}}" />
+                            <TextBlock Text="Synopsis" Margin="0,26,0,0" FontSize="16" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding SelectedLibraryItem.Description}" Margin="0,8,0,0"
+                                       Foreground="#4D5967" LineHeight="21" TextWrapping="Wrap" />
+                            <TextBlock Text="Mes informations" Margin="0,26,0,0" FontSize="16" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding SelectedLibraryItem.RatingLabel, StringFormat=Ma note : {0}}"
+                                       Margin="0,8,0,0" Foreground="#4D5967" />
+                            <TextBlock Text="{Binding SelectedLibraryItem.PersonalNotes}" Margin="0,8,0,0"
+                                       Foreground="#286C53" TextWrapping="Wrap" FontStyle="Italic" />
+                            <Button Content="Modifier mes informations"
+                                    Command="{Binding EditMediaCommand}"
+                                    CommandParameter="{Binding SelectedLibraryItem}"
+                                    Style="{StaticResource PrimaryButton}" HorizontalAlignment="Left" Margin="0,26,0,0" />
+                        </StackPanel>
+                    </Grid>
+                </ScrollViewer>
             </Grid>
         </Grid>
     </Grid>

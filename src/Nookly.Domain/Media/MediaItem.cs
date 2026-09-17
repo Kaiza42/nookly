@@ -28,6 +28,9 @@ public sealed class MediaItem
     public decimal? CommunityRating { get; private set; }
     public decimal? PersonalRating { get; private set; }
     public string? PersonalNotes { get; private set; }
+    public bool IsFavorite { get; private set; }
+    public int? CurrentSeason { get; private set; }
+    public int? CurrentEpisode { get; private set; }
     public DateOnly? ReleaseDate { get; private set; }
     public DateTimeOffset CreatedAtUtc { get; private set; }
     public DateTimeOffset UpdatedAtUtc { get; private set; }
@@ -65,7 +68,10 @@ public sealed class MediaItem
     public void UpdatePersonalTracking(
         MediaStatus status,
         decimal? personalRating,
-        string? personalNotes)
+        string? personalNotes,
+        bool isFavorite = false,
+        int? currentSeason = null,
+        int? currentEpisode = null)
     {
         if (personalRating is < 0 or > 10)
         {
@@ -74,9 +80,25 @@ public sealed class MediaItem
                 "The personal rating must be between 0 and 10.");
         }
 
+        if (currentSeason is < 0 || currentEpisode is < 0)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(currentSeason),
+                "The season and episode must be positive numbers.");
+        }
+
+        if (Type is MediaType.Movie or MediaType.Manga)
+        {
+            currentSeason = null;
+            currentEpisode = null;
+        }
+
         Status = status;
         PersonalRating = personalRating;
         PersonalNotes = string.IsNullOrWhiteSpace(personalNotes) ? null : personalNotes.Trim();
+        IsFavorite = isFavorite;
+        CurrentSeason = currentSeason;
+        CurrentEpisode = currentEpisode;
         UpdatedAtUtc = DateTimeOffset.UtcNow;
     }
 }
