@@ -7,7 +7,6 @@
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
         <converters:InverseBooleanConverter x:Key="InverseBoolean" />
-        <converters:ResponsiveContentWidthConverter x:Key="ResponsiveContentWidth" />
         <Style x:Key="NavButton" TargetType="Button">
             <Setter Property="Height" Value="42" />
             <Setter Property="Margin" Value="12,2" />
@@ -167,8 +166,7 @@
                     <ListView ItemsSource="{Binding FilteredItems}"
                               Visibility="{Binding HasFilteredItems, Converter={StaticResource BoolToVisibility}}"
                               Background="Transparent" BorderThickness="0"
-                              Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Grid}, Converter={StaticResource ResponsiveContentWidth}}"
-                              HorizontalAlignment="Left"
+                              HorizontalAlignment="Stretch"
                               ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                         <ListView.ItemContainerStyle>
                             <Style TargetType="ListViewItem">
@@ -305,8 +303,8 @@
                 <ListView Grid.Row="4" ItemsSource="{Binding SearchResults}" Margin="0,18,0,0"
                           Visibility="{Binding HasSearchResults, Converter={StaticResource BoolToVisibility}}"
                           Background="Transparent" BorderThickness="0"
-                          Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Grid}, Converter={StaticResource ResponsiveContentWidth}}"
-                          HorizontalAlignment="Left">
+                          HorizontalAlignment="Stretch"
+                          ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                     <ListView.ItemContainerStyle>
                         <Style TargetType="ListViewItem">
                             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
