@@ -9,5 +9,10 @@ public sealed record MediaItemDto(
     MediaType Type,
     MediaStatus Status,
     decimal? PersonalRating,
+    string? ExternalSource,
+    string? ExternalId,
+    string? PosterUrl,
+    decimal? CommunityRating,
+    DateOnly? ReleaseDate,
     DateTimeOffset CreatedAtUtc,
     DateTimeOffset UpdatedAtUtc);

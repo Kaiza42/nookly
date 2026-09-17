@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Nookly.Contracts.Media;
+using Nookly.Contracts.Search;
 
 namespace Nookly.Desktop.Services;
 
@@ -17,6 +18,21 @@ public sealed class MediaApiClient(HttpClient httpClient) : IMediaApiClient
         response.EnsureSuccessStatusCode();
 
         return await response.Content.ReadFromJsonAsync<MediaItemResponse[]>(
+                   JsonOptions,
+                   cancellationToken)
+               ?? [];
+    }
+
+    public async Task<IReadOnlyList<MediaSearchResultResponse>> SearchMediaAsync(
+        string query,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.GetAsync(
+            $"api/media/search?query={Uri.EscapeDataString(query)}",
+            cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadFromJsonAsync<MediaSearchResultResponse[]>(
                    JsonOptions,
                    cancellationToken)
                ?? [];

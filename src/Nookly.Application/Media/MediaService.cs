@@ -24,7 +24,29 @@ public sealed class MediaService(IMediaRepository repository) : IMediaService
         CreateMediaRequest request,
         CancellationToken cancellationToken = default)
     {
+        if (request.ExternalSource is not null && request.ExternalId is not null)
+        {
+            var exists = await repository.ExistsByExternalIdAsync(
+                request.ExternalSource,
+                request.ExternalId,
+                cancellationToken);
+            if (exists)
+            {
+                throw new DuplicateMediaException("This media is already in the library.");
+            }
+        }
+
         var item = MediaItem.Create(request.Title, request.Type, request.Description);
+        if (request.ExternalSource is not null && request.ExternalId is not null)
+        {
+            item.AttachExternalMetadata(
+                request.ExternalSource,
+                request.ExternalId,
+                request.PosterUrl,
+                request.CommunityRating,
+                request.ReleaseDate);
+        }
+
         await repository.AddAsync(item, cancellationToken);
         return ToDto(item);
     }
@@ -71,6 +93,11 @@ public sealed class MediaService(IMediaRepository repository) : IMediaService
         item.Type,
         item.Status,
         item.PersonalRating,
+        item.ExternalSource,
+        item.ExternalId,
+        item.PosterUrl,
+        item.CommunityRating,
+        item.ReleaseDate,
         item.CreatedAtUtc,
         item.UpdatedAtUtc);
 }

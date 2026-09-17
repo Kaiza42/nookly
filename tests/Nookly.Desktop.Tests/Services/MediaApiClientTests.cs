@@ -68,6 +68,36 @@ public sealed class MediaApiClientTests
         Assert.Equal(MediaType.Manga, result.Type);
     }
 
+    [Fact]
+    public async Task SearchMediaAsync_EncodesQueryAndDeserializesResults()
+    {
+        const string json = """
+            [{
+              "externalSource": "tmdb",
+              "externalId": "438631",
+              "title": "Dune",
+              "type": "Movie",
+              "communityRating": 7.8,
+              "releaseDate": "2021-09-15"
+            }]
+            """;
+        var handler = new StubHttpMessageHandler(json);
+        using var httpClient = new HttpClient(handler)
+        {
+            BaseAddress = new Uri("http://localhost/")
+        };
+        var client = new MediaApiClient(httpClient);
+
+        var results = await client.SearchMediaAsync("Dune part two");
+
+        var result = Assert.Single(results);
+        Assert.Equal("Dune", result.Title);
+        Assert.Equal(7.8m, result.CommunityRating);
+        Assert.Equal(
+            "http://localhost/api/media/search?query=Dune%20part%20two",
+            handler.LastRequestUri?.OriginalString);
+    }
+
     private sealed class StubHttpMessageHandler(string content) : HttpMessageHandler
     {
         public HttpMethod? LastMethod { get; private set; }

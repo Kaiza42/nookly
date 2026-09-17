@@ -1,4 +1,5 @@
 using Nookly.Contracts.Media;
+using Nookly.Contracts.Search;
 using Nookly.Desktop.Services;
 using Nookly.Desktop.ViewModels;
 
@@ -56,6 +57,31 @@ public sealed class LibraryViewModelTests
         Assert.True(apiClient.DeleteCalled);
     }
 
+    [Fact]
+    public async Task SearchAndAddResult_AddsExternalMediaToLibrary()
+    {
+        var apiClient = new StubMediaApiClient
+        {
+            SearchResults =
+            [
+                new MediaSearchResultResponse(
+                    "tmdb", "438631", "Dune", "Science fiction", MediaType.Movie,
+                    "https://image.tmdb.org/t/p/w500/poster.jpg", 7.8m,
+                    new DateOnly(2021, 9, 15))
+            ]
+        };
+        var viewModel = CreateViewModel(apiClient);
+        viewModel.SearchQuery = "Dune";
+
+        await viewModel.SearchCommand.ExecuteAsync(null);
+        await viewModel.AddSearchResultCommand.ExecuteAsync(Assert.Single(viewModel.SearchResults));
+
+        Assert.Contains(viewModel.Items, item => item.Title == "Dune");
+        Assert.NotNull(apiClient.LastCreateRequest);
+        Assert.Equal("tmdb", apiClient.LastCreateRequest.ExternalSource);
+        Assert.Equal("438631", apiClient.LastCreateRequest.ExternalId);
+    }
+
     private static LibraryViewModel CreateViewModel(StubMediaApiClient apiClient)
     {
         return new LibraryViewModel(apiClient, new ConfirmingDialogService());
@@ -70,6 +96,8 @@ public sealed class LibraryViewModelTests
             null);
 
         public bool DeleteCalled { get; private set; }
+        public IReadOnlyList<MediaSearchResultResponse> SearchResults { get; init; } = [];
+        public CreateMediaRequest? LastCreateRequest { get; private set; }
 
         public Task<IReadOnlyList<MediaItemResponse>> GetMediaAsync(
             CancellationToken cancellationToken = default)
@@ -77,10 +105,18 @@ public sealed class LibraryViewModelTests
             return Task.FromResult<IReadOnlyList<MediaItemResponse>>([item]);
         }
 
+        public Task<IReadOnlyList<MediaSearchResultResponse>> SearchMediaAsync(
+            string query,
+            CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(SearchResults);
+        }
+
         public Task<MediaItemResponse> CreateMediaAsync(
             CreateMediaRequest request,
             CancellationToken cancellationToken = default)
         {
+            LastCreateRequest = request;
             item = CreateResponse(request.Title, request.Type, MediaStatus.Planned, null);
             return Task.FromResult(item);
         }
@@ -115,6 +151,11 @@ public sealed class LibraryViewModelTests
                 type,
                 status,
                 rating,
+                null,
+                null,
+                null,
+                null,
+                null,
                 now,
                 now);
         }

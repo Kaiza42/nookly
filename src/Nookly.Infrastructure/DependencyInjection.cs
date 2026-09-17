@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Nookly.Application.Abstractions;
 using Nookly.Application.Media;
 using Nookly.Infrastructure.Data;
+using Nookly.Infrastructure.External.Tmdb;
 using Nookly.Infrastructure.Persistence;
 
 namespace Nookly.Infrastructure;
@@ -20,6 +21,12 @@ public static class DependencyInjection
         services.AddDbContext<NooklyDbContext>(options => options.UseNpgsql(connectionString));
         services.AddScoped<IMediaRepository, MediaRepository>();
         services.AddScoped<IMediaService, MediaService>();
+        services.Configure<TmdbOptions>(configuration.GetSection(TmdbOptions.SectionName));
+        services.AddHttpClient<IExternalMediaSearch, TmdbClient>(client =>
+        {
+            client.BaseAddress = new Uri("https://api.themoviedb.org/3/");
+            client.Timeout = TimeSpan.FromSeconds(15);
+        });
 
         return services;
     }

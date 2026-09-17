@@ -7,5 +7,10 @@ public sealed record MediaItemResponse(
     MediaType Type,
     MediaStatus Status,
     decimal? PersonalRating,
+    string? ExternalSource,
+    string? ExternalId,
+    string? PosterUrl,
+    decimal? CommunityRating,
+    DateOnly? ReleaseDate,
     DateTimeOffset CreatedAtUtc,
     DateTimeOffset UpdatedAtUtc);

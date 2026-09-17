@@ -72,6 +72,7 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
@@ -117,6 +118,134 @@
             </Grid>
 
             <Border Grid.Row="1"
+                    Margin="0,22,0,0"
+                    Padding="14"
+                    Background="White"
+                    BorderBrush="#D7DBE1"
+                    BorderThickness="1"
+                    CornerRadius="6">
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                                 Height="38"
+                                 Padding="11,8"
+                                 BorderBrush="#C9CED6"
+                                 ToolTip="Rechercher un film ou une serie sur TMDB" />
+                        <Button Grid.Column="1"
+                                Content="Rechercher"
+                                Command="{Binding SearchCommand}"
+                                Height="38"
+                                MinWidth="105"
+                                Margin="10,0,0,0"
+                                Padding="15,0"
+                                Background="#286C53"
+                                Foreground="White"
+                                BorderBrush="#286C53"
+                                Cursor="Hand" />
+                    </Grid>
+
+                    <ProgressBar Height="3"
+                                 Margin="0,10,0,0"
+                                 IsIndeterminate="True"
+                                 Visibility="{Binding IsSearching, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                    <TextBlock Text="{Binding SearchErrorMessage}"
+                               Margin="0,10,0,0"
+                               Foreground="#8E2F2A"
+                               Visibility="{Binding HasSearchError, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                    <ListBox ItemsSource="{Binding SearchResults}"
+                             Margin="0,12,0,0"
+                             Height="190"
+                             Visibility="{Binding HasSearchResults, Converter={StaticResource BooleanToVisibilityConverter}}"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                             ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="Margin" Value="0,0,10,0" />
+                                <Setter Property="BorderThickness" Value="0" />
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Border Width="360"
+                                        Height="168"
+                                        Padding="10"
+                                        Background="#F8F9FA"
+                                        BorderBrush="#E0E3E8"
+                                        BorderThickness="1"
+                                        CornerRadius="5">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="92" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Border Background="#E4E7EB" CornerRadius="3">
+                                            <Image Source="{Binding PosterUrl}"
+                                                   Stretch="UniformToFill" />
+                                        </Border>
+                                        <Grid Grid.Column="1" Margin="12,0,0,0">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="*" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+                                            <TextBlock Text="{Binding Title}"
+                                                       Foreground="#20242B"
+                                                       FontWeight="SemiBold"
+                                                       FontSize="15"
+                                                       TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Grid.Row="1"
+                                                       Margin="0,4,0,0"
+                                                       Foreground="#69717D">
+                                                <Run Text="{Binding TypeLabel}" />
+                                                <Run Text=" - " />
+                                                <Run Text="{Binding YearLabel}" />
+                                                <Run Text=" - " />
+                                                <Run Text="{Binding RatingLabel}" />
+                                            </TextBlock>
+                                            <TextBlock Grid.Row="2"
+                                                       Text="{Binding Description}"
+                                                       Margin="0,7,0,4"
+                                                       Foreground="#747D89"
+                                                       FontSize="12"
+                                                       TextWrapping="Wrap"
+                                                       MaxHeight="52"
+                                                       TextTrimming="CharacterEllipsis" />
+                                            <Button Grid.Row="3"
+                                                    Content="Ajouter a ma liste"
+                                                    Command="{Binding DataContext.AddSearchResultCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    CommandParameter="{Binding}"
+                                                    Height="30"
+                                                    Padding="10,0"
+                                                    HorizontalAlignment="Left"
+                                                    Background="#286C53"
+                                                    Foreground="White"
+                                                    BorderBrush="#286C53"
+                                                    Cursor="Hand" />
+                                        </Grid>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Row="2"
                     Margin="0,22,0,0"
                     Padding="18"
                     Background="White"
@@ -238,7 +367,7 @@
                 </Grid>
             </Border>
 
-            <Border Grid.Row="2"
+            <Border Grid.Row="3"
                     Margin="0,14,0,0"
                     Padding="14,11"
                     Background="#FFF1F0"
@@ -250,7 +379,7 @@
                            TextWrapping="Wrap" />
             </Border>
 
-            <Grid Grid.Row="3" Margin="0,22,0,0">
+            <Grid Grid.Row="4" Margin="0,22,0,0">
                 <ProgressBar Height="3"
                              VerticalAlignment="Top"
                              IsIndeterminate="True"

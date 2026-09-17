@@ -41,6 +41,26 @@ public sealed class MediaItem
         return new MediaItem(Guid.NewGuid(), title.Trim(), type, description?.Trim());
     }
 
+    public void AttachExternalMetadata(
+        string externalSource,
+        string externalId,
+        string? posterUrl,
+        decimal? communityRating,
+        DateOnly? releaseDate)
+    {
+        if (string.IsNullOrWhiteSpace(externalSource) || string.IsNullOrWhiteSpace(externalId))
+        {
+            throw new ArgumentException("External source and identifier are required together.");
+        }
+
+        ExternalSource = externalSource.Trim();
+        ExternalId = externalId.Trim();
+        PosterUrl = posterUrl;
+        CommunityRating = communityRating;
+        ReleaseDate = releaseDate;
+        UpdatedAtUtc = DateTimeOffset.UtcNow;
+    }
+
     public void Update(
         string title,
         MediaType type,

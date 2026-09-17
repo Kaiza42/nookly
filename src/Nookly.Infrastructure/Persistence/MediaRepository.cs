@@ -25,6 +25,16 @@ internal sealed class MediaRepository(NooklyDbContext dbContext) : IMediaReposit
             .SingleOrDefaultAsync(item => item.Id == id, cancellationToken);
     }
 
+    public Task<bool> ExistsByExternalIdAsync(
+        string externalSource,
+        string externalId,
+        CancellationToken cancellationToken = default)
+    {
+        return dbContext.MediaItems.AnyAsync(
+            item => item.ExternalSource == externalSource && item.ExternalId == externalId,
+            cancellationToken);
+    }
+
     public async Task AddAsync(
         MediaItem mediaItem,
         CancellationToken cancellationToken = default)

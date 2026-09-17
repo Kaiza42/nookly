@@ -1,5 +1,7 @@
+using Nookly.Application.Abstractions;
 using Nookly.Application.Media;
 using Nookly.Contracts.Media;
+using Nookly.Contracts.Search;
 using ApplicationCreateMediaRequest = Nookly.Application.Media.CreateMediaRequest;
 using ApplicationUpdateMediaRequest = Nookly.Application.Media.UpdateMediaRequest;
 using ContractCreateMediaRequest = Nookly.Contracts.Media.CreateMediaRequest;
@@ -21,6 +23,41 @@ public static class MediaEndpoints
             return Results.Ok(items.Select(ToResponse));
         });
 
+        group.MapGet("/search", async (
+            string query,
+            IExternalMediaSearch search,
+            CancellationToken cancellationToken) =>
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return Results.BadRequest(new { error = "A search query is required." });
+            }
+
+            try
+            {
+                var results = await search.SearchAsync(query, cancellationToken);
+                return Results.Ok(results.Select(item => new MediaSearchResultResponse(
+                    item.ExternalSource,
+                    item.ExternalId,
+                    item.Title,
+                    item.Description,
+                    (ContractMediaType)item.Type,
+                    item.PosterUrl,
+                    item.CommunityRating,
+                    item.ReleaseDate)));
+            }
+            catch (InvalidOperationException exception)
+            {
+                return Results.Problem(exception.Message, statusCode: StatusCodes.Status503ServiceUnavailable);
+            }
+            catch (HttpRequestException)
+            {
+                return Results.Problem(
+                    "TMDB is temporarily unavailable.",
+                    statusCode: StatusCodes.Status502BadGateway);
+            }
+        });
+
         group.MapGet("/{id:guid}", async (
             Guid id,
             IMediaService service,
@@ -40,7 +77,12 @@ public static class MediaEndpoints
                 var command = new ApplicationCreateMediaRequest(
                     request.Title,
                     (Nookly.Domain.Media.MediaType)request.Type,
-                    request.Description);
+                    request.Description,
+                    request.ExternalSource,
+                    request.ExternalId,
+                    request.PosterUrl,
+                    request.CommunityRating,
+                    request.ReleaseDate);
 
                 var mediaItem = await service.CreateAsync(command, cancellationToken);
                 return Results.CreatedAtRoute(
@@ -51,6 +93,10 @@ public static class MediaEndpoints
             catch (ArgumentException exception)
             {
                 return Results.BadRequest(new { error = exception.Message });
+            }
+            catch (DuplicateMediaException exception)
+            {
+                return Results.Conflict(new { error = exception.Message });
             }
         });
 
@@ -96,6 +142,11 @@ public static class MediaEndpoints
         (ContractMediaType)item.Type,
         (ContractMediaStatus)item.Status,
         item.PersonalRating,
+        item.ExternalSource,
+        item.ExternalId,
+        item.PosterUrl,
+        item.CommunityRating,
+        item.ReleaseDate,
         item.CreatedAtUtc,
         item.UpdatedAtUtc);
 }
