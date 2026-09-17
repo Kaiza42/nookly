@@ -53,7 +53,7 @@
             </Grid>
         </Border>
 
-        <Grid Grid.Column="1" Margin="34,28" MaxWidth="1240" HorizontalAlignment="Center">
+        <Grid Grid.Column="1" Margin="34,28">
             <!-- Bibliotheque : la recherche filtre uniquement les medias deja ajoutes. -->
             <Grid Visibility="{Binding IsLibraryPage, Converter={StaticResource BoolToVisibility}}">
                 <Grid.RowDefinitions>
@@ -143,7 +143,8 @@
                                Visibility="{Binding ShowNoLibraryResults, Converter={StaticResource BoolToVisibility}}" />
                     <ListView ItemsSource="{Binding FilteredItems}"
                               Visibility="{Binding HasFilteredItems, Converter={StaticResource BoolToVisibility}}"
-                              Background="Transparent" BorderThickness="0">
+                              Background="Transparent" BorderThickness="0"
+                              ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                         <ListView.ItemContainerStyle>
                             <Style TargetType="ListViewItem">
                                 <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -153,34 +154,43 @@
                         </ListView.ItemContainerStyle>
                         <ListView.ItemTemplate>
                             <DataTemplate>
-                                <Border Padding="18,14" Background="White" BorderBrush="#E0E3E8"
-                                        BorderThickness="1" CornerRadius="6">
+                                <Border MinHeight="112" Padding="14,12" Background="White"
+                                        BorderBrush="#E0E3E8" BorderThickness="1" CornerRadius="6">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="58" />
+                                            <ColumnDefinition Width="64" />
                                             <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="90" />
-                                            <ColumnDefinition Width="110" />
-                                            <ColumnDefinition Width="80" />
-                                            <ColumnDefinition Width="170" />
+                                            <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        <Border Width="48" Height="68" VerticalAlignment="Center"
+                                        <Border Width="56" Height="82" VerticalAlignment="Center"
                                                 Background="#E4E7EB" CornerRadius="3">
                                             <Image Source="{Binding PosterUrl}" Stretch="UniformToFill" />
                                         </Border>
-                                        <StackPanel Grid.Column="1" Margin="12,0,0,0">
-                                            <TextBlock Text="{Binding Title}" FontSize="16" FontWeight="SemiBold" />
-                                            <TextBlock Text="{Binding Description}" Margin="0,4,18,0"
-                                                       Foreground="#747D89" TextTrimming="CharacterEllipsis" />
-                                            <TextBlock Text="{Binding PersonalNotes}" Margin="0,5,18,0"
+                                        <Grid Grid.Column="1" Margin="12,0,16,0">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="*" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+                                            <TextBlock Text="{Binding Title}" FontSize="16" FontWeight="SemiBold"
+                                                       TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Grid.Row="1" Text="{Binding Description}" Margin="0,5,0,0"
+                                                       Foreground="#747D89" TextWrapping="Wrap"
+                                                       MaxHeight="38" TextTrimming="CharacterEllipsis" />
+                                            <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,7,0,0">
+                                                <TextBlock Text="{Binding TypeLabel}" Foreground="#4D5967" />
+                                                <TextBlock Text="  |  " Foreground="#A0A6AE" />
+                                                <TextBlock Text="{Binding StatusLabel}" Foreground="#286C53" />
+                                                <TextBlock Text="  |  " Foreground="#A0A6AE" />
+                                                <TextBlock Text="{Binding RatingLabel}" Foreground="#4D5967" />
+                                            </StackPanel>
+                                            <TextBlock Grid.Row="3" Text="{Binding PersonalNotes}" Margin="0,5,0,0"
                                                        Foreground="#286C53" FontStyle="Italic"
                                                        TextTrimming="CharacterEllipsis" />
-                                        </StackPanel>
-                                        <TextBlock Grid.Column="2" Text="{Binding TypeLabel}" VerticalAlignment="Center" />
-                                        <TextBlock Grid.Column="3" Text="{Binding StatusLabel}" VerticalAlignment="Center"
-                                                   Foreground="#286C53" />
-                                        <TextBlock Grid.Column="4" Text="{Binding RatingLabel}" VerticalAlignment="Center" />
-                                        <StackPanel Grid.Column="5" Orientation="Horizontal" HorizontalAlignment="Right">
+                                        </Grid>
+                                        <StackPanel Grid.Column="2" Orientation="Horizontal"
+                                                    HorizontalAlignment="Right" VerticalAlignment="Center">
                                             <Button Content="Modifier"
                                                     Command="{Binding DataContext.EditMediaCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                                     CommandParameter="{Binding}" Height="30" Padding="10,0" Margin="0,0,6,0" />
