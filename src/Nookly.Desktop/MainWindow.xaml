@@ -3,7 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:converters="clr-namespace:Nookly.Desktop.Converters"
         Title="Nookly" Height="720" Width="1120" MinHeight="500" MinWidth="760"
-        WindowStartupLocation="CenterScreen" Loaded="OnLoaded" Background="#F5F6F8">
+        WindowStartupLocation="CenterScreen" Loaded="OnLoaded" Closing="OnClosing"
+        Background="#F5F6F8">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
         <converters:InverseBooleanConverter x:Key="InverseBoolean" />
