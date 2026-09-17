@@ -59,9 +59,11 @@ public partial class LibraryViewModel(
     private bool isCreatePanelOpen;
 
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(SaveMediaCommand))]
     private bool isEditMode;
 
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(SaveMediaCommand))]
     private MediaStatusOption? selectedMediaStatus;
 
     [ObservableProperty]

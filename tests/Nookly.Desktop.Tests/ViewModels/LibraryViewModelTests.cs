@@ -15,6 +15,7 @@ public sealed class LibraryViewModelTests
         await viewModel.LoadCommand.ExecuteAsync(null);
         var item = Assert.Single(viewModel.Items);
         viewModel.EditMediaCommand.Execute(item);
+        Assert.True(viewModel.SaveMediaCommand.CanExecute(null));
         viewModel.SelectedRating = viewModel.Ratings.Single(x => x.Value == 9m);
         viewModel.NewPersonalNotes = "Mon avis personnel";
 

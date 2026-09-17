@@ -11,6 +11,7 @@ public sealed class MediaListItemViewModel(MediaItemResponse mediaItem)
     public MediaStatus Status => mediaItem.Status;
     public decimal? PersonalRating => mediaItem.PersonalRating;
     public string? PersonalNotes => mediaItem.PersonalNotes;
+    public string? PosterUrl => mediaItem.PosterUrl;
 
     public string TypeLabel => Type switch
     {
