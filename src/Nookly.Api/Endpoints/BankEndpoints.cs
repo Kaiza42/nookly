@@ -21,11 +21,17 @@ public static class BankEndpoints
         });
         group.MapDelete("/entries/{id:guid}", async (Guid id, BankService service, CancellationToken token) =>
             await service.DeleteEntryAsync(id, token) ? Results.NoContent() : Results.NotFound());
+        group.MapDelete("/current-month", async (BankService service, CancellationToken token) =>
+        { await service.ResetCurrentMonthAsync(token); return Results.NoContent(); });
         return endpoints;
     }
 
     private static BankSummaryResponse ToResponse(Nookly.Application.Banking.BankSummaryDto summary) => new(
         summary.StartingBalance,
         summary.CurrentBalance,
-        summary.Entries.Select(entry => new BankEntryResponse(entry.Id, entry.Label, entry.Amount, entry.CreatedAtUtc)).ToArray());
+        summary.Entries.Select(ToEntryResponse).ToArray(),
+        summary.History.Select(month => new BankMonthResponse(month.Year, month.Month, month.StartingBalance,
+            month.Income, month.Expenses, month.EndingBalance, month.Entries.Select(ToEntryResponse).ToArray())).ToArray());
+    private static BankEntryResponse ToEntryResponse(Nookly.Application.Banking.BankEntryDto entry) =>
+        new(entry.Id, entry.Label, entry.Amount, entry.CreatedAtUtc);
 }

@@ -14,4 +14,10 @@ public sealed class UserDialogService : IUserDialogService
 
         return result == MessageBoxResult.Yes;
     }
+
+    public bool ConfirmBankMonthReset() => System.Windows.MessageBox.Show(
+        "Reinitialiser le mois courant ? Son solde et toutes ses operations seront supprimes.",
+        "Reinitialiser la banque",
+        MessageBoxButton.YesNo,
+        MessageBoxImage.Warning) == MessageBoxResult.Yes;
 }

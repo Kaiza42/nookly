@@ -8,4 +8,5 @@ public interface IBankApiClient
     Task<BankSummaryResponse> SetStartingBalanceAsync(decimal amount, CancellationToken token = default);
     Task<BankEntryResponse> AddEntryAsync(string label, decimal amount, CancellationToken token = default);
     Task DeleteEntryAsync(Guid id, CancellationToken token = default);
+    Task ResetCurrentMonthAsync(CancellationToken token = default);
 }

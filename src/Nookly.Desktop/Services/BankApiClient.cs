@@ -25,4 +25,6 @@ public sealed class BankApiClient(HttpClient client) : IBankApiClient
     }
     public async Task DeleteEntryAsync(Guid id, CancellationToken token = default)
     { using var response = await client.DeleteAsync($"api/bank/entries/{id}", token); response.EnsureSuccessStatusCode(); }
+    public async Task ResetCurrentMonthAsync(CancellationToken token = default)
+    { using var response = await client.DeleteAsync("api/bank/current-month", token); response.EnsureSuccessStatusCode(); }
 }

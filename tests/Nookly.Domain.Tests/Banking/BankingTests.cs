@@ -7,7 +7,7 @@ public sealed class BankingTests
     [Fact]
     public void Account_StoresStartingBalance()
     {
-        var account = BankAccount.Create(Guid.NewGuid());
+        var account = BankAccount.Create(Guid.NewGuid(), 2026, 9);
         account.SetStartingBalance(2000m);
         Assert.Equal(2000m, account.StartingBalance);
     }

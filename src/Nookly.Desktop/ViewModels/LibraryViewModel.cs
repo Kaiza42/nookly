@@ -26,6 +26,7 @@ public partial class LibraryViewModel(
     public ObservableCollection<DiscoveryPreferenceViewModel> DislikedPreferences { get; } = [];
     public ObservableCollection<DiscoveryPreferenceViewModel> FilteredDislikedPreferences { get; } = [];
     public ObservableCollection<BankEntryViewModel> BankEntries { get; } = [];
+    public ObservableCollection<BankMonthViewModel> BankHistory { get; } = [];
 
     public IReadOnlyList<MediaTypeOption> MediaTypes { get; } =
     [
@@ -308,6 +309,14 @@ public partial class LibraryViewModel(
         catch (HttpRequestException) { BankErrorMessage = "Impossible de supprimer cette operation."; }
     }
 
+    [RelayCommand]
+    private async Task ResetBankMonthAsync()
+    {
+        if (!userDialogService.ConfirmBankMonthReset()) return;
+        try { await bankApiClient.ResetCurrentMonthAsync(); await LoadBankAsync(); }
+        catch (HttpRequestException) { BankErrorMessage = "Impossible de reinitialiser le mois."; }
+    }
+
     private async Task LoadBankAsync()
     {
         try { ApplyBankSummary(await bankApiClient.GetAsync()); BankErrorMessage = null; }
@@ -320,6 +329,8 @@ public partial class LibraryViewModel(
         CurrentBalanceLabel = $"{summary.CurrentBalance:N2} €";
         BankEntries.Clear();
         foreach (var entry in summary.Entries) BankEntries.Add(new BankEntryViewModel(entry));
+        BankHistory.Clear();
+        foreach (var month in summary.History ?? []) BankHistory.Add(new BankMonthViewModel(month));
     }
 
     private static bool TryParseMoney(string text, out decimal amount) =>

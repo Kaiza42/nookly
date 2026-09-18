@@ -239,6 +239,21 @@ public sealed class LibraryViewModelTests
             Assert.Single(viewModel.SelectedSeasonDetails!.Episodes).Title);
     }
 
+    [Fact]
+    public async Task ResetBankMonthCommand_ResetsAndReloadsTheCurrentPeriod()
+    {
+        var bankApiClient = new StubBankApiClient();
+        var viewModel = new LibraryViewModel(
+            new StubMediaApiClient(),
+            new ConfirmingDialogService(),
+            bankApiClient);
+
+        await viewModel.ResetBankMonthCommand.ExecuteAsync(null);
+
+        Assert.True(bankApiClient.ResetCalled);
+        Assert.True(bankApiClient.GetCallCount > 0);
+    }
+
     private static LibraryViewModel CreateViewModel(StubMediaApiClient apiClient)
     {
         return new LibraryViewModel(apiClient, new ConfirmingDialogService(), new StubBankApiClient());
@@ -418,16 +433,28 @@ public sealed class LibraryViewModelTests
     private sealed class ConfirmingDialogService : IUserDialogService
     {
         public bool ConfirmDelete(string title) => true;
+        public bool ConfirmBankMonthReset() => true;
     }
 
     private sealed class StubBankApiClient : IBankApiClient
     {
-        public Task<BankSummaryResponse> GetAsync(CancellationToken token = default) =>
-            Task.FromResult(new BankSummaryResponse(0, 0, []));
+        public bool ResetCalled { get; private set; }
+        public int GetCallCount { get; private set; }
+
+        public Task<BankSummaryResponse> GetAsync(CancellationToken token = default)
+        {
+            GetCallCount++;
+            return Task.FromResult(new BankSummaryResponse(0, 0, []));
+        }
         public Task<BankSummaryResponse> SetStartingBalanceAsync(decimal amount, CancellationToken token = default) =>
             Task.FromResult(new BankSummaryResponse(amount, amount, []));
         public Task<BankEntryResponse> AddEntryAsync(string label, decimal amount, CancellationToken token = default) =>
             Task.FromResult(new BankEntryResponse(Guid.NewGuid(), label, amount, DateTimeOffset.UtcNow));
         public Task DeleteEntryAsync(Guid id, CancellationToken token = default) => Task.CompletedTask;
+        public Task ResetCurrentMonthAsync(CancellationToken token = default)
+        {
+            ResetCalled = true;
+            return Task.CompletedTask;
+        }
     }
 }

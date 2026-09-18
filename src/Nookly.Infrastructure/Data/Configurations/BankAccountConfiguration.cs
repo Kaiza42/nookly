@@ -11,7 +11,7 @@ internal sealed class BankAccountConfiguration : IEntityTypeConfiguration<BankAc
     {
         builder.ToTable("bank_accounts"); builder.HasKey(item => item.Id);
         builder.Property(item => item.StartingBalance).HasPrecision(18, 2);
-        builder.HasIndex(item => item.MemberId).IsUnique();
+        builder.HasIndex(item => new { item.MemberId, item.Year, item.Month }).IsUnique();
         builder.HasOne<Member>().WithMany().HasForeignKey(item => item.MemberId).OnDelete(DeleteBehavior.Cascade);
     }
 }
