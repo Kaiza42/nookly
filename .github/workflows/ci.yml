@@ -52,6 +52,7 @@ jobs:
       - name: Verify Entity Framework migrations
         env:
           ConnectionStrings__Database: Host=localhost;Port=5432;Database=nookly_ci;Username=nookly;Password=nookly
+          NOOKLY_JWT_KEY: nookly-ci-only-signing-key-32-characters-minimum
         run: >-
           dotnet tool run dotnet-ef migrations has-pending-model-changes
           --configuration Release
