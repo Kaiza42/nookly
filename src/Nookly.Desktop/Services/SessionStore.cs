@@ -25,7 +25,7 @@ public sealed class SessionStore
         {
             var json = Encoding.UTF8.GetString(ProtectedData.Unprotect(File.ReadAllBytes(sessionPath), null, DataProtectionScope.CurrentUser));
             var saved = JsonSerializer.Deserialize<SavedSession>(json);
-            if (saved is not null && saved.ExpiresAtUtc > DateTimeOffset.UtcNow)
+            if (saved is not null && saved.Version == 1 && saved.ExpiresAtUtc > DateTimeOffset.UtcNow)
             {
                 AccessToken = saved.AccessToken;
                 Member = saved.Member;
@@ -45,7 +45,7 @@ public sealed class SessionStore
         RememberedEmail = response.Member.Email;
         if (staySignedIn)
         {
-            var json = JsonSerializer.Serialize(new SavedSession(response.AccessToken, response.ExpiresAtUtc, response.Member));
+            var json = JsonSerializer.Serialize(new SavedSession(response.AccessToken, response.ExpiresAtUtc, response.Member, 1));
             File.WriteAllBytes(Path.Combine(directory, "session.dat"), ProtectedData.Protect(Encoding.UTF8.GetBytes(json), null, DataProtectionScope.CurrentUser));
         }
         else ClearSavedToken();
@@ -59,5 +59,5 @@ public sealed class SessionStore
 
     public void ClearToken() { AccessToken = null; Member = null; StaySignedIn = false; ClearSavedToken(); }
     private void ClearSavedToken() { var path = Path.Combine(directory, "session.dat"); if (File.Exists(path)) File.Delete(path); }
-    private sealed record SavedSession(string AccessToken, DateTimeOffset ExpiresAtUtc, MemberResponse Member);
+    private sealed record SavedSession(string AccessToken, DateTimeOffset ExpiresAtUtc, MemberResponse Member, int Version = 0);
 }
