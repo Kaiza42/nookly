@@ -10,12 +10,10 @@ public partial class MainWindow : Window
     private readonly Services.SessionStore session;
     private readonly System.Windows.Forms.NotifyIcon trayIcon;
     private readonly Services.MemberApiClient memberApiClient;
-    private readonly Services.AppUpdateService updateService;
     private readonly System.Windows.Threading.DispatcherTimer activityTimer;
     private bool allowClose;
     public MainWindow(LibraryViewModel viewModel, AdminViewModel adminViewModel,
-        Services.SessionStore session, Services.MemberApiClient memberApiClient,
-        Services.AppUpdateService updateService)
+        Services.SessionStore session, Services.MemberApiClient memberApiClient)
     {
         InitializeComponent();
         var workArea = SystemParameters.WorkArea;
@@ -26,7 +24,6 @@ public partial class MainWindow : Window
         ViewModel = viewModel;
         this.session = session;
         this.memberApiClient = memberApiClient;
-        this.updateService = updateService;
         DataContext = viewModel;
         AdministrationPanel.DataContext = adminViewModel;
         AdministrationButton.Visibility = string.Equals(session.Member?.Role, "Admin", StringComparison.OrdinalIgnoreCase)
@@ -52,8 +49,6 @@ public partial class MainWindow : Window
         await ViewModel.LoadCommand.ExecuteAsync(null);
         await SyncMemberActivityAsync();
         activityTimer.Start();
-        CurrentVersionText.Text = $"Version {updateService.CurrentVersion}";
-        await CheckForUpdatesAsync(false);
     }
 
     private void Logout_Click(object sender, RoutedEventArgs e)
@@ -149,46 +144,5 @@ public partial class MainWindow : Window
     {
         if (AdministrationPanel.DataContext is AdminViewModel adminViewModel)
             await adminViewModel.LoadCommand.ExecuteAsync(null);
-    }
-
-    private async void CheckForUpdates_Click(object sender, RoutedEventArgs e) => await CheckForUpdatesAsync(true);
-
-    private async Task CheckForUpdatesAsync(bool showNoUpdateMessage)
-    {
-        if (!updateService.IsInstalled)
-        {
-            if (showNoUpdateMessage) UpdateStatusText.Text = "Les mises a jour sont disponibles dans la version installee de Nookly.";
-            return;
-        }
-
-        try
-        {
-            UpdateStatusText.Text = "Recherche d'une mise a jour...";
-            var update = await updateService.CheckAsync();
-            if (update is null)
-            {
-                UpdateStatusText.Text = showNoUpdateMessage ? "Nookly est a jour." : string.Empty;
-                return;
-            }
-
-            UpdateStatusText.Text = $"Version {update.TargetFullRelease.Version} disponible.";
-            if (System.Windows.MessageBox.Show(
-                    $"La version {update.TargetFullRelease.Version} est disponible.\n\nLa telecharger et redemarrer Nookly ?",
-                    "Mise a jour Nookly", MessageBoxButton.YesNo, MessageBoxImage.Information) != MessageBoxResult.Yes) return;
-
-            await updateService.DownloadAsync(update, progress => Dispatcher.Invoke(() =>
-                UpdateStatusText.Text = $"Telechargement : {progress} %"));
-            UpdateStatusText.Text = "Installation et redemarrage...";
-            allowClose = true;
-            activityTimer.Stop();
-            trayIcon.Dispose();
-            updateService.ApplyAndRestart(update);
-        }
-        catch (Exception)
-        {
-            UpdateStatusText.Text = showNoUpdateMessage
-                ? "Impossible de verifier les mises a jour pour le moment."
-                : string.Empty;
-        }
     }
 }

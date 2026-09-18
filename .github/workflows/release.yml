@@ -29,15 +29,6 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore Nookly.sln
 
-      - name: Install Velopack CLI
-        run: dotnet tool install --global vpk --version 1.2.0
-
-      - name: Resolve release version
-        shell: pwsh
-        run: |
-          $version = "${{ github.ref_name }}".TrimStart('v')
-          "RELEASE_VERSION=$version" >> $env:GITHUB_ENV
-
       - name: Test release candidate
         run: dotnet test Nookly.sln --configuration Release --no-restore
 
@@ -53,31 +44,6 @@ jobs:
           -p:DebugType=None
           -p:DebugSymbols=false
 
-      - name: Download previous desktop release
-        continue-on-error: true
-        shell: pwsh
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          New-Item -ItemType Directory -Force artifacts/velopack | Out-Null
-          vpk download github `
-            --repoUrl "${{ github.server_url }}/${{ github.repository }}" `
-            --token "$env:GH_TOKEN" `
-            --outputDir artifacts/velopack
-
-      - name: Build Windows installer and update packages
-        shell: pwsh
-        run: >-
-          vpk pack
-          --packId Nookly.Desktop
-          --packTitle Nookly
-          --packAuthors Kaiza42
-          --packVersion "$env:RELEASE_VERSION"
-          --packDir artifacts/Nookly-Desktop-win-x64
-          --mainExe Nookly.Desktop.exe
-          --runtime win-x64
-          --outputDir artifacts/velopack
-
       - name: Publish Linux API
         run: >-
           dotnet publish src/Nookly.Api/Nookly.Api.csproj
@@ -91,22 +57,20 @@ jobs:
       - name: Create archives
         shell: pwsh
         run: |
+          Compress-Archive -Path artifacts/Nookly-Desktop-win-x64/* -DestinationPath artifacts/Nookly-Desktop-win-x64.zip
           Compress-Archive -Path artifacts/Nookly-Api-linux-x64/* -DestinationPath artifacts/Nookly-Api-linux-x64.zip
 
-      - name: Publish installer and update feed
+      - name: Create GitHub release
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          vpk upload github `
-            --repoUrl "${{ github.server_url }}/${{ github.repository }}" `
-            --token "$env:GH_TOKEN" `
-            --outputDir artifacts/velopack `
-            --publish `
-            --merge `
-            --tag "${{ github.ref_name }}" `
-            --releaseName "Nookly ${{ github.ref_name }}"
-          gh release upload "${{ github.ref_name }}" artifacts/Nookly-Api-linux-x64.zip --clobber
+        run: >-
+          gh release create "${{ github.ref_name }}"
+          artifacts/Nookly-Desktop-win-x64.zip
+          artifacts/Nookly-Api-linux-x64.zip
+          --verify-tag
+          --generate-notes
+          --title "Nookly ${{ github.ref_name }}"
 
   container:
     name: Publish API container
