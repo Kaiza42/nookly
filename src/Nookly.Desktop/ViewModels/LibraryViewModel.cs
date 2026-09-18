@@ -48,7 +48,7 @@ public partial class LibraryViewModel(
 
     public IReadOnlyList<DiscoveryTypeOption> DiscoveryMediaTypes { get; } =
     [
-        new("Tous les types", null),
+        new("Type", null),
         new("Films", MediaType.Movie),
         new("Series", MediaType.TvSeries),
         new("Animes", MediaType.Anime)
@@ -56,7 +56,7 @@ public partial class LibraryViewModel(
 
     public IReadOnlyList<GenreOption> DiscoveryGenres { get; } =
     [
-        new("Tous les genres", null),
+        new("Genre", null),
         new("Action", 28),
         new("Animation", 16),
         new("Aventure", 12),

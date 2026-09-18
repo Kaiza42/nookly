@@ -94,6 +94,32 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style x:Key="HoverCardItem" TargetType="ListViewItem">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListViewItem">
+                        <Border x:Name="HoverSurface" Background="Transparent" CornerRadius="8">
+                            <ContentPresenter />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="HoverSurface" Property="Effect">
+                                    <Setter.Value>
+                                        <DropShadowEffect Color="#60796E" BlurRadius="12"
+                                                          ShadowDepth="2" Opacity="0.28" />
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <DataTemplate x:Key="RichDetailsTemplate">
             <StackPanel MaxWidth="850" HorizontalAlignment="Left">
                 <TextBlock Margin="0,14,0,0" Foreground="#69717D" TextWrapping="Wrap">
@@ -387,10 +413,8 @@
                               HorizontalAlignment="Stretch"
                               ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                         <ListView.ItemContainerStyle>
-                            <Style TargetType="ListViewItem">
-                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Style TargetType="ListViewItem" BasedOn="{StaticResource HoverCardItem}">
                                 <Setter Property="Margin" Value="0,0,0,8" />
-                                <Setter Property="Padding" Value="0" />
                                 <EventSetter Event="MouseDoubleClick" Handler="LibraryItem_DoubleClick" />
                             </Style>
                         </ListView.ItemContainerStyle>
@@ -464,12 +488,12 @@
                 <Grid>
                     <StackPanel>
                         <TextBlock Text="Decouvrir" FontSize="28" FontWeight="SemiBold" />
-                        <TextBlock Text="Explore les films, series et animes du catalogue" Margin="0,5,0,0" Foreground="#69717D" />
+                        <TextBlock Text="Explore les films, series et animes" Margin="0,5,0,0" Foreground="#69717D" />
                     </StackPanel>
                     <Button Content="⚄" Command="{Binding RefreshRecommendationsCommand}"
                             ToolTip="Nouvelle selection"
                             HorizontalAlignment="Right" VerticalAlignment="Center"
-                            Width="34" Padding="0" FontSize="18" FontFamily="Segoe UI Symbol"
+                            Width="28" Height="28" Padding="0" FontSize="16" FontFamily="Segoe UI Symbol"
                             Style="{StaticResource SoftButton}" />
                 </Grid>
                 <Grid Grid.Row="1" Margin="0,18,0,0">
@@ -490,24 +514,30 @@
                     <Button Grid.Column="1" Content="Rechercher" Command="{Binding SearchCommand}"
                             Style="{StaticResource PrimaryButton}" Height="34" Margin="10,0,0,0" />
                 </Grid>
-                <Border Grid.Row="2" Margin="0,8,0,0" Padding="7,4" Background="White"
-                        BorderBrush="#D7DBE1" BorderThickness="1" CornerRadius="7">
+                <Border Grid.Row="2" Margin="0,8,0,0" Padding="7,4" Background="#F8FCFA"
+                        BorderBrush="#C8DDD4" BorderThickness="1" CornerRadius="7">
                     <WrapPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,12,0">
                             <TextBlock Text="Type" Margin="0,0,6,0" Foreground="#4D5967"
                                        FontSize="10" VerticalAlignment="Center" />
-                            <ComboBox ItemsSource="{Binding DiscoveryMediaTypes}"
-                                      SelectedItem="{Binding SelectedDiscoveryType}"
-                                      DisplayMemberPath="Label" Width="112" Height="22" Padding="4,0"
-                                      HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+                            <Border Background="White" BorderBrush="#B9D4C8" BorderThickness="1" CornerRadius="5">
+                                <ComboBox ItemsSource="{Binding DiscoveryMediaTypes}"
+                                          SelectedItem="{Binding SelectedDiscoveryType}"
+                                          DisplayMemberPath="Label" Width="96" Height="22" Padding="4,0"
+                                          Background="White" BorderThickness="0"
+                                          HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+                            </Border>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,12,0">
                             <TextBlock Text="Genre" Margin="0,0,6,0" Foreground="#4D5967"
                                        FontSize="10" VerticalAlignment="Center" />
-                            <ComboBox ItemsSource="{Binding DiscoveryGenres}"
-                                      SelectedItem="{Binding SelectedDiscoveryGenre}"
-                                      DisplayMemberPath="Label" Width="112" Height="22" Padding="4,0"
-                                      HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+                            <Border Background="White" BorderBrush="#B9D4C8" BorderThickness="1" CornerRadius="5">
+                                <ComboBox ItemsSource="{Binding DiscoveryGenres}"
+                                          SelectedItem="{Binding SelectedDiscoveryGenre}"
+                                          DisplayMemberPath="Label" Width="96" Height="22" Padding="4,0"
+                                          Background="White" BorderThickness="0"
+                                          HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+                            </Border>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,12,0">
                             <TextBlock Text="Annee" Margin="0,0,6,0" Foreground="#4D5967"
@@ -538,10 +568,8 @@
                           HorizontalAlignment="Stretch"
                           ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                     <ListView.ItemContainerStyle>
-                        <Style TargetType="ListViewItem">
-                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Style TargetType="ListViewItem" BasedOn="{StaticResource HoverCardItem}">
                             <Setter Property="Margin" Value="0,0,0,10" />
-                            <Setter Property="Padding" Value="0" />
                             <EventSetter Event="MouseDoubleClick" Handler="DiscoveryResult_DoubleClick" />
                         </Style>
                     </ListView.ItemContainerStyle>
