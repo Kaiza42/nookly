@@ -609,12 +609,54 @@
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBox Text="{Binding BankEntryLabel, UpdateSourceTrigger=PropertyChanged}"
-                                 Height="36" Padding="10,0" VerticalContentAlignment="Center"
-                                 ToolTip="Intitule de l'operation" />
-                        <TextBox Grid.Column="1" Text="{Binding BankEntryAmountText, UpdateSourceTrigger=PropertyChanged}"
-                                 Height="36" Padding="10,0" Margin="10,0,0,0" VerticalContentAlignment="Center"
-                                 ToolTip="Montant" />
+                        <Grid>
+                            <TextBox x:Name="BankEntryLabelInput"
+                                     Text="{Binding BankEntryLabel, UpdateSourceTrigger=PropertyChanged}"
+                                     Height="36" Padding="10,0" VerticalContentAlignment="Center"
+                                     ToolTip="Motif de l'operation" />
+                            <TextBlock Text="Motif de l'operation" Margin="11,0,0,0"
+                                       VerticalAlignment="Center" Foreground="#7B8490"
+                                       IsHitTestVisible="False">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Binding="{Binding Text, ElementName=BankEntryLabelInput}" Value="" />
+                                                    <Condition Binding="{Binding IsKeyboardFocusWithin, ElementName=BankEntryLabelInput}" Value="False" />
+                                                </MultiDataTrigger.Conditions>
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </MultiDataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Grid>
+                        <Grid Grid.Column="1" Margin="10,0,0,0">
+                            <TextBox x:Name="BankEntryAmountInput"
+                                     Text="{Binding BankEntryAmountText, UpdateSourceTrigger=PropertyChanged}"
+                                     Height="36" Padding="10,0" VerticalContentAlignment="Center"
+                                     ToolTip="Montant de l'operation" />
+                            <TextBlock Text="Montant" Margin="11,0,0,0"
+                                       VerticalAlignment="Center" Foreground="#7B8490"
+                                       IsHitTestVisible="False">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Binding="{Binding Text, ElementName=BankEntryAmountInput}" Value="" />
+                                                    <Condition Binding="{Binding IsKeyboardFocusWithin, ElementName=BankEntryAmountInput}" Value="False" />
+                                                </MultiDataTrigger.Conditions>
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </MultiDataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Grid>
                         <Button Grid.Column="2" Content="+ Recette" Command="{Binding AddIncomeCommand}"
                                 Height="36" Padding="14,0" Margin="10,0,0,0"
                                 Background="#286C53" Foreground="White" BorderBrush="#286C53" />
