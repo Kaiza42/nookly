@@ -29,9 +29,12 @@ public partial class LoginWindow : Window
         try
         {
             var stay = StaySignedInBox.IsChecked == true;
-            var response = isRegistering
-                ? await authentication.RegisterAsync(new RegisterRequest(EmailBox.Text, PasswordBox.Password, PseudoBox.Text, stay))
-                : await authentication.LoginAsync(new LoginRequest(EmailBox.Text, PasswordBox.Password, stay));
+            if (isRegistering)
+            {
+                var result = await authentication.RegisterAsync(new RegisterRequest(EmailBox.Text, PasswordBox.Password, PseudoBox.Text, stay));
+                System.Windows.MessageBox.Show(result.Message, "Inscription"); Switch_Click(sender, e); return;
+            }
+            var response = await authentication.LoginAsync(new LoginRequest(EmailBox.Text, PasswordBox.Password, stay));
             session.Set(response, stay);
             var app = (App)System.Windows.Application.Current;
             await app.ShowWelcomeThenMainAsync(response.Member.DisplayName);
@@ -40,4 +43,5 @@ public partial class LoginWindow : Window
         catch (Exception exception) { ErrorText.Text = exception.Message; }
         finally { SubmitButton.IsEnabled = true; }
     }
+    private void ForgotPassword_Click(object sender, RoutedEventArgs e) => ((App)System.Windows.Application.Current).ShowPasswordResetWindow(this);
 }

@@ -5,6 +5,7 @@
 
 # dotenv files
 .env
+**/.email-outbox/
 
 # User-specific files
 *.rsuser

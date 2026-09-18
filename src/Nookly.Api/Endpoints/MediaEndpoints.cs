@@ -18,7 +18,7 @@ public static class MediaEndpoints
 {
     public static IEndpointRouteBuilder MapMediaEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        var group = endpoints.MapGroup("/api/media").WithTags("Media").RequireAuthorization();
+        var group = endpoints.MapGroup("/api/media").WithTags("Media").RequireAuthorization("MemberOnly");
 
         group.MapGet("/", async (IMediaService service, CancellationToken cancellationToken) =>
         {

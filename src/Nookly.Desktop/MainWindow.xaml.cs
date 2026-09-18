@@ -1,5 +1,6 @@
 using System.Windows;
 using System.ComponentModel;
+using System.Net.Http;
 using Nookly.Desktop.ViewModels;
 
 namespace Nookly.Desktop;
@@ -8,8 +9,10 @@ public partial class MainWindow : Window
 {
     private readonly Services.SessionStore session;
     private readonly System.Windows.Forms.NotifyIcon trayIcon;
+    private readonly Services.MemberApiClient memberApiClient;
+    private readonly System.Windows.Threading.DispatcherTimer activityTimer;
     private bool allowClose;
-    public MainWindow(LibraryViewModel viewModel, Services.SessionStore session)
+    public MainWindow(LibraryViewModel viewModel, Services.SessionStore session, Services.MemberApiClient memberApiClient)
     {
         InitializeComponent();
         var workArea = SystemParameters.WorkArea;
@@ -19,6 +22,7 @@ public partial class MainWindow : Window
         Height = Math.Min(720, workArea.Height);
         ViewModel = viewModel;
         this.session = session;
+        this.memberApiClient = memberApiClient;
         DataContext = viewModel;
         MemberButton.Content = $"{session.Member?.DisplayName ?? "Membre"}  |  Deconnexion";
         StaySignedInCheckBox.IsChecked = session.StaySignedIn;
@@ -29,6 +33,8 @@ public partial class MainWindow : Window
             ContextMenuStrip = CreateTrayMenu()
         };
         trayIcon.DoubleClick += (_, _) => RestoreFromTray();
+        activityTimer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMinutes(1) };
+        activityTimer.Tick += async (_, _) => await SyncMemberActivityAsync();
     }
 
     public LibraryViewModel ViewModel { get; }
@@ -36,6 +42,8 @@ public partial class MainWindow : Window
     private async void OnLoaded(object sender, RoutedEventArgs e)
     {
         await ViewModel.LoadCommand.ExecuteAsync(null);
+        await SyncMemberActivityAsync();
+        activityTimer.Start();
     }
 
     private void Logout_Click(object sender, RoutedEventArgs e)
@@ -43,6 +51,7 @@ public partial class MainWindow : Window
         if (System.Windows.MessageBox.Show("Voulez-vous vous deconnecter ?", "Deconnexion", MessageBoxButton.YesNo,
                 MessageBoxImage.Question) != MessageBoxResult.Yes) return;
         session.ClearToken();
+        activityTimer.Stop();
         ((App)System.Windows.Application.Current).ShowLoginWindow();
         allowClose = true;
         trayIcon.Dispose();
@@ -63,6 +72,7 @@ public partial class MainWindow : Window
         if (result != MessageBoxResult.Yes)
         {
             trayIcon.Dispose();
+            activityTimer.Stop();
             return;
         }
 
@@ -99,9 +109,25 @@ public partial class MainWindow : Window
         Dispatcher.Invoke(() =>
         {
             allowClose = true;
+            activityTimer.Stop();
             trayIcon.Dispose();
             Close();
         });
+    }
+
+    private async Task SyncMemberActivityAsync()
+    {
+        try
+        {
+            await memberApiClient.RecordActivityAsync();
+            foreach (var notification in await memberApiClient.GetNotificationsAsync())
+            {
+                trayIcon.Visible = true;
+                trayIcon.ShowBalloonTip(5000, notification.Title, notification.Message, System.Windows.Forms.ToolTipIcon.Info);
+                await memberApiClient.MarkReadAsync(notification.Id);
+            }
+        }
+        catch (HttpRequestException) { }
     }
 
     private void StaySignedIn_Changed(object sender, RoutedEventArgs e)

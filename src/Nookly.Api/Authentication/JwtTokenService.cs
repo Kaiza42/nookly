@@ -19,7 +19,8 @@ public sealed class JwtTokenService(IConfiguration configuration)
             [
                 new Claim(ClaimTypes.NameIdentifier, member.Id.ToString()),
                 new Claim(ClaimTypes.Email, member.Email),
-                new Claim(ClaimTypes.Name, member.DisplayName)
+                new Claim(ClaimTypes.Name, member.DisplayName),
+                new Claim(ClaimTypes.Role, member.Role.ToString())
             ],
             expires: expires.UtcDateTime,
             signingCredentials: new SigningCredentials(
@@ -28,6 +29,6 @@ public sealed class JwtTokenService(IConfiguration configuration)
         return new AuthenticationResponse(
             new JwtSecurityTokenHandler().WriteToken(token),
             expires,
-            new MemberResponse(member.Id, member.Email, member.DisplayName));
+            new MemberResponse(member.Id, member.Email, member.DisplayName, member.Role.ToString(), member.IsEmailConfirmed));
     }
 }

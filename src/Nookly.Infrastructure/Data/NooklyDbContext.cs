@@ -14,6 +14,8 @@ public sealed class NooklyDbContext(DbContextOptions<NooklyDbContext> options)
     public DbSet<Member> Members => Set<Member>();
     public DbSet<BankAccount> BankAccounts => Set<BankAccount>();
     public DbSet<BankEntry> BankEntries => Set<BankEntry>();
+    public DbSet<AccountToken> AccountTokens => Set<AccountToken>();
+    public DbSet<MemberNotification> MemberNotifications => Set<MemberNotification>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

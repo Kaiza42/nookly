@@ -13,6 +13,7 @@ internal sealed class MemberConfiguration : IEntityTypeConfiguration<Member>
         builder.Property(member => member.Email).HasMaxLength(320).IsRequired();
         builder.Property(member => member.DisplayName).HasMaxLength(50).IsRequired();
         builder.Property(member => member.PasswordHash).HasMaxLength(1000).IsRequired();
+        builder.Property(member => member.Role).HasConversion<string>().HasMaxLength(20).IsRequired();
         builder.HasIndex(member => member.Email).IsUnique();
     }
 }

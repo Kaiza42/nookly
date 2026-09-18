@@ -7,7 +7,7 @@ public static class BankEndpoints
 {
     public static IEndpointRouteBuilder MapBankEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        var group = endpoints.MapGroup("/api/bank").WithTags("Bank").RequireAuthorization();
+        var group = endpoints.MapGroup("/api/bank").WithTags("Bank").RequireAuthorization("MemberOnly");
         group.MapGet("/", async (BankService service, CancellationToken token) => ToResponse(await service.GetAsync(token)));
         group.MapPut("/starting-balance", async (SetStartingBalanceRequest request, BankService service, CancellationToken token) =>
         {

@@ -12,4 +12,30 @@ public sealed class MemberTests
         Assert.Equal("Alice", member.DisplayName);
         Assert.Throws<ArgumentException>(() => Member.Create("test@nookly.test", " "));
     }
+
+    [Fact]
+    public void Member_CanBeConfirmedAndPromotedWithoutExposingPersonalData()
+    {
+        var member = Member.Create("admin@nookly.test", "Admin");
+        Assert.Equal(MemberRole.Member, member.Role);
+        Assert.False(member.IsEmailConfirmed);
+
+        member.ConfirmEmail();
+        member.PromoteToAdmin();
+
+        Assert.True(member.IsEmailConfirmed);
+        Assert.Equal(MemberRole.Admin, member.Role);
+    }
+
+    [Fact]
+    public void Activity_CountsOnlyContinuousApplicationUsage()
+    {
+        var member = Member.Create("alice@nookly.test", "Alice");
+        var start = new DateTimeOffset(2026, 9, 18, 8, 0, 0, TimeSpan.Zero);
+        member.RecordActivity(start);
+        member.RecordActivity(start.AddSeconds(60));
+        member.RecordActivity(start.AddMinutes(10));
+
+        Assert.Equal(60, member.UsageSeconds);
+    }
 }

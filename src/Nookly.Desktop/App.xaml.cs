@@ -34,11 +34,17 @@ public partial class App : System.Windows.Application
             client.BaseAddress = new Uri(apiBaseAddress);
             client.Timeout = TimeSpan.FromSeconds(10);
         }).AddHttpMessageHandler<AuthenticatedHttpHandler>();
+        services.AddHttpClient<AdminApiClient>(client => { client.BaseAddress = new Uri(apiBaseAddress); client.Timeout = TimeSpan.FromSeconds(10); })
+            .AddHttpMessageHandler<AuthenticatedHttpHandler>();
+        services.AddHttpClient<MemberApiClient>(client => { client.BaseAddress = new Uri(apiBaseAddress); client.Timeout = TimeSpan.FromSeconds(10); })
+            .AddHttpMessageHandler<AuthenticatedHttpHandler>();
         services.AddSingleton<IUserDialogService, UserDialogService>();
         services.AddTransient<LibraryViewModel>();
         services.AddTransient<MainWindow>();
         services.AddTransient<LoginWindow>();
         services.AddTransient<WelcomeWindow>();
+        services.AddTransient<AdminWindow>();
+        services.AddTransient<PasswordResetWindow>();
 
         serviceProvider = services.BuildServiceProvider();
         var session = serviceProvider.GetRequiredService<SessionStore>();
@@ -49,12 +55,17 @@ public partial class App : System.Windows.Application
 
     public void ShowMainWindow()
     {
-        var window = serviceProvider!.GetRequiredService<MainWindow>();
+        var provider = serviceProvider ?? throw new InvalidOperationException("Application services are unavailable.");
+        Window window = string.Equals(provider.GetRequiredService<SessionStore>().Member?.Role, "Admin", StringComparison.OrdinalIgnoreCase)
+            ? provider.GetRequiredService<AdminWindow>()
+            : provider.GetRequiredService<MainWindow>();
         MainWindow = window;
         window.Show();
     }
 
     public void ShowLoginWindow() => serviceProvider!.GetRequiredService<LoginWindow>().Show();
+    public void ShowPasswordResetWindow(Window owner)
+    { var window = serviceProvider!.GetRequiredService<PasswordResetWindow>(); window.Owner = owner; window.ShowDialog(); }
 
     public async Task ShowWelcomeThenMainAsync(string displayName)
     {
