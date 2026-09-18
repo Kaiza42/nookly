@@ -10,14 +10,12 @@
       ConnectionStrings__Database: Host=postgres;Port=5432;Database=nookly;Username=nookly;Password=nookly_dev_password
       NOOKLY_JWT_KEY: ${NOOKLY_JWT_KEY:?Define NOOKLY_JWT_KEY in .env}
       NOOKLY_DEMO_USERS: ${NOOKLY_DEMO_USERS:-}
-      NOOKLY_ADMIN_PASSWORD: ${NOOKLY_ADMIN_PASSWORD:-}
       NOOKLY_PUBLIC_API_URL: http://localhost:5186
-      Tmdb__ReadAccessToken: ${TMDB_READ_ACCESS_TOKEN:-}
-      NOOKLY_SMTP_HOST: ${NOOKLY_SMTP_HOST:-}
-      NOOKLY_SMTP_PORT: ${NOOKLY_SMTP_PORT:-587}
-      NOOKLY_SMTP_USER: ${NOOKLY_SMTP_USER:-}
-      NOOKLY_SMTP_PASSWORD: ${NOOKLY_SMTP_PASSWORD:-}
-      NOOKLY_SMTP_FROM: ${NOOKLY_SMTP_FROM:-}
+    volumes:
+      - type: bind
+        source: ${APPDATA}/Microsoft/UserSecrets/252aeac0-7234-40d6-9422-346047ef620c
+        target: /home/app/.microsoft/usersecrets/252aeac0-7234-40d6-9422-346047ef620c
+        read_only: true
     ports:
       - "5186:8080"
     depends_on:

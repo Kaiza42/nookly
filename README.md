@@ -22,7 +22,8 @@ docker compose up -d --build
 
 This starts PostgreSQL and the API. The API applies pending Entity Framework migrations automatically
 and is available at `http://localhost:5186`. Copy `.env.example` to `.env` and replace at least
-`NOOKLY_JWT_KEY`; add `TMDB_READ_ACCESS_TOKEN` to enable catalogue search.
+`NOOKLY_JWT_KEY`. On Windows, Docker Compose mounts this API project's .NET user secrets read-only,
+so the existing TMDB, administrator and SMTP secrets also work inside the container.
 
 In a second terminal, start the desktop client:
 
