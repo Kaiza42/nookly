@@ -1033,8 +1033,7 @@
                                        VerticalAlignment="Center" Foreground="#9299A3"
                                        IsHitTestVisible="False" />
                         </Grid>
-                        <Border Padding="14" Background="White" BorderBrush="#D7DBE1"
-                                BorderThickness="1" CornerRadius="6">
+                        <Border Padding="0" Background="Transparent" BorderThickness="0">
                             <Grid>
                                 <TextBlock Text="Aucun titre masque."
                                            Foreground="#69717D" VerticalAlignment="Center"
