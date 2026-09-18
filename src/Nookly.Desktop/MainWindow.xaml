@@ -26,6 +26,23 @@
             <Setter Property="BorderBrush" Value="#286C53" />
             <Setter Property="Cursor" Value="Hand" />
         </Style>
+        <Style x:Key="VoteIconButton" TargetType="Button">
+            <Setter Property="Width" Value="30" />
+            <Setter Property="Height" Value="30" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
+            <Setter Property="FontSize" Value="17" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <DataTemplate x:Key="RichDetailsTemplate">
             <StackPanel MaxWidth="850" HorizontalAlignment="Left">
                 <TextBlock Margin="0,14,0,0" Foreground="#69717D" TextWrapping="Wrap">
@@ -471,14 +488,17 @@
                                             <Button Content="Voir" ToolTip="Voir la fiche"
                                                     Command="{Binding DataContext.ShowSearchResultCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                                     CommandParameter="{Binding}" Height="30" Padding="10,0" Margin="0,0,8,0" />
-                                            <Button Content="👍" ToolTip="J'aime"
+                                            <Button Content="Ajouter" ToolTip="Ajouter a ma bibliotheque"
+                                                    Command="{Binding DataContext.AddSearchResultCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    CommandParameter="{Binding}" Height="30" Padding="10,0" Margin="0,0,8,0" />
+                                            <Button Content="&#xE8E1;" ToolTip="J'aime"
                                                     Command="{Binding DataContext.LikeDiscoveryResultCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                    CommandParameter="{Binding}" Width="34" Height="30" Margin="0,0,6,0"
-                                                    FontFamily="Segoe UI Emoji" />
-                                            <Button Content="👎" ToolTip="Ne plus me proposer ce titre"
+                                                    CommandParameter="{Binding}" Style="{StaticResource VoteIconButton}"
+                                                    Foreground="#27864A" Margin="0,0,5,0" />
+                                            <Button Content="&#xE8E0;" ToolTip="Ne plus me proposer ce titre"
                                                     Command="{Binding DataContext.DislikeDiscoveryResultCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                    CommandParameter="{Binding}" Width="34" Height="30"
-                                                    FontFamily="Segoe UI Emoji" />
+                                                    CommandParameter="{Binding}" Style="{StaticResource VoteIconButton}"
+                                                    Foreground="#C43D3D" />
                                         </StackPanel>
                                     </Grid>
                             </Border>
