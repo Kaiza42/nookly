@@ -76,9 +76,9 @@
                                                     <ColumnDefinition Width="*" />
                                                 </Grid.ColumnDefinitions>
                                                 <TextBlock x:Name="Chevron" Text="&#xE76C;"
-                                                           FontFamily="Segoe MDL2 Assets" FontSize="11"
+                                                           FontFamily="Segoe MDL2 Assets" FontSize="8"
                                                            Foreground="{TemplateBinding Foreground}"
-                                                           VerticalAlignment="Center" Margin="0,0,8,0" />
+                                                           VerticalAlignment="Center" Margin="1,0,7,0" />
                                                 <ContentPresenter Grid.Column="1" VerticalAlignment="Center" />
                                             </Grid>
                                         </Border>
@@ -385,9 +385,9 @@
                     <TextBlock x:Name="SidebarBrand" Text="Nookly" Margin="26,0" VerticalAlignment="Center"
                                Foreground="White" FontSize="24" FontWeight="SemiBold" />
                     <Button x:Name="SidebarToggleButton" Content="&#xE76B;" Click="ToggleSidebar_Click"
-                            HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,0"
-                            Width="32" Height="32" Foreground="#B8C0CC" Background="Transparent"
-                            BorderThickness="0" FontFamily="Segoe MDL2 Assets" FontSize="16"
+                            HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0"
+                            Width="26" Height="26" Foreground="#9FA8B4" Background="Transparent"
+                            BorderThickness="0" FontFamily="Segoe MDL2 Assets" FontSize="11"
                             ToolTip="Replier le menu" Cursor="Hand" />
                 </Grid>
                 <StackPanel x:Name="ExpandedNavigation" Grid.Row="1">
