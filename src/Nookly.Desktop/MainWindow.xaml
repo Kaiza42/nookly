@@ -867,7 +867,7 @@
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Pseudo" Binding="{Binding DisplayName}" Width="*" />
                         <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="2*" />
-                        <DataGridCheckBoxColumn Header="Confirme" Binding="{Binding IsEmailConfirmed}" Width="90" />
+                        <DataGridCheckBoxColumn Header="Confirme" Binding="{Binding IsEmailConfirmed, Mode=OneWay}" Width="90" />
                         <DataGridTextColumn Header="Temps utilise" Binding="{Binding UsageLabel}" Width="130" />
                         <DataGridTextColumn Header="Derniere activite" Binding="{Binding LastActivityLabel}" Width="160" />
                     </DataGrid.Columns>
