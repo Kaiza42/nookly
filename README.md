@@ -17,11 +17,12 @@ Nookly is a personal desktop hub for tracking movies, series, anime, manga, note
 Requirements: .NET 10 SDK and Docker Desktop.
 
 ```powershell
-docker compose up -d
-dotnet tool restore
-dotnet tool run dotnet-ef database update --project src/Nookly.Infrastructure --startup-project src/Nookly.Api
-dotnet run --project src/Nookly.Api
+docker compose up -d --build
 ```
+
+This starts PostgreSQL and the API. The API applies pending Entity Framework migrations automatically
+and is available at `http://localhost:5186`. Copy `.env.example` to `.env` and replace at least
+`NOOKLY_JWT_KEY`; add `TMDB_READ_ACCESS_TOKEN` to enable catalogue search.
 
 In a second terminal, start the desktop client:
 
@@ -37,6 +38,13 @@ Build and test the complete solution:
 ```powershell
 dotnet build Nookly.sln
 dotnet test Nookly.sln --no-build
+```
+
+To follow the API logs or stop the local services:
+
+```powershell
+docker compose logs -f api
+docker compose down
 ```
 
 The PostgreSQL credentials in `compose.yaml` and `appsettings.Development.json` are for local development only.
