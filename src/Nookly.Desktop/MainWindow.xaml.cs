@@ -54,7 +54,9 @@ public partial class MainWindow : Window
     private async void OnLoaded(object sender, RoutedEventArgs e)
     {
         DiscoveryTitlePlaceholder.Text = $"Exemple : {SearchExamples[Random.Shared.Next(SearchExamples.Length)]}";
+        HiddenTitleSearchPlaceholder.Text = $"Exemple : {SearchExamples[Random.Shared.Next(SearchExamples.Length)]}";
         UpdateDiscoveryTitlePlaceholder();
+        UpdateHiddenTitleSearchPlaceholder();
         await ViewModel.LoadCommand.ExecuteAsync(null);
         await SyncMemberActivityAsync();
         activityTimer.Start();
@@ -206,6 +208,18 @@ public partial class MainWindow : Window
         if (DiscoveryTitlePlaceholder is null || DiscoveryTitleInput is null) return;
         DiscoveryTitlePlaceholder.Visibility = string.IsNullOrWhiteSpace(DiscoveryTitleInput.Text) &&
                                                !DiscoveryTitleInput.IsKeyboardFocusWithin
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+    }
+
+    private void HiddenTitleSearchInput_Changed(object sender, RoutedEventArgs e) =>
+        UpdateHiddenTitleSearchPlaceholder();
+
+    private void UpdateHiddenTitleSearchPlaceholder()
+    {
+        if (HiddenTitleSearchPlaceholder is null || HiddenTitleSearchInput is null) return;
+        HiddenTitleSearchPlaceholder.Visibility = string.IsNullOrWhiteSpace(HiddenTitleSearchInput.Text) &&
+                                                  !HiddenTitleSearchInput.IsKeyboardFocusWithin
             ? Visibility.Visible
             : Visibility.Collapsed;
     }
