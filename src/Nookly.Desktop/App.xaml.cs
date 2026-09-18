@@ -2,6 +2,7 @@ using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using Nookly.Desktop.Services;
 using Nookly.Desktop.ViewModels;
+using Velopack;
 
 namespace Nookly.Desktop;
 
@@ -11,6 +12,7 @@ public partial class App : System.Windows.Application
 
     protected override void OnStartup(StartupEventArgs e)
     {
+        VelopackApp.Build().Run();
         base.OnStartup(e);
 
         var services = new ServiceCollection();
@@ -39,6 +41,7 @@ public partial class App : System.Windows.Application
         services.AddHttpClient<MemberApiClient>(client => { client.BaseAddress = new Uri(apiBaseAddress); client.Timeout = TimeSpan.FromSeconds(10); })
             .AddHttpMessageHandler<AuthenticatedHttpHandler>();
         services.AddSingleton<IUserDialogService, UserDialogService>();
+        services.AddSingleton<AppUpdateService>();
         services.AddTransient<LibraryViewModel>();
         services.AddTransient<AdminViewModel>();
         services.AddTransient<MainWindow>();

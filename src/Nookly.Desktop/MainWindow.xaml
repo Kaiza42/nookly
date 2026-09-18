@@ -776,6 +776,12 @@
                         <TextBlock Text="Compte" FontSize="18" FontWeight="SemiBold" />
                         <CheckBox x:Name="StaySignedInCheckBox" Content="Rester connecte sur cet ordinateur"
                                   Margin="0,10,0,24" Checked="StaySignedIn_Changed" Unchecked="StaySignedIn_Changed" />
+                        <TextBlock Text="Application" FontSize="18" FontWeight="SemiBold" />
+                        <TextBlock x:Name="CurrentVersionText" Text="Version developpement"
+                                   Margin="0,7,0,0" Foreground="#69717D" />
+                        <Button Content="Rechercher une mise a jour" Click="CheckForUpdates_Click"
+                                Height="34" Padding="14,0" Margin="0,10,0,0" HorizontalAlignment="Left" />
+                        <TextBlock x:Name="UpdateStatusText" Margin="0,7,0,24" Foreground="#286C53" />
                         <TextBlock Text="Decouverte" FontSize="18" FontWeight="SemiBold" />
                         <TextBlock Text="Gere les contenus retires de tes suggestions."
                                    Margin="0,5,0,12" Foreground="#69717D" />

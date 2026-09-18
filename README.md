@@ -68,9 +68,13 @@ git push origin v0.1.0
 
 The release workflow produces:
 
-- `Nookly-Desktop-win-x64.zip`: self-contained Windows desktop application
+- `Nookly.Desktop-win-Setup.exe`: self-contained Windows installer
+- Velopack full and delta packages used by automatic desktop updates
 - `Nookly-Api-linux-x64.zip`: framework-dependent Linux API
 - `ghcr.io/kaiza42/nookly-api`: versioned API container image
+
+Installed desktop clients check the public GitHub Releases feed at startup. A manual update check is also
+available in **Parametres > Application**. Development builds are intentionally excluded from self-update.
 
 The deployed API requires these environment variables:
 
