@@ -16,7 +16,8 @@
             <Button Content="Mot de passe oublie ?" Click="ForgotPassword_Click" Height="28" Margin="0,6,0,0"
                     HorizontalAlignment="Left" Background="Transparent" BorderThickness="0" Foreground="#286C53" />
             <TextBlock x:Name="ErrorText" Foreground="#A43B36" Margin="0,12,0,0" TextWrapping="Wrap" />
-            <Button x:Name="SubmitButton" Content="Se connecter" Click="Submit_Click" Height="40" Margin="0,18,0,0"
+            <Button x:Name="SubmitButton" Content="Se connecter" Click="Submit_Click" IsDefault="True"
+                    Height="40" Margin="0,18,0,0"
                     Background="#286C53" Foreground="White" BorderBrush="#286C53" />
             <Button x:Name="SwitchButton" Content="Creer un compte" Click="Switch_Click" Height="34" Margin="0,10,0,0"
                     Background="Transparent" BorderThickness="0" Foreground="#286C53" />
