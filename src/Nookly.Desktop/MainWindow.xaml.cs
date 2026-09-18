@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Net.Http;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using Nookly.Desktop.ViewModels;
 
 namespace Nookly.Desktop;
@@ -166,7 +167,13 @@ public partial class MainWindow : Window
         CollapsedNavigation.Visibility = isSidebarCollapsed ? Visibility.Visible : Visibility.Collapsed;
         MemberButton.Visibility = isSidebarCollapsed ? Visibility.Collapsed : Visibility.Visible;
         CollapsedMemberButton.Visibility = isSidebarCollapsed ? Visibility.Visible : Visibility.Collapsed;
-        SidebarToggleButton.Content = isSidebarCollapsed ? "\uE76C" : "\uE76B";
+        var rotation = new DoubleAnimation
+        {
+            To = isSidebarCollapsed ? 180 : 0,
+            Duration = TimeSpan.FromMilliseconds(180),
+            EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
+        };
+        SidebarToggleRotation.BeginAnimation(RotateTransform.AngleProperty, rotation);
         SidebarToggleButton.ToolTip = isSidebarCollapsed ? "Deplier le menu" : "Replier le menu";
         SidebarToggleButton.HorizontalAlignment = isSidebarCollapsed
             ? System.Windows.HorizontalAlignment.Center

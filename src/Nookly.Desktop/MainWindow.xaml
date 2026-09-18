@@ -397,12 +397,18 @@
                 <Grid>
                     <TextBlock x:Name="SidebarBrand" Text="Nookly" Margin="26,0" VerticalAlignment="Center"
                                Foreground="White" FontSize="24" FontWeight="SemiBold" />
-                    <Button x:Name="SidebarToggleButton" Content="&#xE76B;" Click="ToggleSidebar_Click"
+                    <Button x:Name="SidebarToggleButton" Click="ToggleSidebar_Click"
                             HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0"
                             Width="26" Height="26" Foreground="#9FA8B4" Background="Transparent"
                             BorderThickness="0" FontFamily="Segoe MDL2 Assets" FontSize="11"
                             Style="{StaticResource SidebarToggleButtonStyle}"
-                            ToolTip="Replier le menu" Cursor="Hand" />
+                            ToolTip="Replier le menu" Cursor="Hand">
+                        <TextBlock Text="&#xE76B;" RenderTransformOrigin="0.5,0.5">
+                            <TextBlock.RenderTransform>
+                                <RotateTransform x:Name="SidebarToggleRotation" />
+                            </TextBlock.RenderTransform>
+                        </TextBlock>
+                    </Button>
                 </Grid>
                 <StackPanel x:Name="ExpandedNavigation" Grid.Row="1">
                     <Expander Header="Divertissement" IsExpanded="True" Margin="12,8,12,0"
