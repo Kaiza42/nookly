@@ -140,6 +140,8 @@
                                     Style="{StaticResource NavButton}" Margin="0,2" />
                         </StackPanel>
                     </Expander>
+                    <Button Content="Banque" Command="{Binding ShowBankCommand}"
+                            Style="{StaticResource NavButton}" />
                     <Button Content="Parametres" Command="{Binding ShowSettingsCommand}"
                             Style="{StaticResource NavButton}" />
                 </StackPanel>
@@ -554,6 +556,126 @@
                         </StackPanel>
                     </Grid>
                 </ScrollViewer>
+            </Grid>
+
+            <!-- Banque : comptabilite personnelle du membre connecte. -->
+            <Grid Visibility="{Binding IsBankPage, Converter={StaticResource BoolToVisibility}}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="Banque" FontSize="28" FontWeight="SemiBold" />
+                        <TextBlock Text="Suis tes recettes et tes depenses" Margin="0,5,0,0" Foreground="#69717D" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" HorizontalAlignment="Right">
+                        <TextBlock Text="Solde actuel" Foreground="#69717D" HorizontalAlignment="Right" />
+                        <TextBlock Text="{Binding CurrentBalanceLabel}" FontSize="28" FontWeight="SemiBold"
+                                   Foreground="#20242B" HorizontalAlignment="Right" />
+                    </StackPanel>
+                </Grid>
+
+                <Border Grid.Row="1" Margin="0,24,0,0" Padding="14" Background="White"
+                        BorderBrush="#D7DBE1" BorderThickness="1" CornerRadius="6">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="170" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Solde de depart" VerticalAlignment="Center" Margin="0,0,12,0" />
+                        <TextBox Grid.Column="1" Text="{Binding StartingBalanceText, UpdateSourceTrigger=PropertyChanged}"
+                                 Height="34" Padding="9,0" VerticalContentAlignment="Center" />
+                        <Button Grid.Column="2" Content="Enregistrer" Command="{Binding SaveStartingBalanceCommand}"
+                                Height="34" Padding="14,0" Margin="10,0,0,0" />
+                    </Grid>
+                </Border>
+
+                <Border Grid.Row="2" Margin="0,12,0,0" Padding="14" Background="White"
+                        BorderBrush="#D7DBE1" BorderThickness="1" CornerRadius="6">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="150" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox Text="{Binding BankEntryLabel, UpdateSourceTrigger=PropertyChanged}"
+                                 Height="36" Padding="10,0" VerticalContentAlignment="Center"
+                                 ToolTip="Intitule de l'operation" />
+                        <TextBox Grid.Column="1" Text="{Binding BankEntryAmountText, UpdateSourceTrigger=PropertyChanged}"
+                                 Height="36" Padding="10,0" Margin="10,0,0,0" VerticalContentAlignment="Center"
+                                 ToolTip="Montant" />
+                        <Button Grid.Column="2" Content="+ Recette" Command="{Binding AddIncomeCommand}"
+                                Height="36" Padding="14,0" Margin="10,0,0,0"
+                                Background="#286C53" Foreground="White" BorderBrush="#286C53" />
+                        <Button Grid.Column="3" Content="- Depense" Command="{Binding AddExpenseCommand}"
+                                Height="36" Padding="14,0" Margin="8,0,0,0"
+                                Background="#A43B36" Foreground="White" BorderBrush="#A43B36" />
+                    </Grid>
+                </Border>
+
+                <Grid Grid.Row="3" Margin="0,18,0,0">
+                    <TextBlock Text="Aucune operation pour le moment." Foreground="#69717D"
+                               VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding BankEntries.Count}" Value="0">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <ListView ItemsSource="{Binding BankEntries}" Background="Transparent" BorderThickness="0"
+                              ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="Margin" Value="0,0,0,7" />
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Border Padding="14,11" Background="White" BorderBrush="#E0E4E9"
+                                        BorderThickness="1" CornerRadius="4">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Label}" FontWeight="SemiBold" FontSize="14" />
+                                            <TextBlock Text="{Binding DateLabel}" Margin="0,4,0,0" Foreground="#69717D" FontSize="11" />
+                                        </StackPanel>
+                                        <Grid Grid.Column="1" VerticalAlignment="Center" Margin="16,0">
+                                            <TextBlock Text="{Binding AmountLabel}" Foreground="#287A55" FontSize="15" FontWeight="SemiBold"
+                                                       Visibility="{Binding IsIncome, Converter={StaticResource BoolToVisibility}}" />
+                                            <TextBlock Text="{Binding AmountLabel}" Foreground="#B33D36" FontSize="15" FontWeight="SemiBold"
+                                                       Visibility="{Binding IsExpense, Converter={StaticResource BoolToVisibility}}" />
+                                        </Grid>
+                                        <Button Grid.Column="2" Content="Supprimer"
+                                                Command="{Binding DataContext.DeleteBankEntryCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                CommandParameter="{Binding}" Height="30" Padding="10,0" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                    <TextBlock Text="{Binding BankErrorMessage}" Foreground="#A43B36"
+                               VerticalAlignment="Bottom" Margin="0,0,0,4" />
+                </Grid>
             </Grid>
 
             <!-- Parametres generaux de Nookly, independants des futurs modules. -->

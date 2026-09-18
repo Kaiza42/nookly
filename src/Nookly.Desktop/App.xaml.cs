@@ -29,6 +29,11 @@ public partial class App : System.Windows.Application
             client.BaseAddress = new Uri(apiBaseAddress);
             client.Timeout = TimeSpan.FromSeconds(10);
         }).AddHttpMessageHandler<AuthenticatedHttpHandler>();
+        services.AddHttpClient<IBankApiClient, BankApiClient>(client =>
+        {
+            client.BaseAddress = new Uri(apiBaseAddress);
+            client.Timeout = TimeSpan.FromSeconds(10);
+        }).AddHttpMessageHandler<AuthenticatedHttpHandler>();
         services.AddSingleton<IUserDialogService, UserDialogService>();
         services.AddTransient<LibraryViewModel>();
         services.AddTransient<MainWindow>();

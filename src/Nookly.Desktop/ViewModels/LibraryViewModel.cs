@@ -12,7 +12,8 @@ namespace Nookly.Desktop.ViewModels;
 
 public partial class LibraryViewModel(
     IMediaApiClient mediaApiClient,
-    IUserDialogService userDialogService) : ObservableObject
+    IUserDialogService userDialogService,
+    IBankApiClient bankApiClient) : ObservableObject
 {
     private Guid? editingMediaId;
     private CancellationTokenSource? searchDebounceCancellation;
@@ -24,6 +25,7 @@ public partial class LibraryViewModel(
     public ObservableCollection<MediaSearchResultViewModel> SearchResults { get; } = [];
     public ObservableCollection<DiscoveryPreferenceViewModel> DislikedPreferences { get; } = [];
     public ObservableCollection<DiscoveryPreferenceViewModel> FilteredDislikedPreferences { get; } = [];
+    public ObservableCollection<BankEntryViewModel> BankEntries { get; } = [];
 
     public IReadOnlyList<MediaTypeOption> MediaTypes { get; } =
     [
@@ -168,6 +170,24 @@ public partial class LibraryViewModel(
     private bool isSettingsPage;
 
     [ObservableProperty]
+    private bool isBankPage;
+
+    [ObservableProperty]
+    private string startingBalanceText = string.Empty;
+
+    [ObservableProperty]
+    private string bankEntryLabel = string.Empty;
+
+    [ObservableProperty]
+    private string bankEntryAmountText = string.Empty;
+
+    [ObservableProperty]
+    private string currentBalanceLabel = "0,00 €";
+
+    [ObservableProperty]
+    private string? bankErrorMessage;
+
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowNoDislikedPreferences))]
     private bool hasDislikedPreferences;
 
@@ -244,6 +264,66 @@ public partial class LibraryViewModel(
         CloseForm();
         SetPage(library: true);
     }
+
+    [RelayCommand]
+    private async Task ShowBankAsync()
+    {
+        CloseForm();
+        SetPage(bank: true);
+        await LoadBankAsync();
+    }
+
+    [RelayCommand]
+    private async Task SaveStartingBalanceAsync()
+    {
+        if (!TryParseMoney(StartingBalanceText, out var amount)) { BankErrorMessage = "Le solde doit etre un nombre valide."; return; }
+        try { ApplyBankSummary(await bankApiClient.SetStartingBalanceAsync(amount)); BankErrorMessage = null; }
+        catch (HttpRequestException) { BankErrorMessage = "Impossible d'enregistrer le solde."; }
+    }
+
+    [RelayCommand]
+    private Task AddIncomeAsync() => AddBankEntryAsync(1);
+
+    [RelayCommand]
+    private Task AddExpenseAsync() => AddBankEntryAsync(-1);
+
+    private async Task AddBankEntryAsync(int sign)
+    {
+        if (string.IsNullOrWhiteSpace(BankEntryLabel) || !TryParseMoney(BankEntryAmountText, out var amount) || amount <= 0)
+        { BankErrorMessage = "Indique un intitule et un montant positif."; return; }
+        try
+        {
+            await bankApiClient.AddEntryAsync(BankEntryLabel.Trim(), Math.Abs(amount) * sign);
+            BankEntryLabel = BankEntryAmountText = string.Empty;
+            BankErrorMessage = null;
+            await LoadBankAsync();
+        }
+        catch (HttpRequestException) { BankErrorMessage = "Impossible d'ajouter cette operation."; }
+    }
+
+    [RelayCommand]
+    private async Task DeleteBankEntryAsync(BankEntryViewModel entry)
+    {
+        try { await bankApiClient.DeleteEntryAsync(entry.Id); await LoadBankAsync(); }
+        catch (HttpRequestException) { BankErrorMessage = "Impossible de supprimer cette operation."; }
+    }
+
+    private async Task LoadBankAsync()
+    {
+        try { ApplyBankSummary(await bankApiClient.GetAsync()); BankErrorMessage = null; }
+        catch (HttpRequestException) { BankErrorMessage = "Impossible de charger la comptabilite."; }
+    }
+
+    private void ApplyBankSummary(Nookly.Contracts.Banking.BankSummaryResponse summary)
+    {
+        StartingBalanceText = summary.StartingBalance.ToString("0.##", CultureInfo.CurrentCulture);
+        CurrentBalanceLabel = $"{summary.CurrentBalance:N2} €";
+        BankEntries.Clear();
+        foreach (var entry in summary.Entries) BankEntries.Add(new BankEntryViewModel(entry));
+    }
+
+    private static bool TryParseMoney(string text, out decimal amount) =>
+        decimal.TryParse(text.Trim().Replace(',', '.'), NumberStyles.Number, CultureInfo.InvariantCulture, out amount);
 
     [RelayCommand]
     private async Task OpenDiscoverAsync()
@@ -746,13 +826,15 @@ public partial class LibraryViewModel(
         bool discover = false,
         bool detail = false,
         bool libraryDetail = false,
-        bool settings = false)
+        bool settings = false,
+        bool bank = false)
     {
         IsLibraryPage = library;
         IsDiscoverPage = discover;
         IsDetailPage = detail;
         IsLibraryDetailPage = libraryDetail;
         IsSettingsPage = settings;
+        IsBankPage = bank;
     }
 
     private void RefreshLibraryFilter()

@@ -57,5 +57,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapAuthenticationEndpoints();
 app.MapMediaEndpoints();
+app.MapBankEndpoints();
 
 app.Run();

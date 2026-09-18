@@ -2,6 +2,7 @@ using Nookly.Contracts.Media;
 using Nookly.Contracts.Search;
 using Nookly.Contracts.Discovery;
 using Nookly.Contracts.Details;
+using Nookly.Contracts.Banking;
 using Nookly.Desktop.Services;
 using Nookly.Desktop.ViewModels;
 
@@ -240,7 +241,7 @@ public sealed class LibraryViewModelTests
 
     private static LibraryViewModel CreateViewModel(StubMediaApiClient apiClient)
     {
-        return new LibraryViewModel(apiClient, new ConfirmingDialogService());
+        return new LibraryViewModel(apiClient, new ConfirmingDialogService(), new StubBankApiClient());
     }
 
     private sealed class StubMediaApiClient : IMediaApiClient
@@ -417,5 +418,16 @@ public sealed class LibraryViewModelTests
     private sealed class ConfirmingDialogService : IUserDialogService
     {
         public bool ConfirmDelete(string title) => true;
+    }
+
+    private sealed class StubBankApiClient : IBankApiClient
+    {
+        public Task<BankSummaryResponse> GetAsync(CancellationToken token = default) =>
+            Task.FromResult(new BankSummaryResponse(0, 0, []));
+        public Task<BankSummaryResponse> SetStartingBalanceAsync(decimal amount, CancellationToken token = default) =>
+            Task.FromResult(new BankSummaryResponse(amount, amount, []));
+        public Task<BankEntryResponse> AddEntryAsync(string label, decimal amount, CancellationToken token = default) =>
+            Task.FromResult(new BankEntryResponse(Guid.NewGuid(), label, amount, DateTimeOffset.UtcNow));
+        public Task DeleteEntryAsync(Guid id, CancellationToken token = default) => Task.CompletedTask;
     }
 }

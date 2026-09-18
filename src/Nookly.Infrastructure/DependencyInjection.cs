@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Nookly.Application.Abstractions;
 using Nookly.Application.Media;
 using Nookly.Application.Discovery;
+using Nookly.Application.Banking;
 using Nookly.Infrastructure.Data;
 using Nookly.Infrastructure.External.Tmdb;
 using Nookly.Infrastructure.Persistence;
@@ -24,6 +25,8 @@ public static class DependencyInjection
         services.AddScoped<IDiscoveryPreferenceRepository, DiscoveryPreferenceRepository>();
         services.AddScoped<DiscoveryPreferenceService>();
         services.AddScoped<IMediaService, MediaService>();
+        services.AddScoped<IBankRepository, BankRepository>();
+        services.AddScoped<BankService>();
         services.Configure<TmdbOptions>(configuration.GetSection(TmdbOptions.SectionName));
         services.AddHttpClient<IExternalMediaSearch, TmdbClient>(client =>
         {
