@@ -340,6 +340,7 @@
                                 <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                                 <Setter Property="Margin" Value="0,0,0,8" />
                                 <Setter Property="Padding" Value="0" />
+                                <EventSetter Event="MouseDoubleClick" Handler="LibraryItem_DoubleClick" />
                             </Style>
                         </ListView.ItemContainerStyle>
                         <ListView.ItemTemplate>

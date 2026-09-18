@@ -175,6 +175,14 @@ public partial class MainWindow : Window
             await ViewModel.ShowSearchResultCommand.ExecuteAsync(item);
     }
 
+    private async void LibraryItem_DoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        if (FindVisualParent<System.Windows.Controls.Button>(e.OriginalSource as DependencyObject) is not null) return;
+        if (sender is not System.Windows.Controls.ListViewItem { DataContext: MediaListItemViewModel item }) return;
+        if (ViewModel.ShowLibraryItemCommand.CanExecute(item))
+            await ViewModel.ShowLibraryItemCommand.ExecuteAsync(item);
+    }
+
     private static T? FindVisualParent<T>(DependencyObject? child) where T : DependencyObject
     {
         while (child is not null)
