@@ -157,8 +157,10 @@
             </Setter>
         </Style>
         <Style x:Key="RestoreButton" TargetType="Button">
-            <Setter Property="Height" Value="30" />
-            <Setter Property="Padding" Value="12,0" />
+            <Setter Property="Height" Value="28" />
+            <Setter Property="Padding" Value="10,0" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="Normal" />
             <Setter Property="Background" Value="#F1F8F5" />
             <Setter Property="Foreground" Value="#286C53" />
             <Setter Property="BorderBrush" Value="#AFCFC1" />
@@ -1095,7 +1097,7 @@
                         <Expander Header="Suggestions masquees" IsExpanded="True"
                                   Foreground="#25302C" FontSize="18" FontWeight="SemiBold"
                                   Style="{StaticResource CleanExpander}">
-                            <StackPanel>
+                            <StackPanel TextElement.FontSize="12" TextElement.FontWeight="Normal">
                                 <TextBlock Text="Gere les contenus retires de tes suggestions."
                                            Margin="19,3,0,12" Foreground="#69717D" FontSize="12"
                                            FontWeight="Normal" />
