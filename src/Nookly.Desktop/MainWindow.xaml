@@ -51,6 +51,60 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style x:Key="CleanExpander" TargetType="Expander">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Expander">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <ToggleButton x:Name="HeaderToggle" Content="{TemplateBinding Header}"
+                                          IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}}"
+                                          Foreground="{TemplateBinding Foreground}"
+                                          FontSize="{TemplateBinding FontSize}"
+                                          FontWeight="{TemplateBinding FontWeight}"
+                                          HorizontalContentAlignment="Stretch" Background="Transparent"
+                                          BorderThickness="0" Cursor="Hand" FocusVisualStyle="{x:Null}">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <Border x:Name="HeaderSurface" Background="Transparent" Padding="0,5">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock x:Name="Chevron" Text="&#xE76C;"
+                                                           FontFamily="Segoe MDL2 Assets" FontSize="11"
+                                                           Foreground="{TemplateBinding Foreground}"
+                                                           VerticalAlignment="Center" Margin="0,0,8,0" />
+                                                <ContentPresenter Grid.Column="1" VerticalAlignment="Center" />
+                                            </Grid>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsChecked" Value="True">
+                                                <Setter TargetName="Chevron" Property="Text" Value="&#xE70D;" />
+                                            </Trigger>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="HeaderSurface" Property="Opacity" Value="0.82" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+                            <ContentPresenter x:Name="ExpandContent" Grid.Row="1"
+                                              Content="{TemplateBinding Content}" Visibility="Collapsed" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsExpanded" Value="True">
+                                <Setter TargetName="ExpandContent" Property="Visibility" Value="Visible" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <Style x:Key="PrimaryButton" TargetType="Button">
             <Setter Property="Height" Value="38" />
             <Setter Property="Padding" Value="16,0" />
@@ -338,7 +392,8 @@
                 </Grid>
                 <StackPanel x:Name="ExpandedNavigation" Grid.Row="1">
                     <Expander Header="Divertissement" IsExpanded="True" Margin="12,8,12,0"
-                              Foreground="White" FontWeight="SemiBold">
+                              Foreground="White" FontWeight="SemiBold"
+                              Style="{StaticResource CleanExpander}">
                         <StackPanel Margin="0,6,0,0">
                             <Button Content="Bibliotheque" Command="{Binding ShowLibraryCommand}"
                                     Style="{StaticResource NavButton}" Margin="0,2" />
@@ -1017,10 +1072,14 @@
                         <TextBlock Text="Compte" FontSize="18" FontWeight="SemiBold" />
                         <CheckBox x:Name="StaySignedInCheckBox" Content="Rester connecte"
                                   Margin="0,10,0,24" Checked="StaySignedIn_Changed" Unchecked="StaySignedIn_Changed" />
-                        <TextBlock Text="Decouverte" FontSize="18" FontWeight="SemiBold" />
-                        <TextBlock Text="Gere les contenus retires de tes suggestions."
-                                   Margin="0,5,0,12" Foreground="#69717D" />
-                        <Grid Margin="0,0,0,10">
+                        <Expander Header="Suggestions masquees" IsExpanded="True"
+                                  Foreground="#25302C" FontSize="18" FontWeight="SemiBold"
+                                  Style="{StaticResource CleanExpander}">
+                            <StackPanel>
+                                <TextBlock Text="Gere les contenus retires de tes suggestions."
+                                           Margin="19,3,0,12" Foreground="#69717D" FontSize="12"
+                                           FontWeight="Normal" />
+                                <Grid Margin="0,0,0,10">
                             <TextBox x:Name="HiddenTitleSearchInput"
                                      Text="{Binding DislikedPreferencesSearchQuery, UpdateSourceTrigger=PropertyChanged}"
                                      Height="34" Padding="10,0" VerticalContentAlignment="Center"
@@ -1032,8 +1091,8 @@
                             <TextBlock x:Name="HiddenTitleSearchPlaceholder" Margin="11,0"
                                        VerticalAlignment="Center" Foreground="#9299A3"
                                        IsHitTestVisible="False" />
-                        </Grid>
-                        <Border Padding="0" Background="Transparent" BorderThickness="0">
+                                </Grid>
+                                <Border Padding="0" Background="Transparent" BorderThickness="0">
                             <Grid>
                                 <TextBlock Text="Aucun titre masque."
                                            Foreground="#69717D" VerticalAlignment="Center"
@@ -1080,7 +1139,9 @@
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
                             </Grid>
-                        </Border>
+                                </Border>
+                            </StackPanel>
+                        </Expander>
                     </StackPanel>
                 </ScrollViewer>
             </Grid>
