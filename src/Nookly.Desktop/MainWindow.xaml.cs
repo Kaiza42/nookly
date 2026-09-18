@@ -9,6 +9,9 @@ namespace Nookly.Desktop;
 
 public partial class MainWindow : Window
 {
+    private static readonly string[] SearchExamples =
+        ["Dune", "Bleach", "Breaking Bad", "Le Seigneur des anneaux", "Arcane", "Interstellar"];
+
     private readonly Services.SessionStore session;
     private readonly System.Windows.Forms.NotifyIcon trayIcon;
     private readonly Services.MemberApiClient memberApiClient;
@@ -50,6 +53,8 @@ public partial class MainWindow : Window
 
     private async void OnLoaded(object sender, RoutedEventArgs e)
     {
+        DiscoveryTitlePlaceholder.Text = $"Exemple : {SearchExamples[Random.Shared.Next(SearchExamples.Length)]}";
+        UpdateDiscoveryTitlePlaceholder();
         await ViewModel.LoadCommand.ExecuteAsync(null);
         await SyncMemberActivityAsync();
         activityTimer.Start();
@@ -191,5 +196,17 @@ public partial class MainWindow : Window
             child = VisualTreeHelper.GetParent(child);
         }
         return null;
+    }
+
+    private void DiscoveryTitleInput_Changed(object sender, RoutedEventArgs e) =>
+        UpdateDiscoveryTitlePlaceholder();
+
+    private void UpdateDiscoveryTitlePlaceholder()
+    {
+        if (DiscoveryTitlePlaceholder is null || DiscoveryTitleInput is null) return;
+        DiscoveryTitlePlaceholder.Visibility = string.IsNullOrWhiteSpace(DiscoveryTitleInput.Text) &&
+                                               !DiscoveryTitleInput.IsKeyboardFocusWithin
+            ? Visibility.Visible
+            : Visibility.Collapsed;
     }
 }

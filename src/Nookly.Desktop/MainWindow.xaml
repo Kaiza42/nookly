@@ -25,6 +25,57 @@
             <Setter Property="Foreground" Value="White" />
             <Setter Property="BorderBrush" Value="#286C53" />
             <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="5">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
+                                              Margin="{TemplateBinding Padding}" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="SoftButton" TargetType="Button">
+            <Setter Property="Height" Value="30" />
+            <Setter Property="Padding" Value="10,0" />
+            <Setter Property="Background" Value="White" />
+            <Setter Property="BorderBrush" Value="#C9CED6" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="5">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
+                                              Margin="{TemplateBinding Padding}" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="RoundedTextBox" TargetType="TextBox">
+            <Setter Property="Background" Value="White" />
+            <Setter Property="BorderBrush" Value="#C9CED6" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="InputBorder" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="5">
+                            <ScrollViewer x:Name="PART_ContentHost" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="InputBorder" Property="BorderBrush" Value="#4A8ED8" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
         <Style x:Key="VoteIconButton" TargetType="Button">
             <Setter Property="Width" Value="30" />
@@ -418,24 +469,29 @@
                     <Button Content="⚄" Command="{Binding RefreshRecommendationsCommand}"
                             ToolTip="Nouvelle selection"
                             HorizontalAlignment="Right" VerticalAlignment="Center"
-                            Width="34" Height="34" Padding="0" FontSize="18" FontFamily="Segoe UI Symbol"
-                            Background="White" BorderBrush="#D7DBE1" />
+                            Width="34" Padding="0" FontSize="18" FontFamily="Segoe UI Symbol"
+                            Style="{StaticResource SoftButton}" />
                 </Grid>
-                <Grid Grid.Row="1" Margin="0,22,0,0">
+                <Grid Grid.Row="1" Margin="0,18,0,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <StackPanel>
-                        <TextBlock Text="Titre" Margin="0,0,0,6" Foreground="#4D5967" />
-                        <TextBox Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
-                                 Height="42" Padding="12,9" BorderBrush="#C9CED6" ToolTip="Rechercher sur TMDB" />
-                    </StackPanel>
+                    <Grid>
+                        <TextBox x:Name="DiscoveryTitleInput"
+                                 Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                                 Height="34" Padding="12,6" Style="{StaticResource RoundedTextBox}"
+                                 ToolTip="Rechercher sur TMDB" TextChanged="DiscoveryTitleInput_Changed"
+                                 GotKeyboardFocus="DiscoveryTitleInput_Changed"
+                                 LostKeyboardFocus="DiscoveryTitleInput_Changed" />
+                        <TextBlock x:Name="DiscoveryTitlePlaceholder" Margin="13,0" VerticalAlignment="Center"
+                                   Foreground="#9299A3" IsHitTestVisible="False" />
+                    </Grid>
                     <Button Grid.Column="1" Content="Rechercher" Command="{Binding SearchCommand}"
-                            Style="{StaticResource PrimaryButton}" Height="42" Margin="10,25,0,0" />
+                            Style="{StaticResource PrimaryButton}" Height="34" Margin="10,0,0,0" />
                 </Grid>
                 <Border Grid.Row="2" Margin="0,8,0,0" Padding="7,4" Background="White"
-                        BorderBrush="#D7DBE1" BorderThickness="1" CornerRadius="6">
+                        BorderBrush="#D7DBE1" BorderThickness="1" CornerRadius="7">
                     <WrapPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,12,0">
                             <TextBlock Text="Type" Margin="0,0,6,0" Foreground="#4D5967"
@@ -458,14 +514,15 @@
                                        FontSize="10" VerticalAlignment="Center" />
                             <TextBox Text="{Binding DiscoveryYear, UpdateSourceTrigger=PropertyChanged}"
                                      Width="60" Height="22" Padding="5,1" TextAlignment="Center"
-                                     VerticalContentAlignment="Center" ToolTip="Par exemple 2024" />
+                                     VerticalContentAlignment="Center" ToolTip="Par exemple 2024"
+                                     Style="{StaticResource RoundedTextBox}" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="Acteur" Margin="0,0,6,0" Foreground="#4D5967"
                                        FontSize="10" VerticalAlignment="Center" />
                             <TextBox Text="{Binding ActorQuery, UpdateSourceTrigger=PropertyChanged}"
                                      Width="135" Height="22" Padding="5,1" TextAlignment="Center"
-                                     VerticalContentAlignment="Center" />
+                                     VerticalContentAlignment="Center" Style="{StaticResource RoundedTextBox}" />
                         </StackPanel>
                     </WrapPanel>
                 </Border>
@@ -491,7 +548,7 @@
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <Border Padding="12" Background="White" BorderBrush="#E0E3E8"
-                                    BorderThickness="1" CornerRadius="6">
+                                    BorderThickness="1" CornerRadius="8">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="64" />
@@ -518,10 +575,10 @@
                                                     VerticalAlignment="Center" Margin="12,0,0,0">
                                             <Button Content="Voir" ToolTip="Voir la fiche"
                                                     Command="{Binding DataContext.ShowSearchResultCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                    CommandParameter="{Binding}" Height="30" Padding="10,0" Margin="0,0,8,0" />
+                                                    CommandParameter="{Binding}" Style="{StaticResource SoftButton}" Margin="0,0,8,0" />
                                             <Button Content="Ajouter" ToolTip="Ajouter a ma bibliotheque"
                                                     Command="{Binding DataContext.AddSearchResultCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                    CommandParameter="{Binding}" Height="30" Padding="10,0" Margin="0,0,8,0" />
+                                                    CommandParameter="{Binding}" Style="{StaticResource SoftButton}" Margin="0,0,8,0" />
                                             <Button Content="&#xE8E1;" ToolTip="J'aime"
                                                     Command="{Binding DataContext.LikeDiscoveryResultCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                                     CommandParameter="{Binding}" Style="{StaticResource VoteIconButton}"
