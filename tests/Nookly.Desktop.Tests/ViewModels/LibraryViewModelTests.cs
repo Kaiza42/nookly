@@ -240,6 +240,34 @@ public sealed class LibraryViewModelTests
     }
 
     [Fact]
+    public async Task EpisodeProgress_IsSavedAndUpdatesSeasonCount()
+    {
+        var apiClient = new StubMediaApiClient
+        {
+            SearchResults =
+            [
+                new MediaSearchResultResponse(
+                    "tmdb", "30984", "Bleach", null, MediaType.Anime,
+                    null, 8.4m, new DateOnly(2004, 10, 5))
+            ],
+            Details = StubMediaApiClient.CreateSeriesDetails()
+        };
+        var viewModel = CreateViewModel(apiClient);
+        await viewModel.OpenDiscoverCommand.ExecuteAsync(null);
+        await viewModel.ShowSearchResultCommand.ExecuteAsync(Assert.Single(viewModel.SearchResults));
+        await WaitUntilAsync(() => viewModel.SelectedSeasonDetails is not null, TimeSpan.FromSeconds(2));
+        var episode = Assert.Single(viewModel.SelectedSeasonDetails!.Episodes);
+        episode.IsWatched = true;
+        episode.PersonalNotes = "Tres bon debut";
+
+        await viewModel.SaveEpisodeProgressCommand.ExecuteAsync(episode);
+
+        Assert.True(apiClient.LastEpisodeProgressRequest?.IsWatched);
+        Assert.Equal("Tres bon debut", apiClient.LastEpisodeProgressRequest?.PersonalNotes);
+        Assert.Equal("1 / 1 episodes vus", viewModel.SelectedSeasonDetails.ProgressLabel);
+    }
+
+    [Fact]
     public async Task ResetBankMonthCommand_ResetsAndReloadsTheCurrentPeriod()
     {
         var bankApiClient = new StubBankApiClient();
@@ -277,6 +305,8 @@ public sealed class LibraryViewModelTests
         public IReadOnlyList<DiscoveryPreferenceResponse> DislikedPreferences { get; init; } = [];
         public bool RestorePreferenceCalled { get; private set; }
         public MediaDetailsResponse? Details { get; init; }
+        public UpdateSeasonProgressRequest? LastSeasonProgressRequest { get; private set; }
+        public UpdateEpisodeProgressRequest? LastEpisodeProgressRequest { get; private set; }
 
         public Task<IReadOnlyList<MediaItemResponse>> GetMediaAsync(
             CancellationToken cancellationToken = default)
@@ -316,6 +346,34 @@ public sealed class LibraryViewModelTests
                 new DateOnly(2004, 10, 5),
                 8.2m,
                 [new EpisodeResponse(1, "Le jour ou je suis devenu un Shinigami", "Ichigo rencontre Rukia.", null, new DateOnly(2004, 10, 5), 24, 8.1m)]));
+
+        public Task<SeasonProgressResponse> GetSeasonProgressAsync(
+            string externalId,
+            int seasonNumber,
+            int totalEpisodes,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult(new SeasonProgressResponse(seasonNumber, null, 0, totalEpisodes, []));
+
+        public Task UpdateSeasonProgressAsync(
+            string externalId,
+            int seasonNumber,
+            UpdateSeasonProgressRequest request,
+            CancellationToken cancellationToken = default)
+        {
+            LastSeasonProgressRequest = request;
+            return Task.CompletedTask;
+        }
+
+        public Task UpdateEpisodeProgressAsync(
+            string externalId,
+            int seasonNumber,
+            int episodeNumber,
+            UpdateEpisodeProgressRequest request,
+            CancellationToken cancellationToken = default)
+        {
+            LastEpisodeProgressRequest = request;
+            return Task.CompletedTask;
+        }
 
         public Task<MediaItemResponse> CreateMediaAsync(
             CreateMediaRequest request,

@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nookly.Contracts.Media;
 using Nookly.Contracts.Discovery;
+using Nookly.Contracts.Details;
 using Nookly.Desktop.Services;
 
 namespace Nookly.Desktop.ViewModels;
@@ -221,6 +222,9 @@ public partial class LibraryViewModel(
 
     [ObservableProperty]
     private string? detailsErrorMessage;
+
+    [ObservableProperty]
+    private string? detailsStatusMessage;
 
     public bool ShowEmptyState => !IsLoading && !HasError && !HasItems;
     public bool ShowNoDislikedPreferences => !HasDislikedPreferences;
@@ -449,11 +453,14 @@ public partial class LibraryViewModel(
         try
         {
             IsLoadingDetails = true;
+            DetailsStatusMessage = null;
             SelectedSeasonDetails = null;
             var season = await mediaApiClient.GetSeasonDetailsAsync(externalId, seasonNumber);
+            var progress = await mediaApiClient.GetSeasonProgressAsync(
+                externalId, seasonNumber, season.Episodes.Count);
             if (SelectedSeason?.Number == seasonNumber)
             {
-                SelectedSeasonDetails = new SeasonDetailsViewModel(season);
+                SelectedSeasonDetails = new SeasonDetailsViewModel(season, progress);
             }
         }
         catch (HttpRequestException)
@@ -464,6 +471,48 @@ public partial class LibraryViewModel(
         finally
         {
             IsLoadingDetails = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task SaveSeasonProgressAsync()
+    {
+        if (SelectedMediaDetails is null || SelectedSeasonDetails is null) return;
+        try
+        {
+            await mediaApiClient.UpdateSeasonProgressAsync(
+                SelectedMediaDetails.ExternalId,
+                SelectedSeasonDetails.Number,
+                new UpdateSeasonProgressRequest(SelectedSeasonDetails.PersonalNotes));
+            DetailsStatusMessage = "Note de saison enregistree.";
+            HasDetailsError = false;
+        }
+        catch (HttpRequestException)
+        {
+            HasDetailsError = true;
+            DetailsErrorMessage = "Impossible d'enregistrer la note de cette saison.";
+        }
+    }
+
+    [RelayCommand]
+    private async Task SaveEpisodeProgressAsync(EpisodeViewModel episode)
+    {
+        if (SelectedMediaDetails is null || SelectedSeasonDetails is null) return;
+        try
+        {
+            await mediaApiClient.UpdateEpisodeProgressAsync(
+                SelectedMediaDetails.ExternalId,
+                SelectedSeasonDetails.Number,
+                episode.Number,
+                new UpdateEpisodeProgressRequest(episode.IsWatched, episode.PersonalNotes));
+            SelectedSeasonDetails.RefreshWatchedCount();
+            DetailsStatusMessage = $"Progression de l'episode {episode.Number} enregistree.";
+            HasDetailsError = false;
+        }
+        catch (HttpRequestException)
+        {
+            HasDetailsError = true;
+            DetailsErrorMessage = $"Impossible d'enregistrer l'episode {episode.Number}.";
         }
     }
 

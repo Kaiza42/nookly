@@ -1,3 +1,4 @@
+using CommunityToolkit.Mvvm.ComponentModel;
 using Nookly.Contracts.Details;
 using Nookly.Contracts.Media;
 
@@ -34,17 +35,59 @@ public sealed class SeasonSummaryViewModel(SeasonSummaryResponse season)
     public override string ToString() => $"Saison {Number}";
 }
 
-public sealed class SeasonDetailsViewModel(SeasonDetailsResponse season)
+public sealed partial class SeasonDetailsViewModel : ObservableObject
 {
+    private readonly SeasonDetailsResponse season;
+
+    public SeasonDetailsViewModel(SeasonDetailsResponse season, SeasonProgressResponse progress)
+    {
+        this.season = season;
+        personalNotes = progress.PersonalNotes ?? string.Empty;
+        watchedEpisodes = progress.WatchedEpisodes;
+        Episodes = season.Episodes.Select(item =>
+        {
+            var saved = progress.Episodes.FirstOrDefault(value => value.EpisodeNumber == item.Number);
+            return new EpisodeViewModel(item, saved);
+        }).ToArray();
+    }
+
+    [ObservableProperty]
+    private string personalNotes;
+
+    [ObservableProperty]
+    private int watchedEpisodes;
+
     public string Title => season.Title;
+    public int Number => season.Number;
     public string? Description => season.Description;
     public string? PosterUrl => season.PosterUrl;
     public string MetaLabel => $"{season.Episodes.Count} episodes · {(season.CommunityRating is null ? "Non notee" : $"{season.CommunityRating:0.0}/10")}";
-    public IReadOnlyList<EpisodeViewModel> Episodes => season.Episodes.Select(item => new EpisodeViewModel(item)).ToArray();
+    public string ProgressLabel => $"{WatchedEpisodes} / {season.Episodes.Count} episodes vus";
+    public IReadOnlyList<EpisodeViewModel> Episodes { get; }
+
+    partial void OnWatchedEpisodesChanged(int value) => OnPropertyChanged(nameof(ProgressLabel));
+
+    public void RefreshWatchedCount() => WatchedEpisodes = Episodes.Count(item => item.IsWatched);
 }
 
-public sealed class EpisodeViewModel(EpisodeResponse episode)
+public sealed partial class EpisodeViewModel : ObservableObject
 {
+    private readonly EpisodeResponse episode;
+
+    public EpisodeViewModel(EpisodeResponse episode, EpisodeProgressResponse? progress)
+    {
+        this.episode = episode;
+        isWatched = progress?.IsWatched == true;
+        personalNotes = progress?.PersonalNotes ?? string.Empty;
+    }
+
+    [ObservableProperty]
+    private bool isWatched;
+
+    [ObservableProperty]
+    private string personalNotes;
+
+    public int Number => episode.Number;
     public string NumberLabel => $"Episode {episode.Number}";
     public string Title => episode.Title;
     public string? Description => episode.Description;

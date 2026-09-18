@@ -28,6 +28,25 @@ public interface IMediaApiClient
         int seasonNumber,
         CancellationToken cancellationToken = default);
 
+    Task<SeasonProgressResponse> GetSeasonProgressAsync(
+        string externalId,
+        int seasonNumber,
+        int totalEpisodes,
+        CancellationToken cancellationToken = default);
+
+    Task UpdateSeasonProgressAsync(
+        string externalId,
+        int seasonNumber,
+        UpdateSeasonProgressRequest request,
+        CancellationToken cancellationToken = default);
+
+    Task UpdateEpisodeProgressAsync(
+        string externalId,
+        int seasonNumber,
+        int episodeNumber,
+        UpdateEpisodeProgressRequest request,
+        CancellationToken cancellationToken = default);
+
     Task<MediaItemResponse> CreateMediaAsync(
         CreateMediaRequest request,
         CancellationToken cancellationToken = default);

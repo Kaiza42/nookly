@@ -64,8 +64,18 @@
                                 <StackPanel>
                                     <TextBlock Text="{Binding Title}" FontSize="17" FontWeight="SemiBold" />
                                     <TextBlock Text="{Binding MetaLabel}" Margin="0,5,0,0" Foreground="#69717D" />
+                                    <TextBlock Text="{Binding ProgressLabel}" Margin="0,5,0,0"
+                                               Foreground="#286C53" FontWeight="SemiBold" />
                                     <TextBlock Text="{Binding Description}" Margin="0,8,0,14" Foreground="#4D5967"
                                                TextWrapping="Wrap" />
+                                    <TextBlock Text="Ma note sur cette saison" FontWeight="SemiBold" />
+                                    <TextBox Text="{Binding PersonalNotes, UpdateSourceTrigger=PropertyChanged}"
+                                             AcceptsReturn="True" TextWrapping="Wrap" MaxLength="4000"
+                                             MinHeight="64" Padding="9" Margin="0,6,0,0"
+                                             VerticalScrollBarVisibility="Auto" />
+                                    <Button Content="Enregistrer la note de saison"
+                                            Command="{Binding DataContext.SaveSeasonProgressCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                            Style="{StaticResource PrimaryButton}" HorizontalAlignment="Left" Margin="0,8,0,14" />
                                     <ListBox ItemsSource="{Binding Episodes}" Height="440"
                                              Background="Transparent" BorderThickness="0"
                                              ScrollViewer.CanContentScroll="True"
@@ -100,6 +110,19 @@
                                                             <TextBlock Text="{Binding Description}" Margin="0,5,0,0"
                                                                        Foreground="#4D5967" TextWrapping="Wrap"
                                                                        MaxHeight="42" TextTrimming="CharacterEllipsis" />
+                                                            <DockPanel Margin="0,9,0,0" LastChildFill="False">
+                                                                <CheckBox Content="Vu" IsChecked="{Binding IsWatched, Mode=TwoWay}"
+                                                                          VerticalAlignment="Center" Margin="0,0,14,0" />
+                                                                <Button Content="Enregistrer"
+                                                                        Command="{Binding DataContext.SaveEpisodeProgressCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                                        CommandParameter="{Binding}"
+                                                                        Height="28" Padding="12,0" />
+                                                            </DockPanel>
+                                                            <TextBox Text="{Binding PersonalNotes, UpdateSourceTrigger=PropertyChanged}"
+                                                                     AcceptsReturn="True" TextWrapping="Wrap" MaxLength="4000"
+                                                                     MinHeight="48" Padding="8" Margin="0,7,0,0"
+                                                                     ToolTip="Note personnelle sur cet episode"
+                                                                     VerticalScrollBarVisibility="Auto" />
                                                         </StackPanel>
                                                     </Grid>
                                                 </Border>
@@ -110,6 +133,8 @@
                             </DataTemplate>
                         </ContentControl.ContentTemplate>
                     </ContentControl>
+                    <TextBlock Text="{Binding DataContext.DetailsStatusMessage, RelativeSource={RelativeSource AncestorType=Window}}"
+                               Foreground="#286C53" Margin="0,8,0,0" />
                 </StackPanel>
             </StackPanel>
         </DataTemplate>

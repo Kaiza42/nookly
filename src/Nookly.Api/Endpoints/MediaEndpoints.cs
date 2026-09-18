@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Nookly.Application.Abstractions;
 using Nookly.Application.Media;
 using Nookly.Application.Discovery;
@@ -5,6 +6,8 @@ using Nookly.Contracts.Discovery;
 using Nookly.Contracts.Media;
 using Nookly.Contracts.Search;
 using Nookly.Contracts.Details;
+using Nookly.Domain.Media;
+using Nookly.Infrastructure.Data;
 using ApplicationCreateMediaRequest = Nookly.Application.Media.CreateMediaRequest;
 using ApplicationUpdateMediaRequest = Nookly.Application.Media.UpdateMediaRequest;
 using ContractCreateMediaRequest = Nookly.Contracts.Media.CreateMediaRequest;
@@ -151,6 +154,67 @@ public static class MediaEndpoints
             {
                 return Results.Problem("TMDB is temporarily unavailable.", statusCode: StatusCodes.Status502BadGateway);
             }
+        });
+
+        group.MapGet("/external/{externalId}/seasons/{seasonNumber:int}/progress", async (
+            string externalId,
+            int seasonNumber,
+            int totalEpisodes,
+            NooklyDbContext db,
+            ICurrentMember currentMember,
+            CancellationToken cancellationToken) =>
+        {
+            if (seasonNumber < 1 || totalEpisodes < 0) return Results.BadRequest();
+            return Results.Ok(await GetSeasonProgressAsync(
+                db, currentMember.Id, externalId, seasonNumber, totalEpisodes, cancellationToken));
+        });
+
+        group.MapPut("/external/{externalId}/seasons/{seasonNumber:int}/progress", async (
+            string externalId,
+            int seasonNumber,
+            UpdateSeasonProgressRequest request,
+            NooklyDbContext db,
+            ICurrentMember currentMember,
+            CancellationToken cancellationToken) =>
+        {
+            if (seasonNumber < 1 || request.PersonalNotes?.Length > 4000) return Results.BadRequest();
+            var progress = await db.SeasonProgress.SingleOrDefaultAsync(item =>
+                item.MemberId == currentMember.Id && item.ExternalSource == "tmdb" &&
+                item.ExternalId == externalId && item.SeasonNumber == seasonNumber, cancellationToken);
+            if (progress is null)
+            {
+                progress = SeasonProgress.Create(currentMember.Id, "tmdb", externalId, seasonNumber);
+                db.SeasonProgress.Add(progress);
+            }
+            progress.SetNotes(request.PersonalNotes);
+            await db.SaveChangesAsync(cancellationToken);
+            return Results.NoContent();
+        });
+
+        group.MapPut("/external/{externalId}/seasons/{seasonNumber:int}/episodes/{episodeNumber:int}/progress", async (
+            string externalId,
+            int seasonNumber,
+            int episodeNumber,
+            UpdateEpisodeProgressRequest request,
+            NooklyDbContext db,
+            ICurrentMember currentMember,
+            CancellationToken cancellationToken) =>
+        {
+            if (seasonNumber < 1 || episodeNumber < 1 || request.PersonalNotes?.Length > 4000)
+                return Results.BadRequest();
+            var progress = await db.EpisodeProgress.SingleOrDefaultAsync(item =>
+                item.MemberId == currentMember.Id && item.ExternalSource == "tmdb" &&
+                item.ExternalId == externalId && item.SeasonNumber == seasonNumber &&
+                item.EpisodeNumber == episodeNumber, cancellationToken);
+            if (progress is null)
+            {
+                progress = EpisodeProgress.Create(
+                    currentMember.Id, "tmdb", externalId, seasonNumber, episodeNumber);
+                db.EpisodeProgress.Add(progress);
+            }
+            progress.Update(request.IsWatched, request.PersonalNotes);
+            await db.SaveChangesAsync(cancellationToken);
+            return Results.NoContent();
         });
 
         group.MapPost("/preferences", async (
@@ -322,4 +386,31 @@ public static class MediaEndpoints
             season.AirDate,
             season.EpisodeCount,
             season.CommunityRating)).ToArray());
+
+    private static async Task<SeasonProgressResponse> GetSeasonProgressAsync(
+        NooklyDbContext db,
+        Guid memberId,
+        string externalId,
+        int seasonNumber,
+        int totalEpisodes,
+        CancellationToken cancellationToken)
+    {
+        var seasonNotes = await db.SeasonProgress.AsNoTracking()
+            .Where(item => item.MemberId == memberId && item.ExternalSource == "tmdb" &&
+                           item.ExternalId == externalId && item.SeasonNumber == seasonNumber)
+            .Select(item => item.PersonalNotes)
+            .SingleOrDefaultAsync(cancellationToken);
+        var episodes = await db.EpisodeProgress.AsNoTracking()
+            .Where(item => item.MemberId == memberId && item.ExternalSource == "tmdb" &&
+                           item.ExternalId == externalId && item.SeasonNumber == seasonNumber)
+            .OrderBy(item => item.EpisodeNumber)
+            .Select(item => new EpisodeProgressResponse(item.EpisodeNumber, item.IsWatched, item.PersonalNotes))
+            .ToArrayAsync(cancellationToken);
+        return new SeasonProgressResponse(
+            seasonNumber,
+            seasonNotes,
+            episodes.Count(item => item.IsWatched),
+            totalEpisodes,
+            episodes);
+    }
 }

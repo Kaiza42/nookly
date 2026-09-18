@@ -76,6 +76,49 @@ public sealed class MediaApiClient(HttpClient httpClient) : IMediaApiClient
                ?? throw new InvalidOperationException("The API returned an empty response.");
     }
 
+    public async Task<SeasonProgressResponse> GetSeasonProgressAsync(
+        string externalId,
+        int seasonNumber,
+        int totalEpisodes,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.GetAsync(
+            $"api/media/external/{Uri.EscapeDataString(externalId)}/seasons/{seasonNumber}/progress?totalEpisodes={totalEpisodes}",
+            cancellationToken);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<SeasonProgressResponse>(JsonOptions, cancellationToken)
+               ?? throw new InvalidOperationException("The API returned an empty response.");
+    }
+
+    public async Task UpdateSeasonProgressAsync(
+        string externalId,
+        int seasonNumber,
+        UpdateSeasonProgressRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.PutAsJsonAsync(
+            $"api/media/external/{Uri.EscapeDataString(externalId)}/seasons/{seasonNumber}/progress",
+            request,
+            JsonOptions,
+            cancellationToken);
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task UpdateEpisodeProgressAsync(
+        string externalId,
+        int seasonNumber,
+        int episodeNumber,
+        UpdateEpisodeProgressRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.PutAsJsonAsync(
+            $"api/media/external/{Uri.EscapeDataString(externalId)}/seasons/{seasonNumber}/episodes/{episodeNumber}/progress",
+            request,
+            JsonOptions,
+            cancellationToken);
+        response.EnsureSuccessStatusCode();
+    }
+
     public async Task<MediaItemResponse> CreateMediaAsync(
         CreateMediaRequest request,
         CancellationToken cancellationToken = default)
