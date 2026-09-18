@@ -159,7 +159,7 @@
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="220" />
+            <ColumnDefinition x:Name="SidebarColumn" Width="220" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
@@ -170,9 +170,16 @@
                     <RowDefinition Height="*" />
                     <RowDefinition Height="60" />
                 </Grid.RowDefinitions>
-                <TextBlock Text="Nookly" Margin="26,0" VerticalAlignment="Center"
-                           Foreground="White" FontSize="24" FontWeight="SemiBold" />
-                <StackPanel Grid.Row="1">
+                <Grid>
+                    <TextBlock x:Name="SidebarBrand" Text="Nookly" Margin="26,0" VerticalAlignment="Center"
+                               Foreground="White" FontSize="24" FontWeight="SemiBold" />
+                    <Button x:Name="SidebarToggleButton" Content="&#xE76B;" Click="ToggleSidebar_Click"
+                            HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,0"
+                            Width="32" Height="32" Foreground="#B8C0CC" Background="Transparent"
+                            BorderThickness="0" FontFamily="Segoe MDL2 Assets" FontSize="16"
+                            ToolTip="Replier le menu" Cursor="Hand" />
+                </Grid>
+                <StackPanel x:Name="ExpandedNavigation" Grid.Row="1">
                     <Expander Header="Divertissement" IsExpanded="True" Margin="12,8,12,0"
                               Foreground="White" FontWeight="SemiBold">
                         <StackPanel Margin="0,6,0,0">
@@ -190,9 +197,31 @@
                             Command="{Binding ShowAdminCommand}" Click="Administration_Click"
                             Style="{StaticResource NavButton}" Visibility="Collapsed" />
                 </StackPanel>
+                <StackPanel x:Name="CollapsedNavigation" Grid.Row="1" Visibility="Collapsed" Margin="0,8,0,0">
+                    <Button Content="&#xE8F1;" Command="{Binding ShowLibraryCommand}" ToolTip="Bibliotheque"
+                            Style="{StaticResource NavButton}" FontFamily="Segoe MDL2 Assets" FontSize="18"
+                            HorizontalContentAlignment="Center" Padding="0" />
+                    <Button Content="&#xE721;" Command="{Binding OpenDiscoverCommand}" ToolTip="Decouvrir"
+                            Style="{StaticResource NavButton}" FontFamily="Segoe MDL2 Assets" FontSize="18"
+                            HorizontalContentAlignment="Center" Padding="0" />
+                    <Button Content="&#xE8C7;" Command="{Binding ShowBankCommand}" ToolTip="Banque"
+                            Style="{StaticResource NavButton}" FontFamily="Segoe MDL2 Assets" FontSize="18"
+                            HorizontalContentAlignment="Center" Padding="0" />
+                    <Button Content="&#xE713;" Command="{Binding ShowSettingsCommand}" ToolTip="Parametres"
+                            Style="{StaticResource NavButton}" FontFamily="Segoe MDL2 Assets" FontSize="18"
+                            HorizontalContentAlignment="Center" Padding="0" />
+                    <Button x:Name="CollapsedAdministrationButton" Content="&#xE77B;"
+                            Command="{Binding ShowAdminCommand}" Click="Administration_Click" ToolTip="Administration"
+                            Style="{StaticResource NavButton}" FontFamily="Segoe MDL2 Assets" FontSize="18"
+                            HorizontalContentAlignment="Center" Padding="0" Visibility="Collapsed" />
+                </StackPanel>
                 <Button x:Name="MemberButton" Grid.Row="2" Click="Logout_Click" Margin="12,8"
                         HorizontalContentAlignment="Left" Padding="14,0" Background="Transparent"
                         BorderThickness="0" Foreground="#B8C0CC" Cursor="Hand" />
+                <Button x:Name="CollapsedMemberButton" Grid.Row="2" Click="Logout_Click"
+                        Content="&#xE8AC;" ToolTip="Se deconnecter" Visibility="Collapsed"
+                        Margin="10,8" Padding="0" Background="Transparent" BorderThickness="0"
+                        Foreground="#B8C0CC" FontFamily="Segoe MDL2 Assets" FontSize="18" Cursor="Hand" />
             </Grid>
         </Border>
 
@@ -455,6 +484,7 @@
                             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                             <Setter Property="Margin" Value="0,0,0,10" />
                             <Setter Property="Padding" Value="0" />
+                            <EventSetter Event="MouseDoubleClick" Handler="DiscoveryResult_DoubleClick" />
                         </Style>
                     </ListView.ItemContainerStyle>
                     <ListView.ItemTemplate>

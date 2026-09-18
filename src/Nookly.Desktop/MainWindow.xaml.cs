@@ -1,6 +1,8 @@
 using System.Windows;
 using System.ComponentModel;
 using System.Net.Http;
+using System.Windows.Input;
+using System.Windows.Media;
 using Nookly.Desktop.ViewModels;
 
 namespace Nookly.Desktop;
@@ -12,6 +14,7 @@ public partial class MainWindow : Window
     private readonly Services.MemberApiClient memberApiClient;
     private readonly System.Windows.Threading.DispatcherTimer activityTimer;
     private bool allowClose;
+    private bool isSidebarCollapsed;
     public MainWindow(LibraryViewModel viewModel, AdminViewModel adminViewModel,
         Services.SessionStore session, Services.MemberApiClient memberApiClient)
     {
@@ -29,6 +32,7 @@ public partial class MainWindow : Window
         AdministrationButton.Visibility = string.Equals(session.Member?.Role, "Admin", StringComparison.OrdinalIgnoreCase)
             ? Visibility.Visible
             : Visibility.Collapsed;
+        CollapsedAdministrationButton.Visibility = AdministrationButton.Visibility;
         MemberButton.Content = $"{session.Member?.DisplayName ?? "Membre"}  |  Deconnexion";
         StaySignedInCheckBox.IsChecked = session.StaySignedIn;
         trayIcon = new System.Windows.Forms.NotifyIcon
@@ -144,5 +148,40 @@ public partial class MainWindow : Window
     {
         if (AdministrationPanel.DataContext is AdminViewModel adminViewModel)
             await adminViewModel.LoadCommand.ExecuteAsync(null);
+    }
+
+    private void ToggleSidebar_Click(object sender, RoutedEventArgs e)
+    {
+        isSidebarCollapsed = !isSidebarCollapsed;
+        SidebarColumn.Width = new GridLength(isSidebarCollapsed ? 64 : 220);
+        SidebarBrand.Visibility = isSidebarCollapsed ? Visibility.Collapsed : Visibility.Visible;
+        ExpandedNavigation.Visibility = isSidebarCollapsed ? Visibility.Collapsed : Visibility.Visible;
+        CollapsedNavigation.Visibility = isSidebarCollapsed ? Visibility.Visible : Visibility.Collapsed;
+        MemberButton.Visibility = isSidebarCollapsed ? Visibility.Collapsed : Visibility.Visible;
+        CollapsedMemberButton.Visibility = isSidebarCollapsed ? Visibility.Visible : Visibility.Collapsed;
+        SidebarToggleButton.Content = isSidebarCollapsed ? "\uE76C" : "\uE76B";
+        SidebarToggleButton.ToolTip = isSidebarCollapsed ? "Deplier le menu" : "Replier le menu";
+        SidebarToggleButton.HorizontalAlignment = isSidebarCollapsed
+            ? System.Windows.HorizontalAlignment.Center
+            : System.Windows.HorizontalAlignment.Right;
+        SidebarToggleButton.Margin = isSidebarCollapsed ? new Thickness(0) : new Thickness(0, 0, 12, 0);
+    }
+
+    private async void DiscoveryResult_DoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        if (FindVisualParent<System.Windows.Controls.Button>(e.OriginalSource as DependencyObject) is not null) return;
+        if (sender is not System.Windows.Controls.ListViewItem { DataContext: MediaSearchResultViewModel item }) return;
+        if (ViewModel.ShowSearchResultCommand.CanExecute(item))
+            await ViewModel.ShowSearchResultCommand.ExecuteAsync(item);
+    }
+
+    private static T? FindVisualParent<T>(DependencyObject? child) where T : DependencyObject
+    {
+        while (child is not null)
+        {
+            if (child is T parent) return parent;
+            child = VisualTreeHelper.GetParent(child);
+        }
+        return null;
     }
 }
