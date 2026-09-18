@@ -174,6 +174,9 @@ public partial class LibraryViewModel(
     private bool isBankPage;
 
     [ObservableProperty]
+    private bool isAdminPage;
+
+    [ObservableProperty]
     private string startingBalanceText = string.Empty;
 
     [ObservableProperty]
@@ -272,6 +275,13 @@ public partial class LibraryViewModel(
         CloseForm();
         SetPage(bank: true);
         await LoadBankAsync();
+    }
+
+    [RelayCommand]
+    private void ShowAdmin()
+    {
+        CloseForm();
+        SetPage(admin: true);
     }
 
     [RelayCommand]
@@ -838,7 +848,8 @@ public partial class LibraryViewModel(
         bool detail = false,
         bool libraryDetail = false,
         bool settings = false,
-        bool bank = false)
+        bool bank = false,
+        bool admin = false)
     {
         IsLibraryPage = library;
         IsDiscoverPage = discover;
@@ -846,6 +857,7 @@ public partial class LibraryViewModel(
         IsLibraryDetailPage = libraryDetail;
         IsSettingsPage = settings;
         IsBankPage = bank;
+        IsAdminPage = admin;
     }
 
     private void RefreshLibraryFilter()

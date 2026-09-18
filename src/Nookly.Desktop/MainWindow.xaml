@@ -144,6 +144,9 @@
                             Style="{StaticResource NavButton}" />
                     <Button Content="Parametres" Command="{Binding ShowSettingsCommand}"
                             Style="{StaticResource NavButton}" />
+                    <Button x:Name="AdministrationButton" Content="Administration"
+                            Command="{Binding ShowAdminCommand}" Click="Administration_Click"
+                            Style="{StaticResource NavButton}" Visibility="Collapsed" />
                 </StackPanel>
                 <Button x:Name="MemberButton" Grid.Row="2" Click="Logout_Click" Margin="12,8"
                         HorizontalContentAlignment="Left" Padding="14,0" Background="Transparent"
@@ -833,6 +836,67 @@
                         </Border>
                     </StackPanel>
                 </ScrollViewer>
+            </Grid>
+
+            <!-- Administration : aucune donnee personnelle des membres n'est exposee ici. -->
+            <Grid x:Name="AdministrationPanel"
+                  Visibility="{Binding DataContext.IsAdminPage, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVisibility}}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="Administration" FontSize="28" FontWeight="SemiBold" />
+                        <TextBlock Text="Comptes, activite et notifications. Les donnees personnelles restent privees."
+                                   Margin="0,5,0,0" Foreground="#69717D" />
+                    </StackPanel>
+                    <Button Grid.Column="1" Content="Actualiser" Command="{Binding LoadCommand}"
+                            Height="34" Padding="14,0" VerticalAlignment="Top" />
+                </Grid>
+
+                <DataGrid Grid.Row="1" ItemsSource="{Binding Members}" SelectedItem="{Binding SelectedMember}"
+                          Margin="0,22,0,0" AutoGenerateColumns="False" IsReadOnly="True"
+                          SelectionMode="Single" CanUserAddRows="False" HeadersVisibility="Column"
+                          GridLinesVisibility="Horizontal">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Pseudo" Binding="{Binding DisplayName}" Width="*" />
+                        <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="2*" />
+                        <DataGridCheckBoxColumn Header="Confirme" Binding="{Binding IsEmailConfirmed}" Width="90" />
+                        <DataGridTextColumn Header="Temps utilise" Binding="{Binding UsageLabel}" Width="130" />
+                        <DataGridTextColumn Header="Derniere activite" Binding="{Binding LastActivityLabel}" Width="160" />
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <Border Grid.Row="2" Margin="0,18,0,0" Padding="16" Background="White"
+                        BorderBrush="#D7DBE1" BorderThickness="1" CornerRadius="6">
+                    <StackPanel>
+                        <TextBlock Text="Envoyer une notification" FontSize="16" FontWeight="SemiBold" />
+                        <TextBlock Text="Selectionne d'abord un utilisateur dans la liste."
+                                   Margin="0,4,0,12" Foreground="#69717D" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="220" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox Text="{Binding NotificationTitle, UpdateSourceTrigger=PropertyChanged}"
+                                     Height="36" Padding="9,0" VerticalContentAlignment="Center"
+                                     ToolTip="Titre de la notification" />
+                            <TextBox Grid.Column="1" Text="{Binding NotificationMessage, UpdateSourceTrigger=PropertyChanged}"
+                                     Height="36" Margin="10,0" Padding="9,0" VerticalContentAlignment="Center"
+                                     ToolTip="Message" />
+                            <Button Grid.Column="2" Content="Envoyer" Command="{Binding SendNotificationCommand}"
+                                    Height="36" Padding="15,0" Background="#286C53" Foreground="White" />
+                        </Grid>
+                        <TextBlock Text="{Binding StatusMessage}" Margin="0,10,0,0" Foreground="#286C53" />
+                    </StackPanel>
+                </Border>
             </Grid>
         </Grid>
     </Grid>

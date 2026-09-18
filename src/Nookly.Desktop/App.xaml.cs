@@ -40,10 +40,10 @@ public partial class App : System.Windows.Application
             .AddHttpMessageHandler<AuthenticatedHttpHandler>();
         services.AddSingleton<IUserDialogService, UserDialogService>();
         services.AddTransient<LibraryViewModel>();
+        services.AddTransient<AdminViewModel>();
         services.AddTransient<MainWindow>();
         services.AddTransient<LoginWindow>();
         services.AddTransient<WelcomeWindow>();
-        services.AddTransient<AdminWindow>();
         services.AddTransient<PasswordResetWindow>();
 
         serviceProvider = services.BuildServiceProvider();
@@ -56,9 +56,7 @@ public partial class App : System.Windows.Application
     public void ShowMainWindow()
     {
         var provider = serviceProvider ?? throw new InvalidOperationException("Application services are unavailable.");
-        Window window = string.Equals(provider.GetRequiredService<SessionStore>().Member?.Role, "Admin", StringComparison.OrdinalIgnoreCase)
-            ? provider.GetRequiredService<AdminWindow>()
-            : provider.GetRequiredService<MainWindow>();
+        Window window = provider.GetRequiredService<MainWindow>();
         MainWindow = window;
         window.Show();
     }

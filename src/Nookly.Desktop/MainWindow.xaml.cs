@@ -12,7 +12,8 @@ public partial class MainWindow : Window
     private readonly Services.MemberApiClient memberApiClient;
     private readonly System.Windows.Threading.DispatcherTimer activityTimer;
     private bool allowClose;
-    public MainWindow(LibraryViewModel viewModel, Services.SessionStore session, Services.MemberApiClient memberApiClient)
+    public MainWindow(LibraryViewModel viewModel, AdminViewModel adminViewModel,
+        Services.SessionStore session, Services.MemberApiClient memberApiClient)
     {
         InitializeComponent();
         var workArea = SystemParameters.WorkArea;
@@ -24,6 +25,10 @@ public partial class MainWindow : Window
         this.session = session;
         this.memberApiClient = memberApiClient;
         DataContext = viewModel;
+        AdministrationPanel.DataContext = adminViewModel;
+        AdministrationButton.Visibility = string.Equals(session.Member?.Role, "Admin", StringComparison.OrdinalIgnoreCase)
+            ? Visibility.Visible
+            : Visibility.Collapsed;
         MemberButton.Content = $"{session.Member?.DisplayName ?? "Membre"}  |  Deconnexion";
         StaySignedInCheckBox.IsChecked = session.StaySignedIn;
         trayIcon = new System.Windows.Forms.NotifyIcon
@@ -133,5 +138,11 @@ public partial class MainWindow : Window
     private void StaySignedIn_Changed(object sender, RoutedEventArgs e)
     {
         if (IsLoaded) session.SetStaySignedIn(StaySignedInCheckBox.IsChecked == true);
+    }
+
+    private async void Administration_Click(object sender, RoutedEventArgs e)
+    {
+        if (AdministrationPanel.DataContext is AdminViewModel adminViewModel)
+            await adminViewModel.LoadCommand.ExecuteAsync(null);
     }
 }
