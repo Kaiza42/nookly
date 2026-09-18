@@ -89,6 +89,53 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style x:Key="RestoreButton" TargetType="Button">
+            <Setter Property="Height" Value="30" />
+            <Setter Property="Padding" Value="12,0" />
+            <Setter Property="Background" Value="#F1F8F5" />
+            <Setter Property="Foreground" Value="#286C53" />
+            <Setter Property="BorderBrush" Value="#AFCFC1" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="RestoreSurface" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="5">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
+                                              Margin="{TemplateBinding Padding}" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="RestoreSurface" Property="Background" Value="#E2F1EA" />
+                                <Setter TargetName="RestoreSurface" Property="BorderBrush" Value="#78AC96" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="RestoreSurface" Property="Background" Value="#D5E9DF" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="HoverCardBorder" TargetType="Border">
+            <Setter Property="Background" Value="White" />
+            <Setter Property="BorderBrush" Value="#DCE5E1" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Effect">
+                        <Setter.Value>
+                            <DropShadowEffect Color="#60796E" BlurRadius="12"
+                                              ShadowDepth="2" Opacity="0.28" />
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
         <Style x:Key="RoundedTextBox" TargetType="TextBox">
             <Setter Property="Background" Value="White" />
             <Setter Property="BorderBrush" Value="#C9CED6" />
@@ -999,8 +1046,8 @@
                                               Visibility="{Binding HasDislikedPreferences, Converter={StaticResource BoolToVisibility}}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <Border Padding="12,9" Margin="0,0,0,6" Background="#F7F8FA"
-                                                    BorderBrush="#E3E6EA" BorderThickness="1" CornerRadius="4">
+                                            <Border Padding="12,9" Margin="0,0,0,8"
+                                                    Style="{StaticResource HoverCardBorder}">
                                                 <Grid>
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="76" />
@@ -1026,7 +1073,7 @@
                                                     </StackPanel>
                                                     <Button Grid.Column="2" Content="Restaurer"
                                                             Command="{Binding DataContext.RestoreDiscoveryPreferenceCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                            CommandParameter="{Binding}" Height="30" Padding="12,0"
+                                                            CommandParameter="{Binding}" Style="{StaticResource RestoreButton}"
                                                             Margin="16,0,0,0" VerticalAlignment="Center" />
                                                 </Grid>
                                             </Border>
