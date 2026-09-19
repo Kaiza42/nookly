@@ -10,6 +10,8 @@ public sealed class MemberTests
         var member = Member.Create("  Alice@Nookly.Test ", " Alice ");
         Assert.Equal("alice@nookly.test", member.Email);
         Assert.Equal("Alice", member.DisplayName);
+        Assert.Equal(10, member.PublicId.Length);
+        Assert.All(member.PublicId, character => Assert.Contains(character, "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"));
         Assert.Throws<ArgumentException>(() => Member.Create("test@nookly.test", " "));
     }
 

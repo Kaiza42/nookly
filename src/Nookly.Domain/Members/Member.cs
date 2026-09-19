@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+
 namespace Nookly.Domain.Members;
 
 public sealed class Member
@@ -7,6 +9,7 @@ public sealed class Member
     private Member(string email, string displayName, MemberRole role)
     {
         Id = Guid.NewGuid();
+        PublicId = CreatePublicId();
         Email = email.Trim().ToLowerInvariant();
         DisplayName = displayName.Trim();
         Role = role;
@@ -14,6 +17,7 @@ public sealed class Member
     }
 
     public Guid Id { get; private set; }
+    public string PublicId { get; private set; } = string.Empty;
     public string Email { get; private set; } = string.Empty;
     public string DisplayName { get; private set; } = string.Empty;
     public string PasswordHash { get; private set; } = string.Empty;
@@ -28,6 +32,18 @@ public sealed class Member
         if (string.IsNullOrWhiteSpace(email)) throw new ArgumentException("An email is required.");
         if (string.IsNullOrWhiteSpace(displayName)) throw new ArgumentException("A display name is required.");
         return new Member(email, displayName, role);
+    }
+
+    private static string CreatePublicId()
+    {
+        const string alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+        return string.Create(10, alphabet, static (buffer, characters) =>
+        {
+            for (var index = 0; index < buffer.Length; index++)
+            {
+                buffer[index] = characters[RandomNumberGenerator.GetInt32(characters.Length)];
+            }
+        });
     }
 
     public void SetPasswordHash(string passwordHash) => PasswordHash =

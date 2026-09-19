@@ -37,7 +37,7 @@ public partial class MainWindow : Window
             ? Visibility.Visible
             : Visibility.Collapsed;
         CollapsedAdministrationButton.Visibility = AdministrationButton.Visibility;
-        MemberButton.Content = $"{session.Member?.DisplayName ?? "Membre"}  |  Deconnexion";
+        MemberButton.Content = session.Member?.DisplayName ?? "Membre";
         StaySignedInCheckBox.IsChecked = session.StaySignedIn;
         trayIcon = new System.Windows.Forms.NotifyIcon
         {
@@ -54,6 +54,14 @@ public partial class MainWindow : Window
 
     private async void OnLoaded(object sender, RoutedEventArgs e)
     {
+        try
+        {
+            var member = await memberApiClient.GetProfileAsync();
+            session.UpdateMember(member);
+            MemberButton.Content = member.DisplayName;
+        }
+        catch (HttpRequestException) { }
+
         DiscoveryTitlePlaceholder.Text = $"Exemple : {SearchExamples[Random.Shared.Next(SearchExamples.Length)]}";
         HiddenTitleSearchPlaceholder.Text = $"Exemple : {SearchExamples[Random.Shared.Next(SearchExamples.Length)]}";
         UpdateDiscoveryTitlePlaceholder();
@@ -73,6 +81,15 @@ public partial class MainWindow : Window
         allowClose = true;
         trayIcon.Dispose();
         Close();
+    }
+
+    private async void CopyMemberId_Click(object sender, RoutedEventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(session.Member?.PublicId)) return;
+        System.Windows.Clipboard.SetText(session.Member.PublicId);
+        CopyIdNotification.Visibility = Visibility.Visible;
+        await Task.Delay(1800);
+        CopyIdNotification.Visibility = Visibility.Collapsed;
     }
 
     private void OnClosing(object? sender, CancelEventArgs e)
@@ -173,8 +190,8 @@ public partial class MainWindow : Window
         SidebarBrand.Visibility = isSidebarCollapsed ? Visibility.Collapsed : Visibility.Visible;
         ExpandedNavigation.Visibility = isSidebarCollapsed ? Visibility.Collapsed : Visibility.Visible;
         CollapsedNavigation.Visibility = isSidebarCollapsed ? Visibility.Visible : Visibility.Collapsed;
-        MemberButton.Visibility = isSidebarCollapsed ? Visibility.Collapsed : Visibility.Visible;
-        CollapsedMemberButton.Visibility = isSidebarCollapsed ? Visibility.Visible : Visibility.Collapsed;
+        ExpandedAccountArea.Visibility = isSidebarCollapsed ? Visibility.Collapsed : Visibility.Visible;
+        CollapsedAccountArea.Visibility = isSidebarCollapsed ? Visibility.Visible : Visibility.Collapsed;
         var rotation = new DoubleAnimation
         {
             To = isSidebarCollapsed ? 180 : 0,

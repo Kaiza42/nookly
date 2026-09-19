@@ -20,7 +20,8 @@ public static class AuthenticationEndpoints
         group.MapPost("/reset-password", ResetPasswordAsync).AllowAnonymous();
         group.MapGet("/me", (Nookly.Application.Abstractions.ICurrentMember current, NooklyDbContext db, CancellationToken token) =>
             db.Members.Where(member => member.Id == current.Id)
-                .Select(member => new MemberResponse(member.Id, member.Email, member.DisplayName, member.Role.ToString(), member.IsEmailConfirmed))
+                .Select(member => new MemberResponse(member.Id, member.Email, member.DisplayName,
+                    member.Role.ToString(), member.IsEmailConfirmed, member.PublicId))
                 .SingleAsync(token)).RequireAuthorization();
         return endpoints;
     }

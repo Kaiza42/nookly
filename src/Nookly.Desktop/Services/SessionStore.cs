@@ -13,6 +13,7 @@ public sealed class SessionStore
     public MemberResponse? Member { get; private set; }
     public string RememberedEmail { get; private set; } = string.Empty;
     public bool StaySignedIn { get; private set; }
+    private DateTimeOffset? expiresAtUtc;
 
     public void Load()
     {
@@ -29,6 +30,7 @@ public sealed class SessionStore
             {
                 AccessToken = saved.AccessToken;
                 Member = saved.Member;
+                expiresAtUtc = saved.ExpiresAtUtc;
                 StaySignedIn = true;
             }
         }
@@ -39,6 +41,7 @@ public sealed class SessionStore
     {
         AccessToken = response.AccessToken;
         Member = response.Member;
+        expiresAtUtc = response.ExpiresAtUtc;
         StaySignedIn = staySignedIn;
         Directory.CreateDirectory(directory);
         File.WriteAllText(Path.Combine(directory, "email.txt"), response.Member.Email);
@@ -57,7 +60,18 @@ public sealed class SessionStore
         if (!value) ClearSavedToken();
     }
 
-    public void ClearToken() { AccessToken = null; Member = null; StaySignedIn = false; ClearSavedToken(); }
+    public void UpdateMember(MemberResponse member)
+    {
+        Member = member;
+        if (!StaySignedIn || AccessToken is null || expiresAtUtc is null) return;
+        var sessionPath = Path.Combine(directory, "session.dat");
+        var json = JsonSerializer.Serialize(new SavedSession(
+            AccessToken, expiresAtUtc.Value, member, 1));
+        File.WriteAllBytes(sessionPath, ProtectedData.Protect(
+            Encoding.UTF8.GetBytes(json), null, DataProtectionScope.CurrentUser));
+    }
+
+    public void ClearToken() { AccessToken = null; Member = null; expiresAtUtc = null; StaySignedIn = false; ClearSavedToken(); }
     private void ClearSavedToken() { var path = Path.Combine(directory, "session.dat"); if (File.Exists(path)) File.Delete(path); }
     private sealed record SavedSession(string AccessToken, DateTimeOffset ExpiresAtUtc, MemberResponse Member, int Version = 0);
 }

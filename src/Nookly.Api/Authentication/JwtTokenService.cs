@@ -29,6 +29,7 @@ public sealed class JwtTokenService(IConfiguration configuration)
         return new AuthenticationResponse(
             new JwtSecurityTokenHandler().WriteToken(token),
             expires,
-            new MemberResponse(member.Id, member.Email, member.DisplayName, member.Role.ToString(), member.IsEmailConfirmed));
+            new MemberResponse(member.Id, member.Email, member.DisplayName, member.Role.ToString(),
+                member.IsEmailConfirmed, member.PublicId));
     }
 }
