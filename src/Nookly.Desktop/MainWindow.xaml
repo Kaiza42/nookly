@@ -93,6 +93,11 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style x:Key="LogoutButton" TargetType="Button" BasedOn="{StaticResource AccountButton}">
+            <Setter Property="Height" Value="32" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="#AEB7C2" />
+        </Style>
         <Style x:Key="CleanExpander" TargetType="Expander">
             <Setter Property="Template">
                 <Setter.Value>
@@ -582,25 +587,24 @@
                     <Button x:Name="MemberButton" Click="CopyMemberId_Click"
                             Style="{StaticResource AccountButton}" ToolTip="Copier mon identifiant" />
                     <Button Click="Logout_Click" Content="Se deconnecter" Margin="0,4,0,0"
-                            Height="32" Padding="11,0" HorizontalContentAlignment="Left"
-                            Background="Transparent" BorderThickness="0" Foreground="#AEB7C2"
-                            Cursor="Hand" FocusVisualStyle="{x:Null}" />
+                            Style="{StaticResource LogoutButton}" />
                 </StackPanel>
                 <StackPanel x:Name="CollapsedAccountArea" Grid.Row="2" Visibility="Collapsed" Margin="10,5">
                     <Button Click="CopyMemberId_Click" Content="&#xE77B;" ToolTip="Copier mon identifiant"
                             Style="{StaticResource AccountButton}" HorizontalContentAlignment="Center"
                             Padding="0" FontFamily="Segoe MDL2 Assets" FontSize="17" />
                     <Button Click="Logout_Click" Content="&#xE8AC;" ToolTip="Se deconnecter"
-                            Margin="0,4,0,0" Height="34" Padding="0" Background="Transparent"
-                            BorderThickness="0" Foreground="#B8C0CC" FontFamily="Segoe MDL2 Assets"
-                            FontSize="17" Cursor="Hand" FocusVisualStyle="{x:Null}" />
+                            Margin="0,4,0,0" Height="34" Padding="0"
+                            Style="{StaticResource LogoutButton}" HorizontalContentAlignment="Center"
+                            FontFamily="Segoe MDL2 Assets" FontSize="17" />
                 </StackPanel>
-                <Border x:Name="CopyIdNotification" Grid.Row="2" Margin="12,0,12,88"
-                        Padding="9,5" Background="#DDF0E7" CornerRadius="5"
-                        VerticalAlignment="Bottom" Visibility="Collapsed">
-                    <TextBlock Text="Identifiant copi&#xE9;" Foreground="#286C53" FontSize="11"
-                               HorizontalAlignment="Center" />
-                </Border>
+                <Popup x:Name="CopyIdPopup" Placement="Top" VerticalOffset="-7"
+                       AllowsTransparency="True" StaysOpen="True">
+                    <Border Padding="11,7" Background="#E7ECE9" BorderBrush="#BAC7C1"
+                            BorderThickness="1" CornerRadius="6">
+                        <TextBlock Text="Identifiant copi&#xE9;" Foreground="#34423C" FontSize="11" />
+                    </Border>
+                </Popup>
             </Grid>
         </Border>
 

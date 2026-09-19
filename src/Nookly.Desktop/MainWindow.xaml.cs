@@ -87,9 +87,10 @@ public partial class MainWindow : Window
     {
         if (string.IsNullOrWhiteSpace(session.Member?.PublicId)) return;
         System.Windows.Clipboard.SetText(session.Member.PublicId);
-        CopyIdNotification.Visibility = Visibility.Visible;
+        CopyIdPopup.PlacementTarget = sender as UIElement;
+        CopyIdPopup.IsOpen = true;
         await Task.Delay(1800);
-        CopyIdNotification.Visibility = Visibility.Collapsed;
+        CopyIdPopup.IsOpen = false;
     }
 
     private void OnClosing(object? sender, CancelEventArgs e)
