@@ -555,7 +555,7 @@
         </DataTemplate>
     </Window.Resources>
 
-    <Grid>
+    <Grid x:Name="MainRoot">
         <Grid.ColumnDefinitions>
             <ColumnDefinition x:Name="SidebarColumn" Width="220" />
             <ColumnDefinition Width="*" />
@@ -1535,6 +1535,49 @@
                     </StackPanel>
                 </Border>
             </Grid>
+        </Grid>
+        <Grid x:Name="CloseConfirmationOverlay" Grid.ColumnSpan="2" Panel.ZIndex="100"
+              Background="#7A11161C" Visibility="Collapsed">
+            <Border Width="430" Padding="24" Background="#F8F9FA"
+                    BorderBrush="#D5DDD9" BorderThickness="1" CornerRadius="8"
+                    HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="32" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Fermer Nookly" FontSize="20" FontWeight="SemiBold"
+                                   VerticalAlignment="Center" />
+                        <Button Grid.Column="1" Content="&#xE711;" Click="CancelClose_Click"
+                                Width="30" Height="30" Background="Transparent" BorderThickness="0"
+                                FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="#68727D"
+                                Cursor="Hand" FocusVisualStyle="{x:Null}" ToolTip="Annuler" />
+                    </Grid>
+                    <StackPanel Grid.Row="1" Margin="0,18,0,22">
+                        <TextBlock Text="Garder Nookly actif pres de l'horloge ?"
+                                   FontSize="15" FontWeight="SemiBold" />
+                        <TextBlock Text="Tu pourras le rouvrir depuis la zone de notification."
+                                   Margin="0,7,0,0" Foreground="#65717B" TextWrapping="Wrap" />
+                    </StackPanel>
+                    <Grid Grid.Row="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="1" Content="Quitter completement" Click="ConfirmFullExit_Click"
+                                Style="{StaticResource SoftButton}" Height="36" Margin="0,0,9,0" />
+                        <Button Grid.Column="2" Content="Garder en arriere-plan" Click="ConfirmTray_Click"
+                                Style="{StaticResource PrimaryButton}" Height="36" />
+                    </Grid>
+                </Grid>
+            </Border>
         </Grid>
     </Grid>
 </Window>

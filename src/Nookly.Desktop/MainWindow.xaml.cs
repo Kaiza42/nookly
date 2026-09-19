@@ -114,27 +114,29 @@ public partial class MainWindow : Window
     private void OnClosing(object? sender, CancelEventArgs e)
     {
         if (allowClose) return;
-
-        var result = System.Windows.MessageBox.Show(
-            "Voulez-vous garder Nookly dans la zone de notification ?\n\n" +
-            "Oui : masquer pres de l'horloge\nNon : fermer completement",
-            "Fermer Nookly",
-            MessageBoxButton.YesNo,
-            MessageBoxImage.Question);
-
-        if (result != MessageBoxResult.Yes)
-        {
-            trayIcon.Dispose();
-            activityTimer.Stop();
-            return;
-        }
-
         e.Cancel = true;
+        CloseConfirmationOverlay.Visibility = Visibility.Visible;
+    }
+
+    private void CancelClose_Click(object sender, RoutedEventArgs e) =>
+        CloseConfirmationOverlay.Visibility = Visibility.Collapsed;
+
+    private void ConfirmTray_Click(object sender, RoutedEventArgs e)
+    {
+        CloseConfirmationOverlay.Visibility = Visibility.Collapsed;
         Hide();
         ShowInTaskbar = false;
         trayIcon.Visible = true;
         trayIcon.ShowBalloonTip(1500, "Nookly", "Nookly continue de fonctionner ici.",
             System.Windows.Forms.ToolTipIcon.Info);
+    }
+
+    private void ConfirmFullExit_Click(object sender, RoutedEventArgs e)
+    {
+        allowClose = true;
+        activityTimer.Stop();
+        trayIcon.Dispose();
+        Close();
     }
 
     private System.Windows.Forms.ContextMenuStrip CreateTrayMenu()
