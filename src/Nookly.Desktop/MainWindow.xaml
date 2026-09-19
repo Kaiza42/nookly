@@ -651,6 +651,8 @@
                         <StackPanel>
                             <Button Content="Quitter Nookly" Click="ExitApplication_Click"
                                     Style="{StaticResource AccountButton}" />
+                            <Button Content="Se deconnecter" Click="LogoutOnly_Click"
+                                    Style="{StaticResource AccountButton}" />
                             <Button Content="Se deconnecter et quitter" Click="LogoutAndExit_Click"
                                     Style="{StaticResource AccountButton}" Foreground="#E4B4B0" />
                         </StackPanel>
@@ -658,9 +660,9 @@
                 </Popup>
                 <Popup x:Name="CopyIdPopup" Placement="Top" VerticalOffset="-7"
                        AllowsTransparency="True" StaysOpen="True">
-                    <Border Padding="11,7" Background="#E7ECE9" BorderBrush="#BAC7C1"
+                    <Border Padding="11,7" Background="#343B43" BorderBrush="#4A545E"
                             BorderThickness="1" CornerRadius="6">
-                        <TextBlock Text="Identifiant copi&#xE9;" Foreground="#34423C" FontSize="11" />
+                        <TextBlock Text="Identifiant copi&#xE9;" Foreground="#E6ECE9" FontSize="11" />
                     </Border>
                 </Popup>
             </Grid>

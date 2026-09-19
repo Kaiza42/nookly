@@ -79,6 +79,17 @@ public partial class MainWindow : Window
 
     private void ExitApplication_Click(object sender, RoutedEventArgs e) => ExitApplication(false);
 
+    private void LogoutOnly_Click(object sender, RoutedEventArgs e)
+    {
+        PowerMenuPopup.IsOpen = false;
+        session.ClearToken();
+        activityTimer.Stop();
+        ((App)System.Windows.Application.Current).ShowLoginWindow();
+        allowClose = true;
+        trayIcon.Dispose();
+        Close();
+    }
+
     private void LogoutAndExit_Click(object sender, RoutedEventArgs e) => ExitApplication(true);
 
     private void ExitApplication(bool logout)
