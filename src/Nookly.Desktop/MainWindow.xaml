@@ -266,21 +266,10 @@
             <Setter Property="BorderBrush" Value="#DCE5E1" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="CornerRadius" Value="8" />
-            <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
-            <Setter Property="RenderTransform">
-                <Setter.Value>
-                    <ScaleTransform ScaleX="1" ScaleY="1" />
-                </Setter.Value>
-            </Setter>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Panel.ZIndex" Value="10" />
                     <Setter Property="BorderBrush" Value="#C6D7CF" />
-                    <Setter Property="RenderTransform">
-                        <Setter.Value>
-                            <ScaleTransform ScaleX="1.004" ScaleY="1.004" />
-                        </Setter.Value>
-                    </Setter>
                     <Setter Property="Effect">
                         <Setter.Value>
                             <DropShadowEffect Color="#49675A" BlurRadius="18"
