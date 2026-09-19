@@ -374,7 +374,8 @@
                 </TextBlock>
                 <TextBlock Text="Synopsis" Margin="0,24,0,0" FontSize="16" FontWeight="SemiBold" />
                 <TextBlock Text="{Binding Description}" Margin="0,8,0,0" Foreground="#4D5967"
-                           LineHeight="21" TextWrapping="Wrap" />
+                           LineHeight="21" TextWrapping="Wrap" MaxWidth="1050"
+                           HorizontalAlignment="Left" />
                 <Button Content="Voir la bande-annonce" Command="{Binding DataContext.OpenTrailerCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                         Style="{StaticResource PrimaryButton}" HorizontalAlignment="Left" Margin="0,18,0,0"
                         Visibility="{Binding HasTrailer, Converter={StaticResource BoolToVisibility}}" />
@@ -419,7 +420,8 @@
                                     <TextBlock Text="{Binding ProgressLabel}" Margin="0,5,0,0"
                                                Foreground="#286C53" FontWeight="SemiBold" />
                                     <TextBlock Text="{Binding Description}" Margin="0,8,0,14" Foreground="#4D5967"
-                                               TextWrapping="Wrap" />
+                                               TextWrapping="Wrap" MaxWidth="1050"
+                                               HorizontalAlignment="Left" />
                                     <ToggleButton Content="Saison vue" IsChecked="{Binding IsWatched, Mode=TwoWay}"
                                                   Style="{StaticResource SeasonWatchedToggle}"
                                                   HorizontalAlignment="Left" Margin="0,0,0,14" />
@@ -428,6 +430,7 @@
                                              AcceptsReturn="True" TextWrapping="Wrap" MaxLength="4000"
                                              MinHeight="70" Padding="11,9" Margin="0,6,0,0"
                                              Style="{StaticResource RoundedTextBox}"
+                                             MaxWidth="900" HorizontalAlignment="Left"
                                              VerticalScrollBarVisibility="Auto" />
                                     <Button Content="Enregistrer la saison"
                                             Command="{Binding DataContext.SaveSeasonProgressCommand, RelativeSource={RelativeSource AncestorType=Window}}"
@@ -436,9 +439,9 @@
                                                   HorizontalAlignment="Stretch">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
-                                                <Border Style="{StaticResource HoverCardBorder}"
+                                                <Border Style="{StaticResource HoverCardBorder}" MaxWidth="1200"
                                                         Padding="14" Margin="6,5,8,9"
-                                                        HorizontalAlignment="Stretch">
+                                                        HorizontalAlignment="Left">
                                                     <Grid>
                                                         <Grid.ColumnDefinitions>
                                                             <ColumnDefinition Width="120" />
@@ -456,11 +459,12 @@
                                                                        Foreground="#69717D" FontSize="11" />
                                                             <TextBlock Text="{Binding Description}" Margin="0,5,0,0"
                                                                        Foreground="#4D5967" TextWrapping="Wrap"
+                                                                       MaxWidth="900" HorizontalAlignment="Left"
                                                                        MaxHeight="42" TextTrimming="CharacterEllipsis" />
                                                             <TextBox Text="{Binding PersonalNotes, UpdateSourceTrigger=PropertyChanged}"
                                                                      AcceptsReturn="True" TextWrapping="Wrap" MaxLength="4000"
                                                                      MinHeight="58" Padding="11,9" Margin="0,10,0,0"
-                                                                     HorizontalAlignment="Stretch"
+                                                                     MaxWidth="900" HorizontalAlignment="Left"
                                                                      Style="{StaticResource RoundedTextBox}"
                                                                      ToolTip="Note personnelle sur cet episode"
                                                                      LostKeyboardFocus="EpisodeNote_LostKeyboardFocus"
@@ -985,7 +989,8 @@
                 <Button Content="Retour aux resultats" Command="{Binding BackToDiscoverCommand}"
                         HorizontalAlignment="Left" Height="34" Padding="12,0"
                         Background="White" BorderBrush="#D7DBE1" />
-                <ScrollViewer Grid.Row="1" Margin="0,24,0,0" VerticalScrollBarVisibility="Auto">
+                <ScrollViewer Grid.Row="1" Margin="0,24,0,0" VerticalScrollBarVisibility="Auto"
+                              Focusable="False" FocusVisualStyle="{x:Null}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="260" />
@@ -1027,7 +1032,8 @@
                 </Grid.RowDefinitions>
                 <Button Content="Retour a la bibliotheque" Command="{Binding BackToLibraryCommand}"
                         HorizontalAlignment="Left" Style="{StaticResource SoftButton}" />
-                <ScrollViewer Grid.Row="1" Margin="0,22,0,0" VerticalScrollBarVisibility="Auto">
+                <ScrollViewer Grid.Row="1" Margin="0,22,0,0" VerticalScrollBarVisibility="Auto"
+                              Focusable="False" FocusVisualStyle="{x:Null}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="260" />
