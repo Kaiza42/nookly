@@ -6,13 +6,11 @@ public sealed class UserDialogService : IUserDialogService
 {
     public bool ConfirmDelete(string title)
     {
-        var result = System.Windows.MessageBox.Show(
-            $"Supprimer '{title}' de la bibliotheque ?",
-            "Confirmer la suppression",
-            MessageBoxButton.YesNo,
-            MessageBoxImage.Warning);
-
-        return result == MessageBoxResult.Yes;
+        var dialog = new ConfirmationWindow(title)
+        {
+            Owner = System.Windows.Application.Current.MainWindow
+        };
+        return dialog.ShowDialog() == true;
     }
 
     public bool ConfirmBankMonthReset() => System.Windows.MessageBox.Show(
