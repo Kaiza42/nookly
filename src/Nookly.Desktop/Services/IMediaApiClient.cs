@@ -12,10 +12,11 @@ public interface IMediaApiClient
 
     Task<IReadOnlyList<MediaSearchResultResponse>> SearchMediaAsync(
         string? query,
-        MediaType? type = null,
-        int? genreId = null,
+        IReadOnlyCollection<MediaType>? types = null,
+        IReadOnlyCollection<int>? genreIds = null,
         int? year = null,
         string? actor = null,
+        IReadOnlyCollection<string>? countries = null,
         CancellationToken cancellationToken = default);
 
     Task<MediaDetailsResponse> GetMediaDetailsAsync(

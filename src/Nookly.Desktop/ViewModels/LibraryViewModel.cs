@@ -50,7 +50,6 @@ public partial class LibraryViewModel(
 
     public IReadOnlyList<DiscoveryTypeOption> DiscoveryMediaTypes { get; } =
     [
-        new("Type", null),
         new("Films", MediaType.Movie),
         new("Series", MediaType.TvSeries),
         new("Animes", MediaType.Anime)
@@ -58,7 +57,6 @@ public partial class LibraryViewModel(
 
     public IReadOnlyList<GenreOption> DiscoveryGenres { get; } =
     [
-        new("Genre", null),
         new("Action", 28),
         new("Animation", 16),
         new("Aventure", 12),
@@ -71,6 +69,18 @@ public partial class LibraryViewModel(
         new("Romance", 10749),
         new("Science-fiction", 878),
         new("Thriller", 53)
+    ];
+
+    public IReadOnlyList<CountryOption> DiscoveryCountries { get; } =
+    [
+        new("France", "FR"),
+        new("Etats-Unis", "US"),
+        new("Japon", "JP"),
+        new("Coree du Sud", "KR"),
+        new("Royaume-Uni", "GB"),
+        new("Canada", "CA"),
+        new("Espagne", "ES"),
+        new("Allemagne", "DE")
     ];
 
     [ObservableProperty]
@@ -131,12 +141,6 @@ public partial class LibraryViewModel(
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SearchCommand))]
     private string searchQuery = string.Empty;
-
-    [ObservableProperty]
-    private DiscoveryTypeOption? selectedDiscoveryType;
-
-    [ObservableProperty]
-    private GenreOption? selectedDiscoveryGenre;
 
     [ObservableProperty]
     private string discoveryYear = string.Empty;
@@ -412,14 +416,43 @@ public partial class LibraryViewModel(
     [RelayCommand]
     private Task RefreshRecommendationsAsync() => LoadRecommendationsAsync();
 
+    [RelayCommand]
+    private async Task ToggleDiscoveryTypeAsync(DiscoveryTypeOption option)
+    {
+        option.IsSelected = !option.IsSelected;
+        await RefreshDiscoveryFiltersAsync();
+    }
+
+    [RelayCommand]
+    private async Task ToggleDiscoveryGenreAsync(GenreOption option)
+    {
+        option.IsSelected = !option.IsSelected;
+        await RefreshDiscoveryFiltersAsync();
+    }
+
+    [RelayCommand]
+    private async Task ToggleDiscoveryCountryAsync(CountryOption option)
+    {
+        option.IsSelected = !option.IsSelected;
+        await RefreshDiscoveryFiltersAsync();
+    }
+
+    private async Task RefreshDiscoveryFiltersAsync()
+    {
+        searchDebounceCancellation?.Cancel();
+        var version = ++searchVersion;
+        await ExecuteSearchAsync(SearchQuery.Trim(), version, CancellationToken.None);
+    }
+
     private async Task LoadRecommendationsAsync()
     {
         searchDebounceCancellation?.Cancel();
         SearchQuery = string.Empty;
         ActorQuery = string.Empty;
         DiscoveryYear = string.Empty;
-        SelectedDiscoveryType = DiscoveryMediaTypes[0];
-        SelectedDiscoveryGenre = DiscoveryGenres[0];
+        foreach (var option in DiscoveryMediaTypes) option.IsSelected = false;
+        foreach (var option in DiscoveryGenres) option.IsSelected = false;
+        foreach (var option in DiscoveryCountries) option.IsSelected = false;
         var version = ++searchVersion;
         await ExecuteSearchAsync(string.Empty, version, CancellationToken.None);
     }
@@ -659,10 +692,11 @@ public partial class LibraryViewModel(
             int? year = int.TryParse(DiscoveryYear, out var parsedYear) ? parsedYear : null;
             var results = await mediaApiClient.SearchMediaAsync(
                 query,
-                SelectedDiscoveryType?.Value,
-                SelectedDiscoveryGenre?.Value,
+                DiscoveryMediaTypes.Where(item => item.IsSelected).Select(item => item.Value).ToArray(),
+                DiscoveryGenres.Where(item => item.IsSelected).Select(item => item.Value).ToArray(),
                 year,
                 ActorQuery,
+                DiscoveryCountries.Where(item => item.IsSelected).Select(item => item.Code).ToArray(),
                 cancellationToken);
             if (version != searchVersion)
             {

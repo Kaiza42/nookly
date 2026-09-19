@@ -148,6 +148,26 @@ public sealed class LibraryViewModelTests
     }
 
     [Fact]
+    public async Task DiscoveryFilters_AllowMultipleTypesGenresAndCountries()
+    {
+        var apiClient = new StubMediaApiClient();
+        var viewModel = CreateViewModel(apiClient);
+
+        await viewModel.ToggleDiscoveryTypeCommand.ExecuteAsync(viewModel.DiscoveryMediaTypes[0]);
+        await viewModel.ToggleDiscoveryTypeCommand.ExecuteAsync(viewModel.DiscoveryMediaTypes[1]);
+        await viewModel.ToggleDiscoveryGenreCommand.ExecuteAsync(
+            viewModel.DiscoveryGenres.Single(item => item.Label == "Thriller"));
+        await viewModel.ToggleDiscoveryGenreCommand.ExecuteAsync(
+            viewModel.DiscoveryGenres.Single(item => item.Label == "Drame"));
+        await viewModel.ToggleDiscoveryCountryCommand.ExecuteAsync(
+            viewModel.DiscoveryCountries.Single(item => item.Code == "FR"));
+
+        Assert.Equal([MediaType.Movie, MediaType.TvSeries], apiClient.LastSearchTypes);
+        Assert.Equal([18, 53], apiClient.LastSearchGenreIds);
+        Assert.Equal(["FR"], apiClient.LastSearchCountries);
+    }
+
+    [Fact]
     public async Task LibrarySearch_FiltersOnlyExistingItems()
     {
         var viewModel = CreateViewModel(new StubMediaApiClient());
@@ -359,6 +379,9 @@ public sealed class LibraryViewModelTests
         public SetDiscoveryPreferenceRequest? LastPreferenceRequest { get; private set; }
         public IReadOnlyList<DiscoveryPreferenceResponse> DislikedPreferences { get; init; } = [];
         public IReadOnlyList<DiscoveryHistoryResponse> DiscoveryHistory { get; init; } = [];
+        public IReadOnlyCollection<MediaType> LastSearchTypes { get; private set; } = [];
+        public IReadOnlyCollection<int> LastSearchGenreIds { get; private set; } = [];
+        public IReadOnlyCollection<string> LastSearchCountries { get; private set; } = [];
         public bool RestorePreferenceCalled { get; private set; }
         public MediaDetailsResponse? Details { get; init; }
         public UpdateSeasonProgressRequest? LastSeasonProgressRequest { get; private set; }
@@ -372,12 +395,16 @@ public sealed class LibraryViewModelTests
 
         public Task<IReadOnlyList<MediaSearchResultResponse>> SearchMediaAsync(
             string? query,
-            MediaType? type = null,
-            int? genreId = null,
+            IReadOnlyCollection<MediaType>? types = null,
+            IReadOnlyCollection<int>? genreIds = null,
             int? year = null,
             string? actor = null,
+            IReadOnlyCollection<string>? countries = null,
             CancellationToken cancellationToken = default)
         {
+            LastSearchTypes = types ?? [];
+            LastSearchGenreIds = genreIds ?? [];
+            LastSearchCountries = countries ?? [];
             return SearchHandler?.Invoke(query ?? string.Empty, cancellationToken)
                    ?? Task.FromResult(SearchResults);
         }

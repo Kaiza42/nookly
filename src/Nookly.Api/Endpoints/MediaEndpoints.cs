@@ -31,10 +31,11 @@ public static class MediaEndpoints
 
         group.MapGet("/search", async (
             string? query,
-            ContractMediaType? type,
-            int? genreId,
+            string? types,
+            string? genreIds,
             int? year,
             string? actor,
+            string? countries,
             IExternalMediaSearch search,
             DiscoveryPreferenceService preferences,
             IMediaService mediaService,
@@ -47,9 +48,12 @@ public static class MediaEndpoints
 
             try
             {
-                var isUnfilteredDiscovery = string.IsNullOrWhiteSpace(query) && type is null &&
-                                            genreId is null && year is null &&
-                                            string.IsNullOrWhiteSpace(actor);
+                var selectedTypes = ParseMediaTypes(types);
+                var selectedGenreIds = ParseInts(genreIds);
+                var selectedCountries = ParseStrings(countries);
+                var isUnfilteredDiscovery = string.IsNullOrWhiteSpace(query) && selectedTypes.Count == 0 &&
+                                            selectedGenreIds.Count == 0 && year is null &&
+                                            string.IsNullOrWhiteSpace(actor) && selectedCountries.Count == 0;
                 IReadOnlyList<Nookly.Application.Search.MediaSearchResult> results;
                 if (isUnfilteredDiscovery)
                 {
@@ -62,10 +66,11 @@ public static class MediaEndpoints
                 {
                     results = await search.SearchAsync(
                         query,
-                        type is null ? null : (Nookly.Domain.Media.MediaType)type,
-                        genreId,
+                        selectedTypes.Select(item => (Nookly.Domain.Media.MediaType)item).ToArray(),
+                        selectedGenreIds,
                         year,
                         actor,
+                        selectedCountries,
                         cancellationToken);
                 }
                 var dislikedIds = await preferences.GetDislikedIdsAsync("tmdb", cancellationToken);
@@ -383,6 +388,27 @@ public static class MediaEndpoints
         item.ReleaseDate,
         item.CreatedAtUtc,
         item.UpdatedAtUtc);
+
+    private static IReadOnlyList<ContractMediaType> ParseMediaTypes(string? value) =>
+        ParseStrings(value)
+            .Select(item => Enum.TryParse<ContractMediaType>(item, true, out var parsed)
+                ? (ContractMediaType?)parsed
+                : null)
+            .OfType<ContractMediaType>()
+            .Distinct()
+            .ToArray();
+
+    private static IReadOnlyList<int> ParseInts(string? value) =>
+        ParseStrings(value)
+            .Select(item => int.TryParse(item, out var parsed) ? (int?)parsed : null)
+            .OfType<int>()
+            .Distinct()
+            .ToArray();
+
+    private static IReadOnlyList<string> ParseStrings(string? value) =>
+        string.IsNullOrWhiteSpace(value)
+            ? []
+            : value.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
     private static MediaDetailsResponse ToDetailsResponse(Nookly.Application.Details.MediaDetails details) => new(
         details.ExternalId,

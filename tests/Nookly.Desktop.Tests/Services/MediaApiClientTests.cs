@@ -116,10 +116,16 @@ public sealed class MediaApiClientTests
         };
         var client = new MediaApiClient(httpClient);
 
-        await client.SearchMediaAsync(null, MediaType.Movie, 18, 1999, "Tom Hanks");
+        await client.SearchMediaAsync(
+            null,
+            [MediaType.Movie, MediaType.TvSeries],
+            [18, 53],
+            1999,
+            "Tom Hanks",
+            ["FR", "US"]);
 
         Assert.Equal(
-            "http://localhost/api/media/search?type=Movie&genreId=18&year=1999&actor=Tom%20Hanks",
+            "http://localhost/api/media/search?types=Movie,TvSeries&genreIds=18,53&year=1999&actor=Tom%20Hanks&countries=FR,US",
             handler.LastRequestUri?.OriginalString);
     }
 

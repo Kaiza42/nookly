@@ -7,10 +7,11 @@ public interface IExternalMediaSearch
 {
     Task<IReadOnlyList<MediaSearchResult>> SearchAsync(
         string? query,
-        Nookly.Domain.Media.MediaType? type = null,
-        int? genreId = null,
+        IReadOnlyCollection<Nookly.Domain.Media.MediaType>? types = null,
+        IReadOnlyCollection<int>? genreIds = null,
         int? year = null,
         string? actor = null,
+        IReadOnlyCollection<string>? countries = null,
         CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<MediaSearchResult>> RecommendAsync(

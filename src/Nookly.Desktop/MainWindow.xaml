@@ -189,6 +189,40 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style x:Key="FilterTileButton" TargetType="Button">
+            <Setter Property="Height" Value="28" />
+            <Setter Property="Padding" Value="11,0" />
+            <Setter Property="Margin" Value="0,0,6,6" />
+            <Setter Property="Background" Value="#F5F7F6" />
+            <Setter Property="Foreground" Value="#46514C" />
+            <Setter Property="BorderBrush" Value="#D7E0DC" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="TileSurface" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="5">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
+                                              Margin="{TemplateBinding Padding}" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="TileSurface" Property="Background" Value="#E9EFEC" />
+                                <Setter TargetName="TileSurface" Property="BorderBrush" Value="#AFC6BB" />
+                            </Trigger>
+                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                <Setter TargetName="TileSurface" Property="Background" Value="#2A493D" />
+                                <Setter TargetName="TileSurface" Property="BorderBrush" Value="#2A493D" />
+                                <Setter Property="Foreground" Value="White" />
+                            </DataTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <Style x:Key="HoverCardBorder" TargetType="Border">
             <Setter Property="Background" Value="White" />
             <Setter Property="BorderBrush" Value="#DCE5E1" />
@@ -704,48 +738,56 @@
                     <Button Grid.Column="1" Content="Rechercher" Command="{Binding SearchCommand}"
                             Style="{StaticResource PrimaryButton}" Height="34" Margin="10,0,0,0" />
                 </Grid>
-                <Border Grid.Row="3" Margin="0,8,0,0" Padding="7,4" Background="#F8FCFA"
+                <Border Grid.Row="3" Margin="0,8,0,0" Padding="12,10" Background="White"
                         Visibility="{Binding IsDiscoveryBrowseSelected, Converter={StaticResource BoolToVisibility}}"
-                        BorderBrush="#C8DDD4" BorderThickness="1" CornerRadius="7">
-                    <WrapPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,12,0">
-                            <TextBlock Text="Type" Margin="0,0,6,0" Foreground="#4D5967"
-                                       FontSize="10" VerticalAlignment="Center" />
-                            <Border Background="White" BorderBrush="#B9D4C8" BorderThickness="1" CornerRadius="5">
-                                <ComboBox ItemsSource="{Binding DiscoveryMediaTypes}"
-                                          SelectedItem="{Binding SelectedDiscoveryType}"
-                                          DisplayMemberPath="Label" Width="96" Height="22" Padding="4,0"
-                                          Background="White" BorderThickness="0"
-                                          HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
-                            </Border>
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,12,0">
-                            <TextBlock Text="Genre" Margin="0,0,6,0" Foreground="#4D5967"
-                                       FontSize="10" VerticalAlignment="Center" />
-                            <Border Background="White" BorderBrush="#B9D4C8" BorderThickness="1" CornerRadius="5">
-                                <ComboBox ItemsSource="{Binding DiscoveryGenres}"
-                                          SelectedItem="{Binding SelectedDiscoveryGenre}"
-                                          DisplayMemberPath="Label" Width="96" Height="22" Padding="4,0"
-                                          Background="White" BorderThickness="0"
-                                          HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
-                            </Border>
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,12,0">
-                            <TextBlock Text="Annee" Margin="0,0,6,0" Foreground="#4D5967"
-                                       FontSize="10" VerticalAlignment="Center" />
+                        BorderBrush="#D9E2DE" BorderThickness="1" CornerRadius="7">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="58" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="Types" Foreground="#53605A" FontWeight="SemiBold" Margin="0,6,8,0" />
+                        <ItemsControl Grid.Column="1" ItemsSource="{Binding DiscoveryMediaTypes}">
+                            <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate><DataTemplate>
+                                <Button Content="{Binding Label}" Command="{Binding DataContext.ToggleDiscoveryTypeCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        CommandParameter="{Binding}" Style="{StaticResource FilterTileButton}" />
+                            </DataTemplate></ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock Grid.Row="1" Text="Genres" Foreground="#53605A" FontWeight="SemiBold" Margin="0,6,8,0" />
+                        <ItemsControl Grid.Row="1" Grid.Column="1" ItemsSource="{Binding DiscoveryGenres}">
+                            <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate><DataTemplate>
+                                <Button Content="{Binding Label}" Command="{Binding DataContext.ToggleDiscoveryGenreCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        CommandParameter="{Binding}" Style="{StaticResource FilterTileButton}" />
+                            </DataTemplate></ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock Grid.Row="2" Text="Pays" Foreground="#53605A" FontWeight="SemiBold" Margin="0,6,8,0" />
+                        <ItemsControl Grid.Row="2" Grid.Column="1" ItemsSource="{Binding DiscoveryCountries}">
+                            <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate><DataTemplate>
+                                <Button Content="{Binding Label}" Command="{Binding DataContext.ToggleDiscoveryCountryCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        CommandParameter="{Binding}" Style="{StaticResource FilterTileButton}" />
+                            </DataTemplate></ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Margin="0,2,0,0">
+                            <TextBlock Text="Annee" Margin="0,0,7,0" Foreground="#53605A" VerticalAlignment="Center" />
                             <TextBox Text="{Binding DiscoveryYear, UpdateSourceTrigger=PropertyChanged}"
-                                     Width="60" Height="22" Padding="5,1" TextAlignment="Center"
+                                     Width="72" Height="28" Padding="7,1" TextAlignment="Center"
                                      VerticalContentAlignment="Center" ToolTip="Par exemple 2024"
                                      Style="{StaticResource RoundedTextBox}" />
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Acteur" Margin="0,0,6,0" Foreground="#4D5967"
-                                       FontSize="10" VerticalAlignment="Center" />
+                            <TextBlock Text="Acteur" Margin="16,0,7,0" Foreground="#53605A" VerticalAlignment="Center" />
                             <TextBox Text="{Binding ActorQuery, UpdateSourceTrigger=PropertyChanged}"
-                                     Width="135" Height="22" Padding="5,1" TextAlignment="Center"
+                                     Width="170" Height="28" Padding="7,1" TextAlignment="Center"
                                      VerticalContentAlignment="Center" Style="{StaticResource RoundedTextBox}" />
                         </StackPanel>
-                    </WrapPanel>
+                    </Grid>
                 </Border>
                 <StackPanel Grid.Row="4"
                             Visibility="{Binding IsDiscoveryBrowseSelected, Converter={StaticResource BoolToVisibility}}">

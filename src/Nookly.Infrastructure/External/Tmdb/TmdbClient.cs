@@ -139,16 +139,18 @@ public sealed class TmdbClient(HttpClient httpClient, IOptions<TmdbOptions> opti
 
     public async Task<IReadOnlyList<MediaSearchResult>> SearchAsync(
         string? query,
-        MediaType? type = null,
-        int? genreId = null,
+        IReadOnlyCollection<MediaType>? types = null,
+        IReadOnlyCollection<int>? genreIds = null,
         int? year = null,
         string? actor = null,
+        IReadOnlyCollection<string>? countries = null,
         CancellationToken cancellationToken = default)
     {
         var token = GetToken();
 
-        if (!string.IsNullOrWhiteSpace(query) && type is null && genreId is null && year is null &&
-            string.IsNullOrWhiteSpace(actor))
+        if (!string.IsNullOrWhiteSpace(query) && types is not { Count: > 0 } &&
+            genreIds is not { Count: > 0 } && year is null &&
+            string.IsNullOrWhiteSpace(actor) && countries is not { Count: > 0 })
         {
             var payload = await GetAsync<TmdbSearchResponse>(
                 $"search/multi?query={Uri.EscapeDataString(query.Trim())}&include_adult=false&language=fr-FR&page=1",
@@ -169,39 +171,45 @@ public sealed class TmdbClient(HttpClient httpClient, IOptions<TmdbOptions> opti
             return [];
         }
 
-        var mediaKinds = type switch
-        {
-            MediaType.Movie => new[] { "movie" },
-            MediaType.TvSeries or MediaType.Anime => new[] { "tv" },
-            _ => new[] { "movie", "tv" }
-        };
-        var isRandomDiscovery = string.IsNullOrWhiteSpace(query) && type is null &&
-                                genreId is null && year is null && actorId is null;
+        var selectedTypes = types is { Count: > 0 }
+            ? types.Distinct().ToArray()
+            : [MediaType.Movie, MediaType.TvSeries];
+        var selectedGenres = genreIds?.Distinct().ToArray() ?? [];
+        var selectedCountries = countries?
+            .Where(item => !string.IsNullOrWhiteSpace(item))
+            .Select(item => item.Trim().ToUpperInvariant())
+            .Distinct(StringComparer.Ordinal)
+            .ToArray() ?? [];
+        var isRandomDiscovery = string.IsNullOrWhiteSpace(query) && types is not { Count: > 0 } &&
+                                selectedGenres.Length == 0 && year is null && actorId is null &&
+                                selectedCountries.Length == 0;
         var page = isRandomDiscovery ? Random.Shared.Next(1, 11) : 1;
 
         var results = new List<MediaSearchResult>();
-        foreach (var mediaKind in mediaKinds)
+        foreach (var selectedType in selectedTypes)
         {
+            var mediaKind = selectedType == MediaType.Movie ? "movie" : "tv";
             var parameters = new List<string>
             {
                 "include_adult=false", "language=fr-FR", $"page={page}", "sort_by=popularity.desc"
             };
-            var genres = new List<int>();
-            if (genreId is not null) genres.Add(MapGenreId(genreId.Value, mediaKind));
+            var genres = selectedGenres.Select(genreId => MapGenreId(genreId, mediaKind)).Distinct().ToList();
             if (year is not null) parameters.Add(mediaKind == "movie" ? $"primary_release_year={year}" : $"first_air_date_year={year}");
             if (actorId is not null) parameters.Add($"with_cast={actorId}");
-            if (type == MediaType.Anime)
+            if (selectedCountries.Length > 0) parameters.Add($"with_origin_country={string.Join('|', selectedCountries)}");
+            if (selectedType == MediaType.Anime)
             {
                 if (!genres.Contains(16)) genres.Add(16);
                 parameters.Add("with_original_language=ja");
             }
-            if (genres.Count > 0) parameters.Add($"with_genres={string.Join(',', genres)}");
+            if (genres.Count > 0) parameters.Add($"with_genres={string.Join('|', genres)}");
 
             var payload = await GetAsync<TmdbSearchResponse>(
                 $"discover/{mediaKind}?{string.Join('&', parameters)}",
                 token,
                 cancellationToken);
-            results.AddRange(payload?.Results.Select(item => MapResult(item, mediaKind)) ?? []);
+            results.AddRange(payload?.Results.Select(item =>
+                MapResult(item, mediaKind) with { Type = selectedType }) ?? []);
         }
 
         var titleQuery = query?.Trim();
@@ -214,6 +222,7 @@ public sealed class TmdbClient(HttpClient httpClient, IOptions<TmdbOptions> opti
         }
 
         var selectedResults = filteredResults
+            .DistinctBy(result => new { result.ExternalId, result.Type })
             .Take(12)
             .ToArray();
         return await AddCastAsync(selectedResults, token, cancellationToken);

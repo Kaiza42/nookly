@@ -27,18 +27,20 @@ public sealed class MediaApiClient(HttpClient httpClient) : IMediaApiClient
 
     public async Task<IReadOnlyList<MediaSearchResultResponse>> SearchMediaAsync(
         string? query,
-        MediaType? type = null,
-        int? genreId = null,
+        IReadOnlyCollection<MediaType>? types = null,
+        IReadOnlyCollection<int>? genreIds = null,
         int? year = null,
         string? actor = null,
+        IReadOnlyCollection<string>? countries = null,
         CancellationToken cancellationToken = default)
     {
         var parameters = new List<string>();
         if (!string.IsNullOrWhiteSpace(query)) parameters.Add($"query={Uri.EscapeDataString(query)}");
-        if (type is not null) parameters.Add($"type={type}");
-        if (genreId is not null) parameters.Add($"genreId={genreId}");
+        if (types is { Count: > 0 }) parameters.Add($"types={string.Join(',', types)}");
+        if (genreIds is { Count: > 0 }) parameters.Add($"genreIds={string.Join(',', genreIds)}");
         if (year is not null) parameters.Add($"year={year}");
         if (!string.IsNullOrWhiteSpace(actor)) parameters.Add($"actor={Uri.EscapeDataString(actor)}");
+        if (countries is { Count: > 0 }) parameters.Add($"countries={string.Join(',', countries)}");
         using var response = await httpClient.GetAsync(
             $"api/media/search?{string.Join('&', parameters)}",
             cancellationToken);
