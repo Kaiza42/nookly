@@ -122,10 +122,11 @@ public sealed class MediaApiClientTests
             [18, 53],
             1999,
             "Tom Hanks",
+            "Denis Villeneuve",
             ["FR", "US"]);
 
         Assert.Equal(
-            "http://localhost/api/media/search?types=Movie,TvSeries&genreIds=18,53&year=1999&actor=Tom%20Hanks&countries=FR,US",
+            "http://localhost/api/media/search?types=Movie,TvSeries&genreIds=18,53&year=1999&actor=Tom%20Hanks&director=Denis%20Villeneuve&countries=FR,US",
             handler.LastRequestUri?.OriginalString);
     }
 

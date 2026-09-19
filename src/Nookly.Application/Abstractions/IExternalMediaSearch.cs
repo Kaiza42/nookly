@@ -11,6 +11,7 @@ public interface IExternalMediaSearch
         IReadOnlyCollection<int>? genreIds = null,
         int? year = null,
         string? actor = null,
+        string? director = null,
         IReadOnlyCollection<string>? countries = null,
         CancellationToken cancellationToken = default);
 

@@ -149,6 +149,9 @@ public partial class LibraryViewModel(
     private string actorQuery = string.Empty;
 
     [ObservableProperty]
+    private string directorQuery = string.Empty;
+
+    [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SearchCommand))]
     [NotifyCanExecuteChangedFor(nameof(AddSearchResultCommand))]
     private bool isSearching;
@@ -449,6 +452,7 @@ public partial class LibraryViewModel(
         searchDebounceCancellation?.Cancel();
         SearchQuery = string.Empty;
         ActorQuery = string.Empty;
+        DirectorQuery = string.Empty;
         DiscoveryYear = string.Empty;
         foreach (var option in DiscoveryMediaTypes) option.IsSelected = false;
         foreach (var option in DiscoveryGenres) option.IsSelected = false;
@@ -696,6 +700,7 @@ public partial class LibraryViewModel(
                 DiscoveryGenres.Where(item => item.IsSelected).Select(item => item.Value).ToArray(),
                 year,
                 ActorQuery,
+                DirectorQuery,
                 DiscoveryCountries.Where(item => item.IsSelected).Select(item => item.Code).ToArray(),
                 cancellationToken);
             if (version != searchVersion)

@@ -738,9 +738,12 @@
                     <Button Grid.Column="1" Content="Rechercher" Command="{Binding SearchCommand}"
                             Style="{StaticResource PrimaryButton}" Height="34" Margin="10,0,0,0" />
                 </Grid>
-                <Border Grid.Row="3" Margin="0,8,0,0" Padding="12,10" Background="White"
-                        Visibility="{Binding IsDiscoveryBrowseSelected, Converter={StaticResource BoolToVisibility}}"
-                        BorderBrush="#D9E2DE" BorderThickness="1" CornerRadius="7">
+                <Expander Grid.Row="3" Header="Filtres" IsExpanded="False" Margin="0,8,0,0"
+                          Foreground="#35423C" FontWeight="SemiBold"
+                          Visibility="{Binding IsDiscoveryBrowseSelected, Converter={StaticResource BoolToVisibility}}"
+                          Style="{StaticResource CleanExpander}">
+                    <Border Margin="0,6,0,0" Padding="12,10" Background="White"
+                            BorderBrush="#D9E2DE" BorderThickness="1" CornerRadius="7">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="58" />
@@ -786,9 +789,14 @@
                             <TextBox Text="{Binding ActorQuery, UpdateSourceTrigger=PropertyChanged}"
                                      Width="170" Height="28" Padding="7,1" TextAlignment="Center"
                                      VerticalContentAlignment="Center" Style="{StaticResource RoundedTextBox}" />
+                            <TextBlock Text="Realisateur" Margin="16,0,7,0" Foreground="#53605A" VerticalAlignment="Center" />
+                            <TextBox Text="{Binding DirectorQuery, UpdateSourceTrigger=PropertyChanged}"
+                                     Width="170" Height="28" Padding="7,1" TextAlignment="Center"
+                                     VerticalContentAlignment="Center" Style="{StaticResource RoundedTextBox}" />
                         </StackPanel>
                     </Grid>
-                </Border>
+                    </Border>
+                </Expander>
                 <StackPanel Grid.Row="4"
                             Visibility="{Binding IsDiscoveryBrowseSelected, Converter={StaticResource BoolToVisibility}}">
                     <ProgressBar Height="3" Margin="0,12,0,0" IsIndeterminate="True"

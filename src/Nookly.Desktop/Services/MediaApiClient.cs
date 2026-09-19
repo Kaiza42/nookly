@@ -31,6 +31,7 @@ public sealed class MediaApiClient(HttpClient httpClient) : IMediaApiClient
         IReadOnlyCollection<int>? genreIds = null,
         int? year = null,
         string? actor = null,
+        string? director = null,
         IReadOnlyCollection<string>? countries = null,
         CancellationToken cancellationToken = default)
     {
@@ -40,6 +41,7 @@ public sealed class MediaApiClient(HttpClient httpClient) : IMediaApiClient
         if (genreIds is { Count: > 0 }) parameters.Add($"genreIds={string.Join(',', genreIds)}");
         if (year is not null) parameters.Add($"year={year}");
         if (!string.IsNullOrWhiteSpace(actor)) parameters.Add($"actor={Uri.EscapeDataString(actor)}");
+        if (!string.IsNullOrWhiteSpace(director)) parameters.Add($"director={Uri.EscapeDataString(director)}");
         if (countries is { Count: > 0 }) parameters.Add($"countries={string.Join(',', countries)}");
         using var response = await httpClient.GetAsync(
             $"api/media/search?{string.Join('&', parameters)}",

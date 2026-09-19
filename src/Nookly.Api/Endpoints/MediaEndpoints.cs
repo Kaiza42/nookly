@@ -35,6 +35,7 @@ public static class MediaEndpoints
             string? genreIds,
             int? year,
             string? actor,
+            string? director,
             string? countries,
             IExternalMediaSearch search,
             DiscoveryPreferenceService preferences,
@@ -53,7 +54,8 @@ public static class MediaEndpoints
                 var selectedCountries = ParseStrings(countries);
                 var isUnfilteredDiscovery = string.IsNullOrWhiteSpace(query) && selectedTypes.Count == 0 &&
                                             selectedGenreIds.Count == 0 && year is null &&
-                                            string.IsNullOrWhiteSpace(actor) && selectedCountries.Count == 0;
+                                            string.IsNullOrWhiteSpace(actor) && string.IsNullOrWhiteSpace(director) &&
+                                            selectedCountries.Count == 0;
                 IReadOnlyList<Nookly.Application.Search.MediaSearchResult> results;
                 if (isUnfilteredDiscovery)
                 {
@@ -70,6 +72,7 @@ public static class MediaEndpoints
                         selectedGenreIds,
                         year,
                         actor,
+                        director,
                         selectedCountries,
                         cancellationToken);
                 }

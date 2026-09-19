@@ -143,6 +143,7 @@ public sealed class TmdbClient(HttpClient httpClient, IOptions<TmdbOptions> opti
         IReadOnlyCollection<int>? genreIds = null,
         int? year = null,
         string? actor = null,
+        string? director = null,
         IReadOnlyCollection<string>? countries = null,
         CancellationToken cancellationToken = default)
     {
@@ -150,7 +151,8 @@ public sealed class TmdbClient(HttpClient httpClient, IOptions<TmdbOptions> opti
 
         if (!string.IsNullOrWhiteSpace(query) && types is not { Count: > 0 } &&
             genreIds is not { Count: > 0 } && year is null &&
-            string.IsNullOrWhiteSpace(actor) && countries is not { Count: > 0 })
+            string.IsNullOrWhiteSpace(actor) && string.IsNullOrWhiteSpace(director) &&
+            countries is not { Count: > 0 })
         {
             var payload = await GetAsync<TmdbSearchResponse>(
                 $"search/multi?query={Uri.EscapeDataString(query.Trim())}&include_adult=false&language=fr-FR&page=1",
@@ -165,8 +167,13 @@ public sealed class TmdbClient(HttpClient httpClient, IOptions<TmdbOptions> opti
             return await AddCastAsync(searchResults, token, cancellationToken);
         }
 
-        var actorId = await ResolveActorIdAsync(actor, token, cancellationToken);
+        var actorId = await ResolvePersonIdAsync(actor, token, cancellationToken);
         if (!string.IsNullOrWhiteSpace(actor) && actorId is null)
+        {
+            return [];
+        }
+        var directorId = await ResolvePersonIdAsync(director, token, cancellationToken);
+        if (!string.IsNullOrWhiteSpace(director) && directorId is null)
         {
             return [];
         }
@@ -181,7 +188,7 @@ public sealed class TmdbClient(HttpClient httpClient, IOptions<TmdbOptions> opti
             .Distinct(StringComparer.Ordinal)
             .ToArray() ?? [];
         var isRandomDiscovery = string.IsNullOrWhiteSpace(query) && types is not { Count: > 0 } &&
-                                selectedGenres.Length == 0 && year is null && actorId is null &&
+                                selectedGenres.Length == 0 && year is null && actorId is null && directorId is null &&
                                 selectedCountries.Length == 0;
         var page = isRandomDiscovery ? Random.Shared.Next(1, 11) : 1;
 
@@ -196,6 +203,7 @@ public sealed class TmdbClient(HttpClient httpClient, IOptions<TmdbOptions> opti
             var genres = selectedGenres.Select(genreId => MapGenreId(genreId, mediaKind)).Distinct().ToList();
             if (year is not null) parameters.Add(mediaKind == "movie" ? $"primary_release_year={year}" : $"first_air_date_year={year}");
             if (actorId is not null) parameters.Add($"with_cast={actorId}");
+            if (directorId is not null) parameters.Add($"with_crew={directorId}");
             if (selectedCountries.Length > 0) parameters.Add($"with_origin_country={string.Join('|', selectedCountries)}");
             if (selectedType == MediaType.Anime)
             {
@@ -270,14 +278,14 @@ public sealed class TmdbClient(HttpClient httpClient, IOptions<TmdbOptions> opti
         }));
     }
 
-    private async Task<long?> ResolveActorIdAsync(
-        string? actor,
+    private async Task<long?> ResolvePersonIdAsync(
+        string? person,
         string token,
         CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(actor)) return null;
+        if (string.IsNullOrWhiteSpace(person)) return null;
         var payload = await GetAsync<TmdbPersonSearchResponse>(
-            $"search/person?query={Uri.EscapeDataString(actor.Trim())}&include_adult=false&language=fr-FR&page=1",
+            $"search/person?query={Uri.EscapeDataString(person.Trim())}&include_adult=false&language=fr-FR&page=1",
             token,
             cancellationToken);
         return payload?.Results.FirstOrDefault()?.Id;
