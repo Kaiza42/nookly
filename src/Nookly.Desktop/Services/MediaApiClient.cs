@@ -160,6 +160,16 @@ public sealed class MediaApiClient(HttpClient httpClient) : IMediaApiClient
                    cancellationToken) ?? [];
     }
 
+    public async Task<IReadOnlyList<DiscoveryHistoryResponse>> GetDiscoveryHistoryAsync(
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.GetAsync("api/media/history", cancellationToken);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<DiscoveryHistoryResponse[]>(
+                   JsonOptions,
+                   cancellationToken) ?? [];
+    }
+
     public async Task RestoreDiscoveryPreferenceAsync(
         string source,
         string externalId,

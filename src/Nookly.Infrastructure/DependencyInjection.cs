@@ -24,6 +24,8 @@ public static class DependencyInjection
         services.AddScoped<IMediaRepository, MediaRepository>();
         services.AddScoped<IDiscoveryPreferenceRepository, DiscoveryPreferenceRepository>();
         services.AddScoped<DiscoveryPreferenceService>();
+        services.AddScoped<IDiscoveryHistoryRepository, DiscoveryHistoryRepository>();
+        services.AddScoped<DiscoveryHistoryService>();
         services.AddScoped<IMediaService, MediaService>();
         services.AddScoped<IBankRepository, BankRepository>();
         services.AddScoped<BankService>();

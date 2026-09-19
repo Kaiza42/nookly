@@ -58,6 +58,9 @@ public interface IMediaApiClient
     Task<IReadOnlyList<DiscoveryPreferenceResponse>> GetDislikedPreferencesAsync(
         CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyList<DiscoveryHistoryResponse>> GetDiscoveryHistoryAsync(
+        CancellationToken cancellationToken = default);
+
     Task RestoreDiscoveryPreferenceAsync(
         string source,
         string externalId,

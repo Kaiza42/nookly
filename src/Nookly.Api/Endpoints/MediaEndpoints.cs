@@ -104,6 +104,7 @@ public static class MediaEndpoints
             ContractMediaType type,
             string externalId,
             IExternalMediaSearch search,
+            DiscoveryHistoryService history,
             CancellationToken cancellationToken) =>
         {
             try
@@ -112,7 +113,9 @@ public static class MediaEndpoints
                     externalId,
                     (Nookly.Domain.Media.MediaType)type,
                     cancellationToken);
-                return details is null ? Results.NotFound() : Results.Ok(ToDetailsResponse(details));
+                if (details is null) return Results.NotFound();
+                await history.RecordAsync("tmdb", details, cancellationToken);
+                return Results.Ok(ToDetailsResponse(details));
             }
             catch (InvalidOperationException exception)
             {
@@ -122,6 +125,24 @@ public static class MediaEndpoints
             {
                 return Results.Problem("TMDB is temporarily unavailable.", statusCode: StatusCodes.Status502BadGateway);
             }
+        });
+
+        group.MapGet("/history", async (
+            DiscoveryHistoryService history,
+            CancellationToken cancellationToken) =>
+        {
+            var items = await history.ListAsync(cancellationToken);
+            return Results.Ok(items.Select(item => new DiscoveryHistoryResponse(
+                item.ExternalSource,
+                item.ExternalId,
+                (ContractMediaType)item.MediaType,
+                item.Title,
+                item.Description,
+                item.PosterUrl,
+                item.CommunityRating,
+                item.ReleaseDate,
+                item.CastLabel,
+                item.ViewedAtUtc)));
         });
 
         group.MapGet("/external/{externalId}/seasons/{seasonNumber:int}", async (

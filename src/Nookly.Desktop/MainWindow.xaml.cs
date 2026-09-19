@@ -189,6 +189,13 @@ public partial class MainWindow : Window
             await ViewModel.ShowSearchResultCommand.ExecuteAsync(item);
     }
 
+    private async void DiscoveryHistoryItem_DoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is not System.Windows.Controls.ListViewItem { DataContext: DiscoveryHistoryViewModel item }) return;
+        if (ViewModel.ShowHistoryItemCommand.CanExecute(item))
+            await ViewModel.ShowHistoryItemCommand.ExecuteAsync(item);
+    }
+
     private async void LibraryItem_DoubleClick(object sender, MouseButtonEventArgs e)
     {
         if (FindVisualParent<System.Windows.Controls.Button>(e.OriginalSource as DependencyObject) is not null) return;

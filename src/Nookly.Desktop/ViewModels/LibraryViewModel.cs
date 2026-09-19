@@ -25,6 +25,7 @@ public partial class LibraryViewModel(
     public ObservableCollection<MediaListItemViewModel> Items { get; } = [];
     public ObservableCollection<MediaListItemViewModel> FilteredItems { get; } = [];
     public ObservableCollection<MediaSearchResultViewModel> SearchResults { get; } = [];
+    public ObservableCollection<DiscoveryHistoryViewModel> DiscoveryHistory { get; } = [];
     public ObservableCollection<DiscoveryPreferenceViewModel> DislikedPreferences { get; } = [];
     public ObservableCollection<DiscoveryPreferenceViewModel> FilteredDislikedPreferences { get; } = [];
     public ObservableCollection<BankEntryViewModel> BankEntries { get; } = [];
@@ -164,6 +165,17 @@ public partial class LibraryViewModel(
     private bool isDiscoverPage;
 
     [ObservableProperty]
+    private bool isDiscoveryBrowseSelected = true;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowEmptyDiscoveryHistory))]
+    private bool isDiscoveryHistorySelected;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowEmptyDiscoveryHistory))]
+    private bool hasDiscoveryHistory;
+
+    [ObservableProperty]
     private bool isDetailPage;
 
     [ObservableProperty]
@@ -233,6 +245,7 @@ public partial class LibraryViewModel(
         HasDislikedPreferences && FilteredDislikedPreferences.Count == 0;
     public bool HasFilteredItems => FilteredItems.Count > 0;
     public bool ShowNoLibraryResults => HasItems && !HasFilteredItems;
+    public bool ShowEmptyDiscoveryHistory => IsDiscoveryHistorySelected && !HasDiscoveryHistory;
     private bool CanSaveMedia =>
         !IsLoading &&
         IsEditMode &&
@@ -356,7 +369,44 @@ public partial class LibraryViewModel(
     {
         CloseForm();
         SetPage(discover: true);
+        IsDiscoveryBrowseSelected = true;
+        IsDiscoveryHistorySelected = false;
         await LoadRecommendationsAsync();
+    }
+
+    [RelayCommand]
+    private void ShowDiscoveryBrowse()
+    {
+        IsDiscoveryBrowseSelected = true;
+        IsDiscoveryHistorySelected = false;
+    }
+
+    [RelayCommand]
+    private async Task ShowDiscoveryHistoryAsync()
+    {
+        IsDiscoveryBrowseSelected = false;
+        IsDiscoveryHistorySelected = true;
+        try
+        {
+            var items = await mediaApiClient.GetDiscoveryHistoryAsync();
+            DiscoveryHistory.Clear();
+            foreach (var item in items) DiscoveryHistory.Add(new DiscoveryHistoryViewModel(item));
+            HasDiscoveryHistory = DiscoveryHistory.Count > 0;
+        }
+        catch (HttpRequestException)
+        {
+            HasSearchError = true;
+            SearchErrorMessage = "Impossible de charger l'historique.";
+        }
+    }
+
+    [RelayCommand]
+    private async Task ShowHistoryItemAsync(DiscoveryHistoryViewModel item)
+    {
+        var result = new MediaSearchResultViewModel(item.ToSearchResult());
+        SelectedSearchResult = result;
+        SetPage(detail: true);
+        await LoadMediaDetailsAsync(result.Result.ExternalId, result.Result.Type);
     }
 
     [RelayCommand]
@@ -383,7 +433,11 @@ public partial class LibraryViewModel(
     }
 
     [RelayCommand]
-    private void BackToDiscover() => SetPage(discover: true);
+    private async Task BackToDiscoverAsync()
+    {
+        SetPage(discover: true);
+        if (IsDiscoveryHistorySelected) await ShowDiscoveryHistoryAsync();
+    }
 
     [RelayCommand]
     private async Task ShowLibraryItemAsync(MediaListItemViewModel item)

@@ -640,6 +640,7 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <Grid>
@@ -651,9 +652,41 @@
                             ToolTip="Nouvelle selection"
                             HorizontalAlignment="Right" VerticalAlignment="Center"
                             Width="28" Height="28" Padding="0" FontSize="16" FontFamily="Segoe UI Symbol"
+                            Visibility="{Binding IsDiscoveryBrowseSelected, Converter={StaticResource BoolToVisibility}}"
                             Style="{StaticResource SoftButton}" />
                 </Grid>
-                <Grid Grid.Row="1" Margin="0,18,0,0">
+                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,16,0,0">
+                    <Button Content="Decouvrir" Command="{Binding ShowDiscoveryBrowseCommand}"
+                            Height="30" Padding="13,0" Margin="0,0,7,0">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource SoftButton}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsDiscoveryBrowseSelected}" Value="True">
+                                        <Setter Property="Background" Value="#E2F1EA" />
+                                        <Setter Property="BorderBrush" Value="#78AC96" />
+                                        <Setter Property="Foreground" Value="#225C46" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                    <Button Content="Historique" Command="{Binding ShowDiscoveryHistoryCommand}"
+                            Height="30" Padding="13,0">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource SoftButton}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsDiscoveryHistorySelected}" Value="True">
+                                        <Setter Property="Background" Value="#E2F1EA" />
+                                        <Setter Property="BorderBrush" Value="#78AC96" />
+                                        <Setter Property="Foreground" Value="#225C46" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </StackPanel>
+                <Grid Grid.Row="2" Margin="0,12,0,0"
+                      Visibility="{Binding IsDiscoveryBrowseSelected, Converter={StaticResource BoolToVisibility}}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
@@ -671,7 +704,8 @@
                     <Button Grid.Column="1" Content="Rechercher" Command="{Binding SearchCommand}"
                             Style="{StaticResource PrimaryButton}" Height="34" Margin="10,0,0,0" />
                 </Grid>
-                <Border Grid.Row="2" Margin="0,8,0,0" Padding="7,4" Background="#F8FCFA"
+                <Border Grid.Row="3" Margin="0,8,0,0" Padding="7,4" Background="#F8FCFA"
+                        Visibility="{Binding IsDiscoveryBrowseSelected, Converter={StaticResource BoolToVisibility}}"
                         BorderBrush="#C8DDD4" BorderThickness="1" CornerRadius="7">
                     <WrapPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,12,0">
@@ -713,14 +747,15 @@
                         </StackPanel>
                     </WrapPanel>
                 </Border>
-                <StackPanel Grid.Row="3">
+                <StackPanel Grid.Row="4"
+                            Visibility="{Binding IsDiscoveryBrowseSelected, Converter={StaticResource BoolToVisibility}}">
                     <ProgressBar Height="3" Margin="0,12,0,0" IsIndeterminate="True"
                                  Visibility="{Binding IsSearching, Converter={StaticResource BoolToVisibility}}" />
                     <TextBlock Text="{Binding SearchErrorMessage}" Margin="0,12,0,0" Foreground="#8E2F2A"
                                Visibility="{Binding HasSearchError, Converter={StaticResource BoolToVisibility}}" />
                 </StackPanel>
-                <ListView Grid.Row="4" ItemsSource="{Binding SearchResults}" Margin="0,18,0,0"
-                          Visibility="{Binding HasSearchResults, Converter={StaticResource BoolToVisibility}}"
+                <ListView Grid.Row="5" ItemsSource="{Binding SearchResults}" Margin="0,18,0,0"
+                          Visibility="{Binding IsDiscoveryBrowseSelected, Converter={StaticResource BoolToVisibility}}"
                           Background="Transparent" BorderThickness="0"
                           HorizontalAlignment="Stretch"
                           ScrollViewer.HorizontalScrollBarVisibility="Disabled">
@@ -774,6 +809,52 @@
                                                     Foreground="#C43D3D" />
                                         </StackPanel>
                                     </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+                <TextBlock Grid.Row="5" Text="Aucun contenu consulte pour le moment."
+                           HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#69717D"
+                           Visibility="{Binding ShowEmptyDiscoveryHistory, Converter={StaticResource BoolToVisibility}}" />
+                <ListView Grid.Row="5" ItemsSource="{Binding DiscoveryHistory}" Margin="0,18,0,0"
+                          Visibility="{Binding IsDiscoveryHistorySelected, Converter={StaticResource BoolToVisibility}}"
+                          Background="Transparent" BorderThickness="0"
+                          ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem" BasedOn="{StaticResource HoverCardItem}">
+                            <Setter Property="Margin" Value="0,0,0,10" />
+                            <EventSetter Event="MouseDoubleClick" Handler="DiscoveryHistoryItem_DoubleClick" />
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Border Padding="12" Background="White" BorderBrush="#E0E3E8"
+                                    BorderThickness="1" CornerRadius="8">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="64" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Border Height="88" Background="#E4E7EB" CornerRadius="3">
+                                        <Image Source="{Binding PosterUrl}" Stretch="UniformToFill" />
+                                    </Border>
+                                    <StackPanel Grid.Column="1" Margin="14,2,20,0">
+                                        <TextBlock Text="{Binding Title}" FontSize="16" FontWeight="SemiBold" />
+                                        <TextBlock Text="{Binding MetaLabel}" Margin="0,5,0,0" Foreground="#69717D" />
+                                        <TextBlock Text="{Binding CastLabel}" Margin="0,5,0,0"
+                                                   Foreground="#4D5967" FontSize="12"
+                                                   TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="{Binding Description}" Margin="0,7,0,0"
+                                                   Foreground="#747D89" TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="12,0,0,0">
+                                        <Button Content="Voir" Command="{Binding DataContext.ShowHistoryItemCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                CommandParameter="{Binding}" Style="{StaticResource SoftButton}" />
+                                        <TextBlock Text="{Binding ViewedAtLabel}" Margin="0,7,0,0"
+                                                   Foreground="#7A838D" FontSize="10" HorizontalAlignment="Right" />
+                                    </StackPanel>
+                                </Grid>
                             </Border>
                         </DataTemplate>
                     </ListView.ItemTemplate>

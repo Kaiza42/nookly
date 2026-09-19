@@ -122,6 +122,32 @@ public sealed class LibraryViewModelTests
     }
 
     [Fact]
+    public async Task DiscoveryHistory_DisplaysMostRecentItemsFromApi()
+    {
+        var apiClient = new StubMediaApiClient
+        {
+            DiscoveryHistory =
+            [
+                new DiscoveryHistoryResponse(
+                    "tmdb", "693134", MediaType.Movie, "Dune : Deuxieme partie",
+                    null, null, 8.1m, new DateOnly(2024, 2, 28), null,
+                    new DateTimeOffset(2026, 9, 19, 10, 0, 0, TimeSpan.Zero)),
+                new DiscoveryHistoryResponse(
+                    "tmdb", "438631", MediaType.Movie, "Dune",
+                    null, null, 7.8m, new DateOnly(2021, 9, 15), null,
+                    new DateTimeOffset(2026, 9, 18, 10, 0, 0, TimeSpan.Zero))
+            ]
+        };
+        var viewModel = CreateViewModel(apiClient);
+
+        await viewModel.ShowDiscoveryHistoryCommand.ExecuteAsync(null);
+
+        Assert.True(viewModel.IsDiscoveryHistorySelected);
+        Assert.Equal("Dune : Deuxieme partie", viewModel.DiscoveryHistory[0].Title);
+        Assert.Equal("Dune", viewModel.DiscoveryHistory[1].Title);
+    }
+
+    [Fact]
     public async Task LibrarySearch_FiltersOnlyExistingItems()
     {
         var viewModel = CreateViewModel(new StubMediaApiClient());
@@ -332,6 +358,7 @@ public sealed class LibraryViewModelTests
         public CreateMediaRequest? LastCreateRequest { get; private set; }
         public SetDiscoveryPreferenceRequest? LastPreferenceRequest { get; private set; }
         public IReadOnlyList<DiscoveryPreferenceResponse> DislikedPreferences { get; init; } = [];
+        public IReadOnlyList<DiscoveryHistoryResponse> DiscoveryHistory { get; init; } = [];
         public bool RestorePreferenceCalled { get; private set; }
         public MediaDetailsResponse? Details { get; init; }
         public UpdateSeasonProgressRequest? LastSeasonProgressRequest { get; private set; }
@@ -430,6 +457,10 @@ public sealed class LibraryViewModelTests
         public Task<IReadOnlyList<DiscoveryPreferenceResponse>> GetDislikedPreferencesAsync(
             CancellationToken cancellationToken = default) =>
             Task.FromResult(DislikedPreferences);
+
+        public Task<IReadOnlyList<DiscoveryHistoryResponse>> GetDiscoveryHistoryAsync(
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult(DiscoveryHistory);
 
         public Task RestoreDiscoveryPreferenceAsync(
             string source,

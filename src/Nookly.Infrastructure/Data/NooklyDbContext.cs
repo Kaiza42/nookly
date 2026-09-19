@@ -13,6 +13,7 @@ public sealed class NooklyDbContext(DbContextOptions<NooklyDbContext> options)
     public DbSet<SeasonProgress> SeasonProgress => Set<SeasonProgress>();
     public DbSet<EpisodeProgress> EpisodeProgress => Set<EpisodeProgress>();
     public DbSet<DiscoveryPreference> DiscoveryPreferences => Set<DiscoveryPreference>();
+    public DbSet<DiscoveryHistoryEntry> DiscoveryHistory => Set<DiscoveryHistoryEntry>();
     public DbSet<Member> Members => Set<Member>();
     public DbSet<BankAccount> BankAccounts => Set<BankAccount>();
     public DbSet<BankEntry> BankEntries => Set<BankEntry>();
