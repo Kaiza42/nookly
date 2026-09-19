@@ -483,8 +483,6 @@
                                 <StackPanel>
                                     <TextBlock Text="{Binding Title}" FontSize="17" FontWeight="SemiBold" />
                                     <TextBlock Text="{Binding MetaLabel}" Margin="0,5,0,0" Foreground="#69717D" />
-                                    <TextBlock Text="{Binding ProgressLabel}" Margin="0,5,0,0"
-                                               Foreground="#286C53" FontWeight="SemiBold" />
                                     <TextBlock Text="{Binding Description}" Margin="0,8,0,14" Foreground="#4D5967"
                                                TextWrapping="Wrap" MaxWidth="1050"
                                                HorizontalAlignment="Left" />
