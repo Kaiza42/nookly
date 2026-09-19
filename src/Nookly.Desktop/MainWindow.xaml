@@ -67,7 +67,7 @@
         <Style x:Key="AccountButton" TargetType="Button">
             <Setter Property="Height" Value="36" />
             <Setter Property="Padding" Value="11,0" />
-            <Setter Property="Background" Value="#292F37" />
+            <Setter Property="Background" Value="Transparent" />
             <Setter Property="Foreground" Value="#E6ECE9" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="HorizontalContentAlignment" Value="Left" />
@@ -93,10 +93,48 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        <Style x:Key="LogoutButton" TargetType="Button" BasedOn="{StaticResource AccountButton}">
-            <Setter Property="Height" Value="32" />
-            <Setter Property="Background" Value="Transparent" />
+        <Style x:Key="PowerButton" TargetType="Button" BasedOn="{StaticResource AccountButton}">
+            <Setter Property="Width" Value="36" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
+            <Setter Property="FontSize" Value="15" />
             <Setter Property="Foreground" Value="#AEB7C2" />
+        </Style>
+        <ControlTemplate x:Key="VerticalScrollBarTemplate" TargetType="ScrollBar">
+            <Grid Width="10" Background="Transparent">
+                <Track x:Name="PART_Track" IsDirectionReversed="True">
+                    <Track.DecreaseRepeatButton>
+                        <RepeatButton Command="ScrollBar.PageUpCommand" Opacity="0" Focusable="False" />
+                    </Track.DecreaseRepeatButton>
+                    <Track.Thumb>
+                        <Thumb MinHeight="34">
+                            <Thumb.Template>
+                                <ControlTemplate TargetType="Thumb">
+                                    <Border x:Name="ThumbSurface" Width="6" Margin="2,1"
+                                            Background="#AEB7B3" CornerRadius="3" />
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="ThumbSurface" Property="Background" Value="#7F8C86" />
+                                        </Trigger>
+                                        <Trigger Property="IsDragging" Value="True">
+                                            <Setter TargetName="ThumbSurface" Property="Background" Value="#66756E" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Thumb.Template>
+                        </Thumb>
+                    </Track.Thumb>
+                    <Track.IncreaseRepeatButton>
+                        <RepeatButton Command="ScrollBar.PageDownCommand" Opacity="0" Focusable="False" />
+                    </Track.IncreaseRepeatButton>
+                </Track>
+            </Grid>
+        </ControlTemplate>
+        <Style TargetType="ScrollBar">
+            <Setter Property="Width" Value="10" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Template" Value="{StaticResource VerticalScrollBarTemplate}" />
         </Style>
         <Style x:Key="CleanExpander" TargetType="Expander">
             <Setter Property="Template">
@@ -528,7 +566,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="78" />
                     <RowDefinition Height="*" />
-                    <RowDefinition Height="94" />
+                    <RowDefinition Height="58" />
                 </Grid.RowDefinitions>
                 <Grid>
                     <TextBlock x:Name="SidebarBrand" Text="Nookly" Margin="26,0" VerticalAlignment="Center"
@@ -583,21 +621,41 @@
                             Style="{StaticResource NavButton}" FontFamily="Segoe MDL2 Assets" FontSize="18"
                             HorizontalContentAlignment="Center" Padding="0" Visibility="Collapsed" />
                 </StackPanel>
-                <StackPanel x:Name="ExpandedAccountArea" Grid.Row="2" Margin="12,6">
-                    <Button x:Name="MemberButton" Click="CopyMemberId_Click"
+                <Grid x:Name="ExpandedAccountArea" Grid.Row="2" Margin="12,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="40" />
+                    </Grid.ColumnDefinitions>
+                    <Button x:Name="MemberButton" Click="CopyMemberId_Click" Margin="0,0,4,0"
                             Style="{StaticResource AccountButton}" ToolTip="Copier mon identifiant" />
-                    <Button Click="Logout_Click" Content="Se deconnecter" Margin="0,4,0,0"
-                            Style="{StaticResource LogoutButton}" />
-                </StackPanel>
-                <StackPanel x:Name="CollapsedAccountArea" Grid.Row="2" Visibility="Collapsed" Margin="10,5">
+                    <Button x:Name="PowerMenuButton" Grid.Column="1" Click="PowerMenu_Click"
+                            Content="&#xE7E8;" Style="{StaticResource PowerButton}"
+                            ToolTip="Options de fermeture" />
+                </Grid>
+                <Grid x:Name="CollapsedAccountArea" Grid.Row="2" Visibility="Collapsed" Margin="6,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
                     <Button Click="CopyMemberId_Click" Content="&#xE77B;" ToolTip="Copier mon identifiant"
                             Style="{StaticResource AccountButton}" HorizontalContentAlignment="Center"
-                            Padding="0" FontFamily="Segoe MDL2 Assets" FontSize="17" />
-                    <Button Click="Logout_Click" Content="&#xE8AC;" ToolTip="Se deconnecter"
-                            Margin="0,4,0,0" Height="34" Padding="0"
-                            Style="{StaticResource LogoutButton}" HorizontalContentAlignment="Center"
-                            FontFamily="Segoe MDL2 Assets" FontSize="17" />
-                </StackPanel>
+                            Padding="0" FontFamily="Segoe MDL2 Assets" FontSize="15" />
+                    <Button Grid.Column="1" Click="PowerMenu_Click" Content="&#xE7E8;"
+                            ToolTip="Options de fermeture" Style="{StaticResource PowerButton}"
+                            Width="26" FontSize="14" />
+                </Grid>
+                <Popup x:Name="PowerMenuPopup" PlacementTarget="{Binding ElementName=PowerMenuButton}"
+                       Placement="Top" VerticalOffset="-7" AllowsTransparency="True" StaysOpen="False">
+                    <Border Width="190" Padding="5" Background="#292F37" BorderBrush="#3B444E"
+                            BorderThickness="1" CornerRadius="7">
+                        <StackPanel>
+                            <Button Content="Quitter Nookly" Click="ExitApplication_Click"
+                                    Style="{StaticResource AccountButton}" />
+                            <Button Content="Se deconnecter et quitter" Click="LogoutAndExit_Click"
+                                    Style="{StaticResource AccountButton}" Foreground="#E4B4B0" />
+                        </StackPanel>
+                    </Border>
+                </Popup>
                 <Popup x:Name="CopyIdPopup" Placement="Top" VerticalOffset="-7"
                        AllowsTransparency="True" StaysOpen="True">
                     <Border Padding="11,7" Background="#E7ECE9" BorderBrush="#BAC7C1"

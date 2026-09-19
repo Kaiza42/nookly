@@ -71,14 +71,21 @@ public partial class MainWindow : Window
         activityTimer.Start();
     }
 
-    private void Logout_Click(object sender, RoutedEventArgs e)
+    private void PowerMenu_Click(object sender, RoutedEventArgs e)
     {
-        if (System.Windows.MessageBox.Show("Voulez-vous vous deconnecter ?", "Deconnexion", MessageBoxButton.YesNo,
-                MessageBoxImage.Question) != MessageBoxResult.Yes) return;
-        session.ClearToken();
-        activityTimer.Stop();
-        ((App)System.Windows.Application.Current).ShowLoginWindow();
+        PowerMenuPopup.PlacementTarget = sender as UIElement;
+        PowerMenuPopup.IsOpen = true;
+    }
+
+    private void ExitApplication_Click(object sender, RoutedEventArgs e) => ExitApplication(false);
+
+    private void LogoutAndExit_Click(object sender, RoutedEventArgs e) => ExitApplication(true);
+
+    private void ExitApplication(bool logout)
+    {
+        if (logout) session.ClearToken();
         allowClose = true;
+        activityTimer.Stop();
         trayIcon.Dispose();
         Close();
     }
