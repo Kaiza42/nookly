@@ -77,7 +77,8 @@ public partial class MainWindow : Window
         PowerMenuPopup.IsOpen = true;
     }
 
-    private void ExitApplication_Click(object sender, RoutedEventArgs e) => ExitApplication(false);
+    private async void ExitApplication_Click(object sender, RoutedEventArgs e) =>
+        await ExitApplicationAsync(false);
 
     private void LogoutOnly_Click(object sender, RoutedEventArgs e)
     {
@@ -90,14 +91,23 @@ public partial class MainWindow : Window
         Close();
     }
 
-    private void LogoutAndExit_Click(object sender, RoutedEventArgs e) => ExitApplication(true);
+    private async void LogoutAndExit_Click(object sender, RoutedEventArgs e) =>
+        await ExitApplicationAsync(true);
 
-    private void ExitApplication(bool logout)
+    private async Task ExitApplicationAsync(bool logout)
     {
+        var displayName = session.Member?.DisplayName ?? "Membre";
         if (logout) session.ClearToken();
         allowClose = true;
         activityTimer.Stop();
         trayIcon.Dispose();
+        Hide();
+        ShowInTaskbar = false;
+        var goodbye = new WelcomeWindow();
+        goodbye.SetGoodbye(displayName);
+        goodbye.Show();
+        await Task.Delay(TimeSpan.FromSeconds(3));
+        goodbye.Close();
         Close();
     }
 
@@ -131,13 +141,8 @@ public partial class MainWindow : Window
             System.Windows.Forms.ToolTipIcon.Info);
     }
 
-    private void ConfirmFullExit_Click(object sender, RoutedEventArgs e)
-    {
-        allowClose = true;
-        activityTimer.Stop();
-        trayIcon.Dispose();
-        Close();
-    }
+    private async void ConfirmFullExit_Click(object sender, RoutedEventArgs e) =>
+        await ExitApplicationAsync(false);
 
     private System.Windows.Forms.ContextMenuStrip CreateTrayMenu()
     {
@@ -161,13 +166,7 @@ public partial class MainWindow : Window
 
     private void ExitFromTray()
     {
-        Dispatcher.Invoke(() =>
-        {
-            allowClose = true;
-            activityTimer.Stop();
-            trayIcon.Dispose();
-            Close();
-        });
+        Dispatcher.Invoke(async () => await ExitApplicationAsync(false));
     }
 
     private async Task SyncMemberActivityAsync()

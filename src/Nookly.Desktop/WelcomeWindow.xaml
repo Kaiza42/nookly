@@ -12,7 +12,7 @@
                 <TextBlock x:Name="WelcomeText" Margin="0,24,0,0" Foreground="White"
                            FontSize="32" FontWeight="SemiBold" TextAlignment="Center"
                            TextWrapping="Wrap" />
-                <TextBlock Text="Ton espace personnel est pret."
+                <TextBlock x:Name="SubtitleText" Text="Ton espace personnel est pret."
                            Margin="0,10,0,0" Foreground="#B8C0CC" FontSize="14"
                            HorizontalAlignment="Center" />
                 <ProgressBar Margin="0,32,0,0" Width="240" Height="3"
