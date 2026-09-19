@@ -326,12 +326,17 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ListViewItem">
-                        <Border x:Name="HoverSurface" Background="Transparent" CornerRadius="8">
-                            <ContentPresenter />
-                        </Border>
+                        <Grid>
+                            <Border x:Name="ShadowSurface" Margin="2" Background="White"
+                                    CornerRadius="8" Opacity="0" IsHitTestVisible="False" />
+                            <Border x:Name="HoverSurface" Background="Transparent" CornerRadius="8">
+                                <ContentPresenter />
+                            </Border>
+                        </Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="HoverSurface" Property="Effect">
+                                <Setter TargetName="ShadowSurface" Property="Opacity" Value="1" />
+                                <Setter TargetName="ShadowSurface" Property="Effect">
                                     <Setter.Value>
                                         <DropShadowEffect Color="#60796E" BlurRadius="12"
                                                           ShadowDepth="2" Opacity="0.28" />
