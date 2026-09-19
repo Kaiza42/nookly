@@ -616,7 +616,7 @@ public partial class LibraryViewModel(
                 episode.Number,
                 new UpdateEpisodeProgressRequest(episode.IsWatched, episode.PersonalNotes));
             SelectedSeasonDetails.RefreshWatchedCount();
-            DetailsStatusMessage = $"Progression de l'episode {episode.Number} enregistree.";
+            DetailsStatusMessage = $"Note de l'episode {episode.Number} enregistree.";
             HasDetailsError = false;
         }
         catch (HttpRequestException)

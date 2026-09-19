@@ -158,6 +158,14 @@ public partial class MainWindow : Window
             await adminViewModel.LoadCommand.ExecuteAsync(null);
     }
 
+    private async void EpisodeNote_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+    {
+        if (sender is FrameworkElement { DataContext: EpisodeViewModel episode })
+        {
+            await ViewModel.SaveEpisodeProgressCommand.ExecuteAsync(episode);
+        }
+    }
+
     private void ToggleSidebar_Click(object sender, RoutedEventArgs e)
     {
         isSidebarCollapsed = !isSidebarCollapsed;
