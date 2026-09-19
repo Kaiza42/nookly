@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.Input;
 using Nookly.Contracts.Media;
 using Nookly.Contracts.Discovery;
 using Nookly.Contracts.Details;
+using Nookly.Contracts.Search;
 using Nookly.Desktop.Services;
 
 namespace Nookly.Desktop.ViewModels;
@@ -615,7 +616,7 @@ public partial class LibraryViewModel(
             }
 
             SearchResults.Clear();
-            foreach (var result in results)
+            foreach (var result in results.Where(result => !IsInLibrary(result)))
             {
                 SearchResults.Add(new MediaSearchResultViewModel(result));
             }
@@ -624,7 +625,9 @@ public partial class LibraryViewModel(
             if (!HasSearchResults)
             {
                 HasSearchError = true;
-                SearchErrorMessage = "Aucun film, serie ou anime trouve.";
+                SearchErrorMessage = results.Count > 0
+                    ? "Tous les resultats trouves sont deja dans ta bibliotheque."
+                    : "Aucun film, serie ou anime trouve.";
             }
         }
         catch (HttpRequestException) when (version == searchVersion)
@@ -645,6 +648,12 @@ public partial class LibraryViewModel(
             }
         }
     }
+
+    private bool IsInLibrary(MediaSearchResultResponse result) =>
+        Items.Any(item =>
+            item.Type == result.Type &&
+            string.Equals(item.ExternalSource, result.ExternalSource, StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(item.ExternalId, result.ExternalId, StringComparison.Ordinal));
 
     [RelayCommand(CanExecute = nameof(CanAddSearchResult))]
     private async Task AddSearchResultAsync(MediaSearchResultViewModel item)
@@ -667,6 +676,8 @@ public partial class LibraryViewModel(
                 result.ReleaseDate);
             var saved = await mediaApiClient.CreateMediaAsync(request);
             Items.Insert(0, new MediaListItemViewModel(saved));
+            SearchResults.Remove(item);
+            HasSearchResults = SearchResults.Count > 0;
             HasItems = true;
             RefreshLibraryFilter();
             SetPage(library: true);

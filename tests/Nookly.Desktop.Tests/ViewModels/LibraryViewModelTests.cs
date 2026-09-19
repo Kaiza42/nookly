@@ -94,6 +94,34 @@ public sealed class LibraryViewModelTests
     }
 
     [Fact]
+    public async Task Discover_HidesMediaAlreadyInLibrary()
+    {
+        var existing = StubMediaApiClient.CreateResponse(
+            "Dune", MediaType.Movie, MediaStatus.Planned, null,
+            externalSource: "tmdb", externalId: "438631");
+        var apiClient = new StubMediaApiClient
+        {
+            MediaItems = [existing],
+            SearchResults =
+            [
+                new MediaSearchResultResponse(
+                    "tmdb", "438631", "Dune", null, MediaType.Movie,
+                    null, 7.8m, new DateOnly(2021, 9, 15)),
+                new MediaSearchResultResponse(
+                    "tmdb", "693134", "Dune : Deuxieme partie", null, MediaType.Movie,
+                    null, 8.1m, new DateOnly(2024, 2, 28))
+            ]
+        };
+        var viewModel = CreateViewModel(apiClient);
+
+        await viewModel.LoadCommand.ExecuteAsync(null);
+        await viewModel.OpenDiscoverCommand.ExecuteAsync(null);
+
+        var result = Assert.Single(viewModel.SearchResults);
+        Assert.Equal("693134", result.Result.ExternalId);
+    }
+
+    [Fact]
     public async Task LibrarySearch_FiltersOnlyExistingItems()
     {
         var viewModel = CreateViewModel(new StubMediaApiClient());
@@ -296,6 +324,7 @@ public sealed class LibraryViewModelTests
             null);
 
         public bool DeleteCalled { get; private set; }
+        public IReadOnlyList<MediaItemResponse>? MediaItems { get; init; }
         public IReadOnlyList<MediaSearchResultResponse> SearchResults { get; init; } = [];
         public Func<string, CancellationToken, Task<IReadOnlyList<MediaSearchResultResponse>>>?
             SearchHandler
@@ -311,7 +340,7 @@ public sealed class LibraryViewModelTests
         public Task<IReadOnlyList<MediaItemResponse>> GetMediaAsync(
             CancellationToken cancellationToken = default)
         {
-            return Task.FromResult<IReadOnlyList<MediaItemResponse>>([item]);
+            return Task.FromResult(MediaItems ?? [item]);
         }
 
         public Task<IReadOnlyList<MediaSearchResultResponse>> SearchMediaAsync(
@@ -380,7 +409,13 @@ public sealed class LibraryViewModelTests
             CancellationToken cancellationToken = default)
         {
             LastCreateRequest = request;
-            item = CreateResponse(request.Title, request.Type, MediaStatus.Planned, null);
+            item = CreateResponse(
+                request.Title,
+                request.Type,
+                MediaStatus.Planned,
+                null,
+                externalSource: request.ExternalSource,
+                externalId: request.ExternalId);
             return Task.FromResult(item);
         }
 
@@ -429,7 +464,7 @@ public sealed class LibraryViewModelTests
             return Task.CompletedTask;
         }
 
-        private static MediaItemResponse CreateResponse(
+        public static MediaItemResponse CreateResponse(
             string title,
             MediaType type,
             MediaStatus status,
@@ -438,7 +473,9 @@ public sealed class LibraryViewModelTests
             string? personalNotes = null,
             bool isFavorite = false,
             int? currentSeason = null,
-            int? currentEpisode = null)
+            int? currentEpisode = null,
+            string? externalSource = null,
+            string? externalId = null)
         {
             var now = DateTimeOffset.UtcNow;
             return new MediaItemResponse(
@@ -452,8 +489,8 @@ public sealed class LibraryViewModelTests
                 isFavorite,
                 currentSeason,
                 currentEpisode,
-                null,
-                null,
+                externalSource,
+                externalId,
                 null,
                 null,
                 null,
