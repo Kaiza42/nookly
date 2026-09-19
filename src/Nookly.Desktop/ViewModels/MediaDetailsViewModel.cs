@@ -60,6 +60,7 @@ public sealed partial class SeasonDetailsViewModel : ObservableObject
             var saved = progress.Episodes.FirstOrDefault(value => value.EpisodeNumber == item.Number);
             return new EpisodeViewModel(item, saved);
         }).ToArray();
+        isWatched = Episodes.Count > 0 && Episodes.All(item => item.IsWatched);
     }
 
     [ObservableProperty]
@@ -67,6 +68,9 @@ public sealed partial class SeasonDetailsViewModel : ObservableObject
 
     [ObservableProperty]
     private int watchedEpisodes;
+
+    [ObservableProperty]
+    private bool isWatched;
 
     public string Title => season.Title;
     public int Number => season.Number;
@@ -77,6 +81,16 @@ public sealed partial class SeasonDetailsViewModel : ObservableObject
     public IReadOnlyList<EpisodeViewModel> Episodes { get; }
 
     partial void OnWatchedEpisodesChanged(int value) => OnPropertyChanged(nameof(ProgressLabel));
+
+    partial void OnIsWatchedChanged(bool value)
+    {
+        foreach (var episode in Episodes)
+        {
+            episode.IsWatched = value;
+        }
+
+        RefreshWatchedCount();
+    }
 
     public void RefreshWatchedCount() => WatchedEpisodes = Episodes.Count(item => item.IsWatched);
 }

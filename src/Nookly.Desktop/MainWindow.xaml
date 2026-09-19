@@ -156,6 +156,44 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style x:Key="SeasonWatchedToggle" TargetType="ToggleButton">
+            <Setter Property="Height" Value="32" />
+            <Setter Property="Padding" Value="12,0" />
+            <Setter Property="Background" Value="#F4F7F5" />
+            <Setter Property="Foreground" Value="#46514C" />
+            <Setter Property="BorderBrush" Value="#CCD8D2" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="ToggleSurface" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6">
+                            <StackPanel Orientation="Horizontal" Margin="{TemplateBinding Padding}">
+                                <TextBlock x:Name="CheckMark" Text="&#xE73E;" FontFamily="Segoe MDL2 Assets"
+                                           FontSize="12" Margin="0,0,7,0" VerticalAlignment="Center"
+                                           Visibility="Collapsed" />
+                                <ContentPresenter VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ToggleSurface" Property="BorderBrush" Value="#91B5A5" />
+                                <Setter TargetName="ToggleSurface" Property="Background" Value="#EAF2EE" />
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="ToggleSurface" Property="Background" Value="#286C53" />
+                                <Setter TargetName="ToggleSurface" Property="BorderBrush" Value="#286C53" />
+                                <Setter Property="Foreground" Value="White" />
+                                <Setter TargetName="CheckMark" Property="Visibility" Value="Visible" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <Style x:Key="RestoreButton" TargetType="Button">
             <Setter Property="Height" Value="28" />
             <Setter Property="Padding" Value="10,0" />
@@ -382,13 +420,16 @@
                                                Foreground="#286C53" FontWeight="SemiBold" />
                                     <TextBlock Text="{Binding Description}" Margin="0,8,0,14" Foreground="#4D5967"
                                                TextWrapping="Wrap" />
+                                    <ToggleButton Content="Saison vue" IsChecked="{Binding IsWatched, Mode=TwoWay}"
+                                                  Style="{StaticResource SeasonWatchedToggle}"
+                                                  HorizontalAlignment="Left" Margin="0,0,0,14" />
                                     <TextBlock Text="Ma note sur cette saison" FontWeight="SemiBold" />
                                     <TextBox Text="{Binding PersonalNotes, UpdateSourceTrigger=PropertyChanged}"
                                              AcceptsReturn="True" TextWrapping="Wrap" MaxLength="4000"
                                              MinHeight="70" Padding="11,9" Margin="0,6,0,0"
                                              Style="{StaticResource RoundedTextBox}"
                                              VerticalScrollBarVisibility="Auto" />
-                                    <Button Content="Enregistrer la note de saison"
+                                    <Button Content="Enregistrer la saison"
                                             Command="{Binding DataContext.SaveSeasonProgressCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                             Style="{StaticResource PrimaryButton}" HorizontalAlignment="Left" Margin="0,8,0,14" />
                                     <ItemsControl ItemsSource="{Binding Episodes}"
@@ -417,9 +458,7 @@
                                                                        Foreground="#4D5967" TextWrapping="Wrap"
                                                                        MaxHeight="42" TextTrimming="CharacterEllipsis" />
                                                             <DockPanel Margin="0,9,0,0" LastChildFill="False">
-                                                                <CheckBox Content="Vu" IsChecked="{Binding IsWatched, Mode=TwoWay}"
-                                                                          VerticalAlignment="Center" Margin="0,0,14,0" />
-                                                                <Button Content="Enregistrer"
+                                                                <Button Content="Enregistrer la note"
                                                                         Command="{Binding DataContext.SaveEpisodeProgressCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                                                         CommandParameter="{Binding}"
                                                                         Style="{StaticResource SoftButton}" />

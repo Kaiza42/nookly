@@ -587,7 +587,14 @@ public partial class LibraryViewModel(
                 SelectedMediaDetails.ExternalId,
                 SelectedSeasonDetails.Number,
                 new UpdateSeasonProgressRequest(SelectedSeasonDetails.PersonalNotes));
-            DetailsStatusMessage = "Note de saison enregistree.";
+            await Task.WhenAll(SelectedSeasonDetails.Episodes.Select(episode =>
+                mediaApiClient.UpdateEpisodeProgressAsync(
+                    SelectedMediaDetails.ExternalId,
+                    SelectedSeasonDetails.Number,
+                    episode.Number,
+                    new UpdateEpisodeProgressRequest(episode.IsWatched, episode.PersonalNotes))));
+            SelectedSeasonDetails.RefreshWatchedCount();
+            DetailsStatusMessage = "Saison enregistree.";
             HasDetailsError = false;
         }
         catch (HttpRequestException)
