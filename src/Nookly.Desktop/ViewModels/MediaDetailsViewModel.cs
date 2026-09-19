@@ -4,8 +4,16 @@ using Nookly.Contracts.Media;
 
 namespace Nookly.Desktop.ViewModels;
 
-public sealed class MediaDetailsViewModel(MediaDetailsResponse details)
+public sealed class MediaDetailsViewModel
 {
+    private readonly MediaDetailsResponse details;
+
+    public MediaDetailsViewModel(MediaDetailsResponse details)
+    {
+        this.details = details;
+        Seasons = details.Seasons.Select(item => new SeasonSummaryViewModel(item)).ToArray();
+    }
+
     public MediaDetailsResponse Details => details;
     public string ExternalId => details.ExternalId;
     public MediaType Type => details.Type;
@@ -22,11 +30,14 @@ public sealed class MediaDetailsViewModel(MediaDetailsResponse details)
     public string? TrailerUrl => details.TrailerUrl;
     public bool HasTrailer => TrailerUrl is not null;
     public bool HasSeasons => details.Seasons.Count > 0;
-    public IReadOnlyList<SeasonSummaryViewModel> Seasons => details.Seasons.Select(item => new SeasonSummaryViewModel(item)).ToArray();
+    public IReadOnlyList<SeasonSummaryViewModel> Seasons { get; }
 }
 
-public sealed class SeasonSummaryViewModel(SeasonSummaryResponse season)
+public sealed partial class SeasonSummaryViewModel(SeasonSummaryResponse season) : ObservableObject
 {
+    [ObservableProperty]
+    private bool isSelected;
+
     public int Number => season.Number;
     public string Title => season.Title;
     public string? Description => season.Description;

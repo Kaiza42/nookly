@@ -496,11 +496,22 @@ public partial class LibraryViewModel(
 
     partial void OnSelectedSeasonChanged(SeasonSummaryViewModel? value)
     {
+        if (SelectedMediaDetails is not null)
+        {
+            foreach (var season in SelectedMediaDetails.Seasons)
+            {
+                season.IsSelected = ReferenceEquals(season, value);
+            }
+        }
+
         if (value is not null && SelectedMediaDetails is not null)
         {
             _ = LoadSeasonDetailsAsync(SelectedMediaDetails.ExternalId, value.Number);
         }
     }
+
+    [RelayCommand]
+    private void SelectSeason(SeasonSummaryViewModel season) => SelectedSeason = season;
 
     [RelayCommand]
     private void OpenTrailer()
