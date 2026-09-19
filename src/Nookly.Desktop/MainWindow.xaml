@@ -825,14 +825,16 @@
                                                     HorizontalAlignment="Right" VerticalAlignment="Center">
                                             <Button Content="Voir"
                                                     Command="{Binding DataContext.ShowLibraryItemCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                    CommandParameter="{Binding}" Height="30" Padding="10,0" Margin="0,0,6,0" />
+                                                    CommandParameter="{Binding}" Style="{StaticResource SoftButton}"
+                                                    ToolTip="Voir la fiche" Margin="0,0,8,0" />
                                             <Button Content="Modifier"
                                                     Command="{Binding DataContext.EditMediaCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                    CommandParameter="{Binding}" Height="30" Padding="10,0" Margin="0,0,6,0" />
-                                            <Button Content="Supprimer"
+                                                    CommandParameter="{Binding}" Style="{StaticResource SoftButton}"
+                                                    ToolTip="Modifier mes informations" Margin="0,0,7,0" />
+                                            <Button Content="&#xE74D;" ToolTip="Supprimer de ma bibliotheque"
                                                     Command="{Binding DataContext.DeleteMediaCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                    CommandParameter="{Binding}" Height="30" Padding="10,0"
-                                                    Foreground="#8E2F2A" Background="#FFF1F0" BorderBrush="#E6A39E" />
+                                                    CommandParameter="{Binding}" Style="{StaticResource VoteIconButton}"
+                                                    Foreground="#C43D3D" />
                                         </StackPanel>
                                     </Grid>
                                 </Border>
