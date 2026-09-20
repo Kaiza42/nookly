@@ -18,6 +18,7 @@ public partial class App : System.Windows.Application
                              ?? "http://localhost:5186/";
 
         services.AddSingleton<SessionStore>();
+        services.AddSingleton<ThemeService>();
         services.AddTransient<AuthenticatedHttpHandler>();
         services.AddHttpClient<AuthenticationApiClient>(client =>
         {
@@ -56,6 +57,8 @@ public partial class App : System.Windows.Application
     public void ShowMainWindow()
     {
         var provider = serviceProvider ?? throw new InvalidOperationException("Application services are unavailable.");
+        var session = provider.GetRequiredService<SessionStore>();
+        if (session.Member is not null) provider.GetRequiredService<ThemeService>().Load(session.Member.Id);
         Window window = provider.GetRequiredService<MainWindow>();
         MainWindow = window;
         window.Show();

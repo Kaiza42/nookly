@@ -4,7 +4,8 @@
         xmlns:converters="clr-namespace:Nookly.Desktop.Converters"
         Title="Nookly" Height="720" Width="1120" MinHeight="500" MinWidth="760"
         WindowStartupLocation="CenterScreen" Loaded="OnLoaded" Closing="OnClosing"
-        Background="#F5F6F8">
+        Background="{DynamicResource ThemeBackgroundBrush}"
+        Foreground="{DynamicResource ThemeTextBrush}">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
         <converters:InverseBooleanConverter x:Key="InverseBoolean" />
@@ -35,7 +36,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="NavSurface" Property="Background" Value="#292F37" />
+                                <Setter TargetName="NavSurface" Property="Background" Value="{DynamicResource ThemeSidebarHoverBrush}" />
                                 <Setter Property="Foreground" Value="#EDF2F0" />
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
@@ -83,7 +84,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Surface" Property="Background" Value="#343C45" />
+                                <Setter TargetName="Surface" Property="Background" Value="{DynamicResource ThemeSidebarHoverBrush}" />
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
                                 <Setter TargetName="Surface" Property="Background" Value="#3A4640" />
@@ -193,18 +194,24 @@
         <Style x:Key="PrimaryButton" TargetType="Button">
             <Setter Property="Height" Value="38" />
             <Setter Property="Padding" Value="16,0" />
-            <Setter Property="Background" Value="#286C53" />
+            <Setter Property="Background" Value="{DynamicResource ThemeAccentBrush}" />
             <Setter Property="Foreground" Value="White" />
-            <Setter Property="BorderBrush" Value="#286C53" />
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeAccentBrush}" />
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                        <Border x:Name="PrimarySurface" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="5">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
                                               Margin="{TemplateBinding Padding}" />
                         </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="PrimarySurface" Property="Background" Value="{DynamicResource ThemeAccentHoverBrush}" />
+                                <Setter TargetName="PrimarySurface" Property="BorderBrush" Value="{DynamicResource ThemeAccentHoverBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
@@ -212,8 +219,9 @@
         <Style x:Key="SoftButton" TargetType="Button">
             <Setter Property="Height" Value="30" />
             <Setter Property="Padding" Value="10,0" />
-            <Setter Property="Background" Value="White" />
-            <Setter Property="BorderBrush" Value="#C9CED6" />
+            <Setter Property="Background" Value="{DynamicResource ThemeSurfaceBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource ThemeTextBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBorderBrush}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="Template">
@@ -334,8 +342,8 @@
             </Setter>
         </Style>
         <Style x:Key="HoverCardBorder" TargetType="Border">
-            <Setter Property="Background" Value="White" />
-            <Setter Property="BorderBrush" Value="#DCE5E1" />
+            <Setter Property="Background" Value="{DynamicResource ThemeSurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBorderBrush}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="CornerRadius" Value="8" />
             <Style.Triggers>
@@ -352,8 +360,9 @@
             </Style.Triggers>
         </Style>
         <Style x:Key="RoundedTextBox" TargetType="TextBox">
-            <Setter Property="Background" Value="White" />
-            <Setter Property="BorderBrush" Value="#C9CED6" />
+            <Setter Property="Background" Value="{DynamicResource ThemeSurfaceBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource ThemeTextBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBorderBrush}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="Template">
                 <Setter.Value>
@@ -399,7 +408,7 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="ListViewItem">
                         <Grid>
-                            <Border x:Name="ShadowSurface" Margin="2" Background="White"
+                            <Border x:Name="ShadowSurface" Margin="2" Background="{DynamicResource ThemeSurfaceBrush}"
                                     CornerRadius="8" Opacity="0" IsHitTestVisible="False" />
                             <Border x:Name="HoverSurface" Background="Transparent" CornerRadius="8">
                                 <ContentPresenter />
@@ -422,7 +431,7 @@
         </Style>
         <DataTemplate x:Key="RichDetailsTemplate">
             <StackPanel HorizontalAlignment="Stretch">
-                <TextBlock Margin="0,14,0,0" Foreground="#69717D" TextWrapping="Wrap">
+                <TextBlock Margin="0,14,0,0" Foreground="{DynamicResource ThemeMutedTextBrush}" TextWrapping="Wrap">
                     <Run Text="{Binding ReleaseDateLabel, Mode=OneWay}" /><Run Text="  |  " />
                     <Run Text="{Binding RuntimeLabel, Mode=OneWay}" /><Run Text="  |  " />
                     <Run Text="{Binding StatusLabel, Mode=OneWay}" /><Run Text="  |  TMDB " />
@@ -482,7 +491,7 @@
                             <DataTemplate>
                                 <StackPanel>
                                     <TextBlock Text="{Binding Title}" FontSize="17" FontWeight="SemiBold" />
-                                    <TextBlock Text="{Binding MetaLabel}" Margin="0,5,0,0" Foreground="#69717D" />
+                                    <TextBlock Text="{Binding MetaLabel}" Margin="0,5,0,0" Foreground="{DynamicResource ThemeMutedTextBrush}" />
                                     <TextBlock Text="{Binding Description}" Margin="0,8,0,14" Foreground="#4D5967"
                                                TextWrapping="Wrap" MaxWidth="1050"
                                                HorizontalAlignment="Left" />
@@ -523,7 +532,7 @@
                                                                 <Run Text="{Binding Title, Mode=OneWay}" />
                                                             </TextBlock>
                                                             <TextBlock Text="{Binding MetaLabel}" Margin="0,3,0,0"
-                                                                       Foreground="#69717D" FontSize="11" />
+                                                                       Foreground="{DynamicResource ThemeMutedTextBrush}" FontSize="11" />
                                                             <TextBlock Text="{Binding Description}" Margin="0,5,0,0"
                                                                        Foreground="#4D5967" TextWrapping="Wrap"
                                                                        HorizontalAlignment="Stretch" />
@@ -559,7 +568,7 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <Border Background="#20242B">
+        <Border Background="{DynamicResource ThemeSidebarBrush}">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="78" />
@@ -682,14 +691,14 @@
                     </Grid.ColumnDefinitions>
                     <StackPanel>
                         <TextBlock Text="Bibliotheque" FontSize="28" FontWeight="SemiBold" />
-                        <TextBlock Text="Tes films, series et animes" Margin="0,5,0,0" Foreground="#69717D" />
+                        <TextBlock Text="Tes films, series et animes" Margin="0,5,0,0" Foreground="{DynamicResource ThemeMutedTextBrush}" />
                     </StackPanel>
                     <StackPanel Grid.Column="1" Orientation="Horizontal">
                         <Button Content="Ajouter" Command="{Binding OpenDiscoverCommand}"
                                 Style="{StaticResource PrimaryButton}" Margin="0,0,8,0" />
                         <Button Content="Actualiser" Command="{Binding LoadCommand}"
                                 IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBoolean}}"
-                                Height="38" Padding="16,0" Background="White" BorderBrush="#D7DBE1" />
+                                Height="38" Padding="16,0" Background="{DynamicResource ThemeSurfaceBrush}" BorderBrush="{DynamicResource ThemeBorderBrush}" />
                     </StackPanel>
                 </Grid>
 
@@ -697,8 +706,8 @@
                          Margin="0,22,0,0" Height="40" Padding="12,8" BorderBrush="#C9CED6"
                          ToolTip="Rechercher uniquement dans ta bibliotheque" />
 
-                <Border Grid.Row="2" Margin="0,14,0,0" Padding="18" Background="White"
-                        BorderBrush="#D7DBE1" BorderThickness="1" CornerRadius="6"
+                <Border Grid.Row="2" Margin="0,14,0,0" Padding="18" Background="{DynamicResource ThemeSurfaceBrush}"
+                        BorderBrush="{DynamicResource ThemeBorderBrush}" BorderThickness="1" CornerRadius="6"
                         Visibility="{Binding IsCreatePanelOpen, Converter={StaticResource BoolToVisibility}}">
                     <Grid>
                         <Grid.RowDefinitions>
@@ -784,7 +793,7 @@
                         </ListView.ItemContainerStyle>
                         <ListView.ItemTemplate>
                             <DataTemplate>
-                                <Border MinHeight="112" Padding="14,12" Background="White"
+                                <Border MinHeight="112" Padding="14,12" Background="{DynamicResource ThemeSurfaceBrush}"
                                         BorderBrush="#E0E3E8" BorderThickness="1" CornerRadius="6">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
@@ -855,7 +864,7 @@
                 <Grid>
                     <StackPanel>
                         <TextBlock Text="Decouvrir" FontSize="28" FontWeight="SemiBold" />
-                        <TextBlock Text="Explore les films, series et animes" Margin="0,5,0,0" Foreground="#69717D" />
+                        <TextBlock Text="Explore les films, series et animes" Margin="0,5,0,0" Foreground="{DynamicResource ThemeMutedTextBrush}" />
                     </StackPanel>
                     <Button Content="⚄" Command="{Binding RefreshRecommendationsCommand}"
                             ToolTip="Nouvelle selection"
@@ -917,7 +926,7 @@
                           Foreground="#35423C" FontWeight="SemiBold"
                           Visibility="{Binding IsDiscoveryBrowseSelected, Converter={StaticResource BoolToVisibility}}"
                           Style="{StaticResource CleanExpander}">
-                    <Border Margin="0,6,0,0" Padding="12,10" Background="White"
+                    <Border Margin="0,6,0,0" Padding="12,10" Background="{DynamicResource ThemeSurfaceBrush}"
                             BorderBrush="#D9E2DE" BorderThickness="1" CornerRadius="7">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -992,7 +1001,7 @@
                     </ListView.ItemContainerStyle>
                     <ListView.ItemTemplate>
                         <DataTemplate>
-                            <Border Padding="12" Background="White" BorderBrush="#E0E3E8"
+                            <Border Padding="12" Background="{DynamicResource ThemeSurfaceBrush}" BorderBrush="{DynamicResource ThemeBorderBrush}"
                                     BorderThickness="1" CornerRadius="8">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
@@ -1053,7 +1062,7 @@
                     </ListView.ItemContainerStyle>
                     <ListView.ItemTemplate>
                         <DataTemplate>
-                            <Border Padding="12" Background="White" BorderBrush="#E0E3E8"
+                            <Border Padding="12" Background="{DynamicResource ThemeSurfaceBrush}" BorderBrush="{DynamicResource ThemeBorderBrush}"
                                     BorderThickness="1" CornerRadius="8">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
@@ -1212,8 +1221,8 @@
                     </StackPanel>
                 </Grid>
 
-                <Border Grid.Row="1" Margin="0,24,0,0" Padding="14" Background="White"
-                        BorderBrush="#D7DBE1" BorderThickness="1" CornerRadius="6">
+                <Border Grid.Row="1" Margin="0,24,0,0" Padding="14" Background="{DynamicResource ThemeSurfaceBrush}"
+                        BorderBrush="{DynamicResource ThemeBorderBrush}" BorderThickness="1" CornerRadius="6">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
@@ -1228,8 +1237,8 @@
                     </Grid>
                 </Border>
 
-                <Border Grid.Row="2" Margin="0,12,0,0" Padding="14" Background="White"
-                        BorderBrush="#D7DBE1" BorderThickness="1" CornerRadius="6">
+                <Border Grid.Row="2" Margin="0,12,0,0" Padding="14" Background="{DynamicResource ThemeSurfaceBrush}"
+                        BorderBrush="{DynamicResource ThemeBorderBrush}" BorderThickness="1" CornerRadius="6">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -1304,8 +1313,8 @@
                             <ItemsControl ItemsSource="{Binding BankHistory}" Margin="0,10,0,0">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Border Padding="12" Margin="0,0,0,8" Background="White"
-                                                BorderBrush="#D7DBE1" BorderThickness="1" CornerRadius="4">
+                                        <Border Padding="12" Margin="0,0,0,8" Background="{DynamicResource ThemeSurfaceBrush}"
+                                                BorderBrush="{DynamicResource ThemeBorderBrush}" BorderThickness="1" CornerRadius="4">
                                             <StackPanel>
                                                 <TextBlock Text="{Binding MonthLabel}" FontWeight="SemiBold" FontSize="15" />
                                                 <TextBlock Text="{Binding SummaryLabel}" Margin="0,5,0,8" Foreground="#69717D" />
@@ -1354,7 +1363,7 @@
                         </ListView.ItemContainerStyle>
                         <ListView.ItemTemplate>
                             <DataTemplate>
-                                <Border Padding="14,11" Background="White" BorderBrush="#E0E4E9"
+                                <Border Padding="14,11" Background="{DynamicResource ThemeSurfaceBrush}" BorderBrush="{DynamicResource ThemeBorderBrush}"
                                         BorderThickness="1" CornerRadius="4">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
@@ -1398,6 +1407,73 @@
                 </StackPanel>
                 <ScrollViewer Grid.Row="1" Margin="0,24,0,0" VerticalScrollBarVisibility="Auto">
                     <StackPanel>
+                        <Expander Header="Apparence" IsExpanded="True" Margin="0,0,0,24"
+                                  Foreground="{DynamicResource ThemeTextBrush}" FontSize="18" FontWeight="SemiBold"
+                                  Style="{StaticResource CleanExpander}">
+                            <StackPanel Margin="19,8,0,0" TextElement.FontWeight="Normal">
+                                <TextBlock Text="Palettes" Foreground="{DynamicResource ThemeMutedTextBrush}"
+                                           FontSize="12" Margin="0,0,0,8" />
+                                <WrapPanel>
+                                    <Button Content="Nookly" Tag="nookly" Click="ThemePreset_Click"
+                                            Style="{StaticResource FilterTileButton}" />
+                                    <Button Content="Nuit" Tag="night" Click="ThemePreset_Click"
+                                            Style="{StaticResource FilterTileButton}" />
+                                    <Button Content="Foret" Tag="forest" Click="ThemePreset_Click"
+                                            Style="{StaticResource FilterTileButton}" />
+                                    <Button Content="Bordeaux" Tag="burgundy" Click="ThemePreset_Click"
+                                            Style="{StaticResource FilterTileButton}" />
+                                    <Button Content="Ocean" Tag="ocean" Click="ThemePreset_Click"
+                                            Style="{StaticResource FilterTileButton}" />
+                                </WrapPanel>
+                                <TextBlock Text="Personnalise" FontSize="14" FontWeight="SemiBold"
+                                           Margin="0,13,0,8" />
+                                <WrapPanel>
+                                    <StackPanel Width="150" Margin="0,0,10,10">
+                                        <TextBlock Text="Fond" Foreground="{DynamicResource ThemeMutedTextBrush}" FontSize="11" />
+                                        <TextBox x:Name="ThemeBackgroundInput" Height="32" Margin="0,4,0,0"
+                                                 Padding="8,0" VerticalContentAlignment="Center" Style="{StaticResource RoundedTextBox}" />
+                                    </StackPanel>
+                                    <StackPanel Width="150" Margin="0,0,10,10">
+                                        <TextBlock Text="Cartes" Foreground="{DynamicResource ThemeMutedTextBrush}" FontSize="11" />
+                                        <TextBox x:Name="ThemeSurfaceInput" Height="32" Margin="0,4,0,0"
+                                                 Padding="8,0" VerticalContentAlignment="Center" Style="{StaticResource RoundedTextBox}" />
+                                    </StackPanel>
+                                    <StackPanel Width="150" Margin="0,0,10,10">
+                                        <TextBlock Text="Menu lateral" Foreground="{DynamicResource ThemeMutedTextBrush}" FontSize="11" />
+                                        <TextBox x:Name="ThemeSidebarInput" Height="32" Margin="0,4,0,0"
+                                                 Padding="8,0" VerticalContentAlignment="Center" Style="{StaticResource RoundedTextBox}" />
+                                    </StackPanel>
+                                    <StackPanel Width="150" Margin="0,0,10,10">
+                                        <TextBlock Text="Accent" Foreground="{DynamicResource ThemeMutedTextBrush}" FontSize="11" />
+                                        <TextBox x:Name="ThemeAccentInput" Height="32" Margin="0,4,0,0"
+                                                 Padding="8,0" VerticalContentAlignment="Center" Style="{StaticResource RoundedTextBox}" />
+                                    </StackPanel>
+                                    <StackPanel Width="150" Margin="0,0,10,10">
+                                        <TextBlock Text="Texte" Foreground="{DynamicResource ThemeMutedTextBrush}" FontSize="11" />
+                                        <TextBox x:Name="ThemeTextInput" Height="32" Margin="0,4,0,0"
+                                                 Padding="8,0" VerticalContentAlignment="Center" Style="{StaticResource RoundedTextBox}" />
+                                    </StackPanel>
+                                    <StackPanel Width="150" Margin="0,0,10,10">
+                                        <TextBlock Text="Texte secondaire" Foreground="{DynamicResource ThemeMutedTextBrush}" FontSize="11" />
+                                        <TextBox x:Name="ThemeMutedInput" Height="32" Margin="0,4,0,0"
+                                                 Padding="8,0" VerticalContentAlignment="Center" Style="{StaticResource RoundedTextBox}" />
+                                    </StackPanel>
+                                    <StackPanel Width="150" Margin="0,0,10,10">
+                                        <TextBlock Text="Bordures" Foreground="{DynamicResource ThemeMutedTextBrush}" FontSize="11" />
+                                        <TextBox x:Name="ThemeBorderInput" Height="32" Margin="0,4,0,0"
+                                                 Padding="8,0" VerticalContentAlignment="Center" Style="{StaticResource RoundedTextBox}" />
+                                    </StackPanel>
+                                </WrapPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Content="Appliquer" Click="ApplyCustomTheme_Click"
+                                            Style="{StaticResource PrimaryButton}" />
+                                    <Button Content="Retablir Nookly" Click="ResetTheme_Click"
+                                            Style="{StaticResource SoftButton}" Margin="8,0,0,0" />
+                                    <TextBlock x:Name="ThemeStatusText" Margin="12,0,0,0"
+                                               VerticalAlignment="Center" Foreground="{DynamicResource ThemeMutedTextBrush}" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Expander>
                         <TextBlock Text="Compte" FontSize="18" FontWeight="SemiBold" />
                         <CheckBox x:Name="StaySignedInCheckBox" Content="Rester connecte"
                                   Margin="0,10,0,24" Checked="StaySignedIn_Changed" Unchecked="StaySignedIn_Changed" />
@@ -1510,8 +1586,8 @@
                     </DataGrid.Columns>
                 </DataGrid>
 
-                <Border Grid.Row="2" Margin="0,18,0,0" Padding="16" Background="White"
-                        BorderBrush="#D7DBE1" BorderThickness="1" CornerRadius="6">
+                <Border Grid.Row="2" Margin="0,18,0,0" Padding="16" Background="{DynamicResource ThemeSurfaceBrush}"
+                        BorderBrush="{DynamicResource ThemeBorderBrush}" BorderThickness="1" CornerRadius="6">
                     <StackPanel>
                         <TextBlock Text="Envoyer une notification" FontSize="16" FontWeight="SemiBold" />
                         <TextBlock Text="Selectionne d'abord un utilisateur dans la liste."

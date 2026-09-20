@@ -16,11 +16,13 @@ public partial class MainWindow : Window
     private readonly Services.SessionStore session;
     private readonly System.Windows.Forms.NotifyIcon trayIcon;
     private readonly Services.MemberApiClient memberApiClient;
+    private readonly Services.ThemeService themeService;
     private readonly System.Windows.Threading.DispatcherTimer activityTimer;
     private bool allowClose;
     private bool isSidebarCollapsed;
     public MainWindow(LibraryViewModel viewModel, AdminViewModel adminViewModel,
-        Services.SessionStore session, Services.MemberApiClient memberApiClient)
+        Services.SessionStore session, Services.MemberApiClient memberApiClient,
+        Services.ThemeService themeService)
     {
         InitializeComponent();
         var workArea = SystemParameters.WorkArea;
@@ -31,6 +33,7 @@ public partial class MainWindow : Window
         ViewModel = viewModel;
         this.session = session;
         this.memberApiClient = memberApiClient;
+        this.themeService = themeService;
         DataContext = viewModel;
         AdministrationPanel.DataContext = adminViewModel;
         AdministrationButton.Visibility = string.Equals(session.Member?.Role, "Admin", StringComparison.OrdinalIgnoreCase)
@@ -64,6 +67,7 @@ public partial class MainWindow : Window
 
         DiscoveryTitlePlaceholder.Text = $"Exemple : {SearchExamples[Random.Shared.Next(SearchExamples.Length)]}";
         HiddenTitleSearchPlaceholder.Text = $"Exemple : {SearchExamples[Random.Shared.Next(SearchExamples.Length)]}";
+        PopulateThemeInputs(themeService.Current);
         UpdateDiscoveryTitlePlaceholder();
         UpdateHiddenTitleSearchPlaceholder();
         await ViewModel.LoadCommand.ExecuteAsync(null);
@@ -187,6 +191,55 @@ public partial class MainWindow : Window
     private void StaySignedIn_Changed(object sender, RoutedEventArgs e)
     {
         if (IsLoaded) session.SetStaySignedIn(StaySignedInCheckBox.IsChecked == true);
+    }
+
+    private void ThemePreset_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement { Tag: string key } ||
+            !Services.ThemeService.Presets.TryGetValue(key, out var palette) || session.Member is null) return;
+        themeService.ApplyAndSave(session.Member.Id, palette);
+        PopulateThemeInputs(palette);
+        ThemeStatusText.Text = $"Palette {palette.Name} appliquee.";
+    }
+
+    private void ApplyCustomTheme_Click(object sender, RoutedEventArgs e)
+    {
+        if (session.Member is null) return;
+        var colors = new[]
+        {
+            ThemeBackgroundInput.Text, ThemeSurfaceInput.Text, ThemeSidebarInput.Text,
+            ThemeAccentInput.Text, ThemeTextInput.Text, ThemeMutedInput.Text, ThemeBorderInput.Text
+        };
+        if (colors.Any(value => !Services.ThemeService.IsValidColor(value)))
+        {
+            ThemeStatusText.Text = "Une couleur n'est pas valide.";
+            return;
+        }
+
+        var palette = new Services.ThemePalette(
+            "Personnalise", colors[0], colors[1], colors[2], colors[3], colors[4], colors[5], colors[6]);
+        themeService.ApplyAndSave(session.Member.Id, palette);
+        ThemeStatusText.Text = "Theme personnalise applique.";
+    }
+
+    private void ResetTheme_Click(object sender, RoutedEventArgs e)
+    {
+        if (session.Member is null) return;
+        var palette = Services.ThemeService.Presets["nookly"];
+        themeService.ApplyAndSave(session.Member.Id, palette);
+        PopulateThemeInputs(palette);
+        ThemeStatusText.Text = "Theme Nookly retabli.";
+    }
+
+    private void PopulateThemeInputs(Services.ThemePalette palette)
+    {
+        ThemeBackgroundInput.Text = palette.Background;
+        ThemeSurfaceInput.Text = palette.Surface;
+        ThemeSidebarInput.Text = palette.Sidebar;
+        ThemeAccentInput.Text = palette.Accent;
+        ThemeTextInput.Text = palette.Text;
+        ThemeMutedInput.Text = palette.MutedText;
+        ThemeBorderInput.Text = palette.Border;
     }
 
     private async void Administration_Click(object sender, RoutedEventArgs e)
