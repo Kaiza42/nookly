@@ -11,7 +11,7 @@
         Foreground="{DynamicResource ThemeTextBrush}">
     <shell:WindowChrome.WindowChrome>
         <shell:WindowChrome CaptionHeight="0" ResizeBorderThickness="6"
-                            GlassFrameThickness="0" CornerRadius="0"
+                            GlassFrameThickness="0" CornerRadius="9"
                             UseAeroCaptionButtons="False" />
     </shell:WindowChrome.WindowChrome>
     <Window.Resources>
