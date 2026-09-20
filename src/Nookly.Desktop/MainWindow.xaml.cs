@@ -211,10 +211,10 @@ public partial class MainWindow : Window
     {
         if (sender is not System.Windows.Controls.TextBox input) return;
         e.Handled = true;
-        var picker = new ColorPickerWindow(input.Text) { Owner = this };
+        var picker = new ColorPickerWindow(GetThemeColor(input)) { Owner = this };
         if (picker.ShowDialog() != true) return;
 
-        input.Text = picker.SelectedHex;
+        SetThemeColor(input, picker.SelectedHex);
         ApplyCustomTheme();
     }
 
@@ -223,8 +223,9 @@ public partial class MainWindow : Window
         if (session.Member is null) return;
         var colors = new[]
         {
-            ThemeBackgroundInput.Text, ThemeSurfaceInput.Text, ThemeSidebarInput.Text,
-            ThemeAccentInput.Text, ThemeTextInput.Text, ThemeMutedInput.Text, ThemeBorderInput.Text
+            GetThemeColor(ThemeBackgroundInput), GetThemeColor(ThemeSurfaceInput), GetThemeColor(ThemeSidebarInput),
+            GetThemeColor(ThemeAccentInput), GetThemeColor(ThemeTextInput), GetThemeColor(ThemeMutedInput),
+            GetThemeColor(ThemeBorderInput)
         };
         if (colors.Any(value => !Services.ThemeService.IsValidColor(value)))
         {
@@ -249,13 +250,24 @@ public partial class MainWindow : Window
 
     private void PopulateThemeInputs(Services.ThemePalette palette)
     {
-        ThemeBackgroundInput.Text = palette.Background;
-        ThemeSurfaceInput.Text = palette.Surface;
-        ThemeSidebarInput.Text = palette.Sidebar;
-        ThemeAccentInput.Text = palette.Accent;
-        ThemeTextInput.Text = palette.Text;
-        ThemeMutedInput.Text = palette.MutedText;
-        ThemeBorderInput.Text = palette.Border;
+        SetThemeColor(ThemeBackgroundInput, palette.Background);
+        SetThemeColor(ThemeSurfaceInput, palette.Surface);
+        SetThemeColor(ThemeSidebarInput, palette.Sidebar);
+        SetThemeColor(ThemeAccentInput, palette.Accent);
+        SetThemeColor(ThemeTextInput, palette.Text);
+        SetThemeColor(ThemeMutedInput, palette.MutedText);
+        SetThemeColor(ThemeBorderInput, palette.Border);
+    }
+
+    private static string GetThemeColor(System.Windows.Controls.TextBox input) =>
+        input.Tag as string ?? "#FFFFFF";
+
+    private static void SetThemeColor(System.Windows.Controls.TextBox input, string color)
+    {
+        input.Tag = color;
+        input.Text = string.Empty;
+        input.Background = new SolidColorBrush(
+            (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(color));
     }
 
     private async void Administration_Click(object sender, RoutedEventArgs e)
