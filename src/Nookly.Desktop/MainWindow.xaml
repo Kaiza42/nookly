@@ -1431,37 +1431,51 @@
                                     <StackPanel Width="150" Margin="0,0,10,10">
                                         <TextBlock Text="Fond" Foreground="{DynamicResource ThemeMutedTextBrush}" FontSize="11" />
                                         <TextBox x:Name="ThemeBackgroundInput" Height="32" Margin="0,4,0,0"
-                                                 Padding="8,0" VerticalContentAlignment="Center" Style="{StaticResource RoundedTextBox}" />
+                                                 Padding="8,0" VerticalContentAlignment="Center" Style="{StaticResource RoundedTextBox}"
+                                                 IsReadOnly="True" Cursor="Hand" ToolTip="Choisir une couleur"
+                                                 PreviewMouseLeftButtonDown="ThemeColorInput_Click" />
                                     </StackPanel>
                                     <StackPanel Width="150" Margin="0,0,10,10">
                                         <TextBlock Text="Cartes" Foreground="{DynamicResource ThemeMutedTextBrush}" FontSize="11" />
                                         <TextBox x:Name="ThemeSurfaceInput" Height="32" Margin="0,4,0,0"
-                                                 Padding="8,0" VerticalContentAlignment="Center" Style="{StaticResource RoundedTextBox}" />
+                                                 Padding="8,0" VerticalContentAlignment="Center" Style="{StaticResource RoundedTextBox}"
+                                                 IsReadOnly="True" Cursor="Hand" ToolTip="Choisir une couleur"
+                                                 PreviewMouseLeftButtonDown="ThemeColorInput_Click" />
                                     </StackPanel>
                                     <StackPanel Width="150" Margin="0,0,10,10">
                                         <TextBlock Text="Menu lateral" Foreground="{DynamicResource ThemeMutedTextBrush}" FontSize="11" />
                                         <TextBox x:Name="ThemeSidebarInput" Height="32" Margin="0,4,0,0"
-                                                 Padding="8,0" VerticalContentAlignment="Center" Style="{StaticResource RoundedTextBox}" />
+                                                 Padding="8,0" VerticalContentAlignment="Center" Style="{StaticResource RoundedTextBox}"
+                                                 IsReadOnly="True" Cursor="Hand" ToolTip="Choisir une couleur"
+                                                 PreviewMouseLeftButtonDown="ThemeColorInput_Click" />
                                     </StackPanel>
                                     <StackPanel Width="150" Margin="0,0,10,10">
                                         <TextBlock Text="Accent" Foreground="{DynamicResource ThemeMutedTextBrush}" FontSize="11" />
                                         <TextBox x:Name="ThemeAccentInput" Height="32" Margin="0,4,0,0"
-                                                 Padding="8,0" VerticalContentAlignment="Center" Style="{StaticResource RoundedTextBox}" />
+                                                 Padding="8,0" VerticalContentAlignment="Center" Style="{StaticResource RoundedTextBox}"
+                                                 IsReadOnly="True" Cursor="Hand" ToolTip="Choisir une couleur"
+                                                 PreviewMouseLeftButtonDown="ThemeColorInput_Click" />
                                     </StackPanel>
                                     <StackPanel Width="150" Margin="0,0,10,10">
                                         <TextBlock Text="Texte" Foreground="{DynamicResource ThemeMutedTextBrush}" FontSize="11" />
                                         <TextBox x:Name="ThemeTextInput" Height="32" Margin="0,4,0,0"
-                                                 Padding="8,0" VerticalContentAlignment="Center" Style="{StaticResource RoundedTextBox}" />
+                                                 Padding="8,0" VerticalContentAlignment="Center" Style="{StaticResource RoundedTextBox}"
+                                                 IsReadOnly="True" Cursor="Hand" ToolTip="Choisir une couleur"
+                                                 PreviewMouseLeftButtonDown="ThemeColorInput_Click" />
                                     </StackPanel>
                                     <StackPanel Width="150" Margin="0,0,10,10">
                                         <TextBlock Text="Texte secondaire" Foreground="{DynamicResource ThemeMutedTextBrush}" FontSize="11" />
                                         <TextBox x:Name="ThemeMutedInput" Height="32" Margin="0,4,0,0"
-                                                 Padding="8,0" VerticalContentAlignment="Center" Style="{StaticResource RoundedTextBox}" />
+                                                 Padding="8,0" VerticalContentAlignment="Center" Style="{StaticResource RoundedTextBox}"
+                                                 IsReadOnly="True" Cursor="Hand" ToolTip="Choisir une couleur"
+                                                 PreviewMouseLeftButtonDown="ThemeColorInput_Click" />
                                     </StackPanel>
                                     <StackPanel Width="150" Margin="0,0,10,10">
                                         <TextBlock Text="Bordures" Foreground="{DynamicResource ThemeMutedTextBrush}" FontSize="11" />
                                         <TextBox x:Name="ThemeBorderInput" Height="32" Margin="0,4,0,0"
-                                                 Padding="8,0" VerticalContentAlignment="Center" Style="{StaticResource RoundedTextBox}" />
+                                                 Padding="8,0" VerticalContentAlignment="Center" Style="{StaticResource RoundedTextBox}"
+                                                 IsReadOnly="True" Cursor="Hand" ToolTip="Choisir une couleur"
+                                                 PreviewMouseLeftButtonDown="ThemeColorInput_Click" />
                                     </StackPanel>
                                 </WrapPanel>
                                 <StackPanel Orientation="Horizontal">

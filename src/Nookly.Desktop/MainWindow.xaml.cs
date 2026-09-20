@@ -204,6 +204,22 @@ public partial class MainWindow : Window
 
     private void ApplyCustomTheme_Click(object sender, RoutedEventArgs e)
     {
+        ApplyCustomTheme();
+    }
+
+    private void ThemeColorInput_Click(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is not System.Windows.Controls.TextBox input) return;
+        e.Handled = true;
+        var picker = new ColorPickerWindow(input.Text) { Owner = this };
+        if (picker.ShowDialog() != true) return;
+
+        input.Text = picker.SelectedHex;
+        ApplyCustomTheme();
+    }
+
+    private void ApplyCustomTheme()
+    {
         if (session.Member is null) return;
         var colors = new[]
         {
