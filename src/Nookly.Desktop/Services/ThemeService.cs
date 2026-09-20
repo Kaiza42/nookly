@@ -24,7 +24,7 @@ public sealed class ThemeService
     public static IReadOnlyDictionary<string, ThemePalette> Presets { get; } =
         new Dictionary<string, ThemePalette>(StringComparer.OrdinalIgnoreCase)
         {
-            ["nookly"] = new("Nookly", "#F5F6F8", "#FFFFFF", "#20242B", "#286C53", "#11161C", "#69717D", "#D7DBE1", "#20242B"),
+            ["nookly"] = new("Nookly", "#F5F6F8", "#FFFFFF", "#20242B", "#286C53", "#11161C", "#69717D", "#D7DBE1", "#F5F6F8"),
             ["night"] = new("Nuit", "#171A1F", "#22262D", "#111318", "#5E9B82", "#F1F4F3", "#AAB3BC", "#39414A", "#22262D"),
             ["forest"] = new("Foret", "#EEF2EF", "#FAFCFA", "#1E2924", "#3F765E", "#17201C", "#65736C", "#CBD6D0", "#E3EAE6"),
             ["burgundy"] = new("Bordeaux", "#F4F1F2", "#FFFFFF", "#292126", "#7A3E50", "#21171B", "#78676D", "#D9CDD1", "#EEE7E9"),

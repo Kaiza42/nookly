@@ -11,7 +11,7 @@
         <SolidColorBrush x:Key="ThemeTextBrush" Color="#11161C" />
         <SolidColorBrush x:Key="ThemeMutedTextBrush" Color="#69717D" />
         <SolidColorBrush x:Key="ThemeBorderBrush" Color="#D7DBE1" />
-        <SolidColorBrush x:Key="ThemeTitleBarBrush" Color="#20242B" />
-        <SolidColorBrush x:Key="ThemeTitleBarTextBrush" Color="#F4F7F6" />
+        <SolidColorBrush x:Key="ThemeTitleBarBrush" Color="#F5F6F8" />
+        <SolidColorBrush x:Key="ThemeTitleBarTextBrush" Color="#11161C" />
     </Application.Resources>
 </Application>

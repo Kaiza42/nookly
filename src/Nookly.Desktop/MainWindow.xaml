@@ -646,19 +646,14 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <Grid Grid.ColumnSpan="2" Background="{DynamicResource ThemeTitleBarBrush}"
+        <Border Grid.Column="0" Background="{DynamicResource ThemeSidebarBrush}"
+                MouseLeftButtonDown="TitleBar_MouseLeftButtonDown" />
+        <Grid Grid.Column="1" Background="{DynamicResource ThemeTitleBarBrush}"
               MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <StackPanel Orientation="Horizontal" Margin="12,0,0,0" VerticalAlignment="Center">
-                <TextBlock Text="N" Width="20" Height="20" TextAlignment="Center" Padding="0,1,0,0"
-                           Background="{DynamicResource ThemeAccentBrush}" Foreground="White"
-                           FontWeight="SemiBold" FontSize="12" />
-                <TextBlock Text="Nookly" Margin="8,0,0,0" VerticalAlignment="Center"
-                           Foreground="{DynamicResource ThemeTitleBarTextBrush}" FontWeight="SemiBold" />
-            </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal">
                 <Button Content="&#xE921;" Click="MinimizeWindow_Click" Style="{StaticResource TitleBarButton}" ToolTip="Reduire" />
                 <Button x:Name="MaxRestoreButton" Content="&#xE922;" Click="MaxRestoreWindow_Click"
