@@ -25,10 +25,10 @@ public sealed class ThemeService
         new Dictionary<string, ThemePalette>(StringComparer.OrdinalIgnoreCase)
         {
             ["nookly"] = new("Nookly", "#F5F6F8", "#FFFFFF", "#20242B", "#286C53", "#11161C", "#69717D", "#D7DBE1", "#F5F6F8"),
-            ["night"] = new("Nuit", "#171A1F", "#22262D", "#111318", "#5E9B82", "#F1F4F3", "#AAB3BC", "#39414A", "#22262D"),
-            ["forest"] = new("Foret", "#EEF2EF", "#FAFCFA", "#1E2924", "#3F765E", "#17201C", "#65736C", "#CBD6D0", "#E3EAE6"),
-            ["burgundy"] = new("Bordeaux", "#F4F1F2", "#FFFFFF", "#292126", "#7A3E50", "#21171B", "#78676D", "#D9CDD1", "#EEE7E9"),
-            ["ocean"] = new("Ocean", "#EFF3F5", "#FFFFFF", "#1E272D", "#3E7180", "#152026", "#65747C", "#CBD7DC", "#E5ECEF")
+            ["night"] = new("Nuit", "#171A1F", "#22262D", "#111318", "#5E9B82", "#F1F4F3", "#AAB3BC", "#39414A", "#171A1F"),
+            ["forest"] = new("Foret", "#EEF2EF", "#FAFCFA", "#1E2924", "#3F765E", "#17201C", "#65736C", "#CBD6D0", "#EEF2EF"),
+            ["burgundy"] = new("Bordeaux", "#F4F1F2", "#FFFFFF", "#292126", "#7A3E50", "#21171B", "#78676D", "#D9CDD1", "#F4F1F2"),
+            ["ocean"] = new("Ocean", "#EFF3F5", "#FFFFFF", "#1E272D", "#3E7180", "#152026", "#65747C", "#CBD7DC", "#EFF3F5")
         };
 
     public ThemePalette Current { get; private set; } = Presets["nookly"];
@@ -46,9 +46,9 @@ public sealed class ThemeService
         try
         {
             var palette = JsonSerializer.Deserialize<ThemePalette>(File.ReadAllText(path)) ?? Presets["nookly"];
-            Apply(string.Equals(palette.Name, "Nookly", StringComparison.OrdinalIgnoreCase)
-                ? Presets["nookly"]
-                : palette);
+            var currentPreset = Presets.Values.FirstOrDefault(candidate =>
+                string.Equals(candidate.Name, palette.Name, StringComparison.OrdinalIgnoreCase));
+            Apply(currentPreset ?? palette);
         }
         catch (JsonException)
         {

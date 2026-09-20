@@ -665,7 +665,7 @@
         <Border Grid.Row="1" Background="{DynamicResource ThemeSidebarBrush}">
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="78" />
+                    <RowDefinition Height="68" />
                     <RowDefinition Height="*" />
                     <RowDefinition Height="58" />
                 </Grid.RowDefinitions>
