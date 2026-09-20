@@ -393,7 +393,7 @@
             <Setter Property="Width" Value="44" />
             <Setter Property="Height" Value="36" />
             <Setter Property="Background" Value="Transparent" />
-            <Setter Property="Foreground" Value="{DynamicResource ThemeTextBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource ThemeTitleBarTextBrush}" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
             <Setter Property="FontSize" Value="10" />
@@ -657,7 +657,7 @@
                            Background="{DynamicResource ThemeAccentBrush}" Foreground="White"
                            FontWeight="SemiBold" FontSize="12" />
                 <TextBlock Text="Nookly" Margin="8,0,0,0" VerticalAlignment="Center"
-                           Foreground="{DynamicResource ThemeTextBrush}" FontWeight="SemiBold" />
+                           Foreground="{DynamicResource ThemeTitleBarTextBrush}" FontWeight="SemiBold" />
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal">
                 <Button Content="&#xE921;" Click="MinimizeWindow_Click" Style="{StaticResource TitleBarButton}" ToolTip="Reduire" />

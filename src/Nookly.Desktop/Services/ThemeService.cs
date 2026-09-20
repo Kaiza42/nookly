@@ -24,7 +24,7 @@ public sealed class ThemeService
     public static IReadOnlyDictionary<string, ThemePalette> Presets { get; } =
         new Dictionary<string, ThemePalette>(StringComparer.OrdinalIgnoreCase)
         {
-            ["nookly"] = new("Nookly", "#F5F6F8", "#FFFFFF", "#20242B", "#286C53", "#11161C", "#69717D", "#D7DBE1", "#DDE1E5"),
+            ["nookly"] = new("Nookly", "#F5F6F8", "#FFFFFF", "#20242B", "#286C53", "#11161C", "#69717D", "#D7DBE1", "#20242B"),
             ["night"] = new("Nuit", "#171A1F", "#22262D", "#111318", "#5E9B82", "#F1F4F3", "#AAB3BC", "#39414A", "#22262D"),
             ["forest"] = new("Foret", "#EEF2EF", "#FAFCFA", "#1E2924", "#3F765E", "#17201C", "#65736C", "#CBD6D0", "#E3EAE6"),
             ["burgundy"] = new("Bordeaux", "#F4F1F2", "#FFFFFF", "#292126", "#7A3E50", "#21171B", "#78676D", "#D9CDD1", "#EEE7E9"),
@@ -88,7 +88,9 @@ public sealed class ThemeService
         SetBrush("ThemeTextBrush", palette.Text);
         SetBrush("ThemeMutedTextBrush", palette.MutedText);
         SetBrush("ThemeBorderBrush", palette.Border);
-        SetBrush("ThemeTitleBarBrush", palette.TitleBar ?? palette.Surface);
+        var titleBar = palette.TitleBar ?? palette.Surface;
+        SetBrush("ThemeTitleBarBrush", titleBar);
+        SetBrush("ThemeTitleBarTextBrush", ContrastText(titleBar));
     }
 
     private static void SetBrush(string key, string value) =>
@@ -100,6 +102,13 @@ public sealed class ThemeService
         var color = (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(value);
         static byte Scale(byte channel, double amount) => (byte)Math.Clamp(channel * amount, 0, 255);
         return $"#{Scale(color.R, factor):X2}{Scale(color.G, factor):X2}{Scale(color.B, factor):X2}";
+    }
+
+    private static string ContrastText(string value)
+    {
+        var color = (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(value);
+        var luminance = (0.2126 * color.R + 0.7152 * color.G + 0.0722 * color.B) / 255;
+        return luminance > 0.58 ? "#11161C" : "#F4F7F6";
     }
 
     private string GetPath(Guid memberId) => Path.Combine(directory, $"{memberId:N}.json");
