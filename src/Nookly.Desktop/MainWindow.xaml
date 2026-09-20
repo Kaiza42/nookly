@@ -4,6 +4,7 @@
         xmlns:converters="clr-namespace:Nookly.Desktop.Converters"
         Title="Nookly" Height="720" Width="1120" MinHeight="500" MinWidth="760"
         WindowStartupLocation="CenterScreen" Loaded="OnLoaded" Closing="OnClosing"
+        WindowStyle="None" ResizeMode="CanResize" StateChanged="Window_StateChanged"
         Background="{DynamicResource ThemeBackgroundBrush}"
         Foreground="{DynamicResource ThemeTextBrush}">
     <Window.Resources>
@@ -381,6 +382,72 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style x:Key="TitleBarButton" TargetType="Button">
+            <Setter Property="Width" Value="44" />
+            <Setter Property="Height" Value="36" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource ThemeTextBrush}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
+            <Setter Property="FontSize" Value="10" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Surface" Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Surface" Property="Background" Value="#16000000" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Surface" Property="Background" Value="#26000000" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="StaySignedInToggle" TargetType="CheckBox">
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Foreground" Value="{DynamicResource ThemeTextBrush}" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="44" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Border x:Name="Track" Width="40" Height="22" HorizontalAlignment="Left"
+                                    Background="#D7DDE1" BorderBrush="{DynamicResource ThemeBorderBrush}"
+                                    BorderThickness="1" CornerRadius="11">
+                                <Ellipse x:Name="Thumb" Width="16" Height="16" Margin="2"
+                                         HorizontalAlignment="Left" Fill="White">
+                                    <Ellipse.Effect>
+                                        <DropShadowEffect Color="#4A5550" BlurRadius="3" ShadowDepth="1" Opacity="0.3" />
+                                    </Ellipse.Effect>
+                                </Ellipse>
+                            </Border>
+                            <ContentPresenter Grid.Column="1" VerticalAlignment="Center" Margin="8,0,0,0" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Track" Property="Background" Value="{DynamicResource ThemeAccentBrush}" />
+                                <Setter TargetName="Track" Property="BorderBrush" Value="{DynamicResource ThemeAccentBrush}" />
+                                <Setter TargetName="Thumb" Property="HorizontalAlignment" Value="Right" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Track" Property="Opacity" Value="0.88" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <Style x:Key="VoteIconButton" TargetType="Button">
             <Setter Property="Width" Value="30" />
             <Setter Property="Height" Value="30" />
@@ -563,12 +630,37 @@
     </Window.Resources>
 
     <Grid x:Name="MainRoot">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="36" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition x:Name="SidebarColumn" Width="220" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <Border Background="{DynamicResource ThemeSidebarBrush}">
+        <Grid Grid.ColumnSpan="2" Background="{DynamicResource ThemeTitleBarBrush}"
+              MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Horizontal" Margin="12,0,0,0" VerticalAlignment="Center">
+                <TextBlock Text="N" Width="20" Height="20" TextAlignment="Center" Padding="0,1,0,0"
+                           Background="{DynamicResource ThemeAccentBrush}" Foreground="White"
+                           FontWeight="SemiBold" FontSize="12" />
+                <TextBlock Text="Nookly" Margin="8,0,0,0" VerticalAlignment="Center"
+                           Foreground="{DynamicResource ThemeTextBrush}" FontWeight="SemiBold" />
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button Content="&#xE921;" Click="MinimizeWindow_Click" Style="{StaticResource TitleBarButton}" ToolTip="Reduire" />
+                <Button x:Name="MaxRestoreButton" Content="&#xE922;" Click="MaxRestoreWindow_Click"
+                        Style="{StaticResource TitleBarButton}" ToolTip="Agrandir" />
+                <Button Content="&#xE8BB;" Click="CloseWindow_Click" Style="{StaticResource TitleBarButton}" ToolTip="Fermer" />
+            </StackPanel>
+        </Grid>
+
+        <Border Grid.Row="1" Background="{DynamicResource ThemeSidebarBrush}">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="78" />
@@ -675,7 +767,7 @@
             </Grid>
         </Border>
 
-        <Grid Grid.Column="1" Margin="34,28">
+        <Grid Grid.Row="1" Grid.Column="1" Margin="34,28">
             <!-- Bibliotheque : la recherche filtre uniquement les medias deja ajoutes. -->
             <Grid Visibility="{Binding IsLibraryPage, Converter={StaticResource BoolToVisibility}}">
                 <Grid.RowDefinitions>
@@ -1477,6 +1569,13 @@
                                                  IsReadOnly="True" Focusable="False" Cursor="Hand" ToolTip="Choisir une couleur"
                                                  PreviewMouseLeftButtonDown="ThemeColorInput_Click" />
                                     </StackPanel>
+                                    <StackPanel Width="150" Margin="0,0,10,10">
+                                        <TextBlock Text="Barre superieure" Foreground="{DynamicResource ThemeMutedTextBrush}" FontSize="11" />
+                                        <TextBox x:Name="ThemeTitleBarInput" Height="32" Margin="0,4,0,0"
+                                                 Padding="8,0" VerticalContentAlignment="Center" Style="{StaticResource RoundedTextBox}"
+                                                 IsReadOnly="True" Focusable="False" Cursor="Hand" ToolTip="Choisir une couleur"
+                                                 PreviewMouseLeftButtonDown="ThemeColorInput_Click" />
+                                    </StackPanel>
                                 </WrapPanel>
                                 <StackPanel Orientation="Horizontal">
                                     <Button Content="Appliquer" Click="ApplyCustomTheme_Click"
@@ -1489,8 +1588,9 @@
                             </StackPanel>
                         </Expander>
                         <TextBlock Text="Compte" FontSize="18" FontWeight="SemiBold" />
-                        <CheckBox x:Name="StaySignedInCheckBox" Content="Rester connecte"
-                                  Margin="0,10,0,24" Checked="StaySignedIn_Changed" Unchecked="StaySignedIn_Changed" />
+                        <CheckBox x:Name="StaySignedInCheckBox" Content="Rester connecte sur cet appareil"
+                                  Margin="0,12,0,24" Height="28" Style="{StaticResource StaySignedInToggle}"
+                                  Checked="StaySignedIn_Changed" Unchecked="StaySignedIn_Changed" />
                         <Expander Header="Suggestions masquees" IsExpanded="True"
                                   Foreground="#25302C" FontSize="18" FontWeight="SemiBold"
                                   Style="{StaticResource CleanExpander}">
@@ -1626,7 +1726,7 @@
                 </Border>
             </Grid>
         </Grid>
-        <Grid x:Name="CloseConfirmationOverlay" Grid.ColumnSpan="2" Panel.ZIndex="100"
+        <Grid x:Name="CloseConfirmationOverlay" Grid.RowSpan="2" Grid.ColumnSpan="2" Panel.ZIndex="100"
               Background="#7A11161C" Visibility="Collapsed">
             <Border Width="430" Padding="24" Background="#F8F9FA"
                     BorderBrush="#D5DDD9" BorderThickness="1" CornerRadius="8"

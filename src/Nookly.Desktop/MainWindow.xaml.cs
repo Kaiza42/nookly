@@ -193,6 +193,33 @@ public partial class MainWindow : Window
         if (IsLoaded) session.SetStaySignedIn(StaySignedInCheckBox.IsChecked == true);
     }
 
+    private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ClickCount == 2)
+        {
+            ToggleWindowState();
+            return;
+        }
+
+        if (e.LeftButton == MouseButtonState.Pressed) DragMove();
+    }
+
+    private void MinimizeWindow_Click(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
+
+    private void MaxRestoreWindow_Click(object sender, RoutedEventArgs e) => ToggleWindowState();
+
+    private void CloseWindow_Click(object sender, RoutedEventArgs e) => Close();
+
+    private void Window_StateChanged(object? sender, EventArgs e)
+    {
+        if (MaxRestoreButton is null) return;
+        MaxRestoreButton.Content = WindowState == WindowState.Maximized ? "\uE923" : "\uE922";
+        MaxRestoreButton.ToolTip = WindowState == WindowState.Maximized ? "Restaurer" : "Agrandir";
+    }
+
+    private void ToggleWindowState() =>
+        WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+
     private void ThemePreset_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not FrameworkElement { Tag: string key } ||
@@ -225,7 +252,7 @@ public partial class MainWindow : Window
         {
             GetThemeColor(ThemeBackgroundInput), GetThemeColor(ThemeSurfaceInput), GetThemeColor(ThemeSidebarInput),
             GetThemeColor(ThemeAccentInput), GetThemeColor(ThemeTextInput), GetThemeColor(ThemeMutedInput),
-            GetThemeColor(ThemeBorderInput)
+            GetThemeColor(ThemeBorderInput), GetThemeColor(ThemeTitleBarInput)
         };
         if (colors.Any(value => !Services.ThemeService.IsValidColor(value)))
         {
@@ -234,7 +261,7 @@ public partial class MainWindow : Window
         }
 
         var palette = new Services.ThemePalette(
-            "Personnalise", colors[0], colors[1], colors[2], colors[3], colors[4], colors[5], colors[6]);
+            "Personnalise", colors[0], colors[1], colors[2], colors[3], colors[4], colors[5], colors[6], colors[7]);
         themeService.ApplyAndSave(session.Member.Id, palette);
         ThemeStatusText.Text = "Theme personnalise applique.";
     }
@@ -257,6 +284,7 @@ public partial class MainWindow : Window
         SetThemeColor(ThemeTextInput, palette.Text);
         SetThemeColor(ThemeMutedInput, palette.MutedText);
         SetThemeColor(ThemeBorderInput, palette.Border);
+        SetThemeColor(ThemeTitleBarInput, palette.TitleBar ?? palette.Surface);
     }
 
     private static string GetThemeColor(System.Windows.Controls.TextBox input) =>

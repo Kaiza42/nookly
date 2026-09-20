@@ -13,7 +13,8 @@ public sealed record ThemePalette(
     string Accent,
     string Text,
     string MutedText,
-    string Border);
+    string Border,
+    string? TitleBar = null);
 
 public sealed class ThemeService
 {
@@ -23,11 +24,11 @@ public sealed class ThemeService
     public static IReadOnlyDictionary<string, ThemePalette> Presets { get; } =
         new Dictionary<string, ThemePalette>(StringComparer.OrdinalIgnoreCase)
         {
-            ["nookly"] = new("Nookly", "#F5F6F8", "#FFFFFF", "#20242B", "#286C53", "#11161C", "#69717D", "#D7DBE1"),
-            ["night"] = new("Nuit", "#171A1F", "#22262D", "#111318", "#5E9B82", "#F1F4F3", "#AAB3BC", "#39414A"),
-            ["forest"] = new("Foret", "#EEF2EF", "#FAFCFA", "#1E2924", "#3F765E", "#17201C", "#65736C", "#CBD6D0"),
-            ["burgundy"] = new("Bordeaux", "#F4F1F2", "#FFFFFF", "#292126", "#7A3E50", "#21171B", "#78676D", "#D9CDD1"),
-            ["ocean"] = new("Ocean", "#EFF3F5", "#FFFFFF", "#1E272D", "#3E7180", "#152026", "#65747C", "#CBD7DC")
+            ["nookly"] = new("Nookly", "#F5F6F8", "#FFFFFF", "#20242B", "#286C53", "#11161C", "#69717D", "#D7DBE1", "#F5F6F8"),
+            ["night"] = new("Nuit", "#171A1F", "#22262D", "#111318", "#5E9B82", "#F1F4F3", "#AAB3BC", "#39414A", "#22262D"),
+            ["forest"] = new("Foret", "#EEF2EF", "#FAFCFA", "#1E2924", "#3F765E", "#17201C", "#65736C", "#CBD6D0", "#E3EAE6"),
+            ["burgundy"] = new("Bordeaux", "#F4F1F2", "#FFFFFF", "#292126", "#7A3E50", "#21171B", "#78676D", "#D9CDD1", "#EEE7E9"),
+            ["ocean"] = new("Ocean", "#EFF3F5", "#FFFFFF", "#1E272D", "#3E7180", "#152026", "#65747C", "#CBD7DC", "#E5ECEF")
         };
 
     public ThemePalette Current { get; private set; } = Presets["nookly"];
@@ -84,6 +85,7 @@ public sealed class ThemeService
         SetBrush("ThemeTextBrush", palette.Text);
         SetBrush("ThemeMutedTextBrush", palette.MutedText);
         SetBrush("ThemeBorderBrush", palette.Border);
+        SetBrush("ThemeTitleBarBrush", palette.TitleBar ?? palette.Surface);
     }
 
     private static void SetBrush(string key, string value) =>

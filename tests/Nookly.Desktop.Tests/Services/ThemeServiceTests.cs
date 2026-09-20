@@ -19,7 +19,7 @@ public sealed class ThemeServiceTests
         Assert.False(ThemeService.IsValidColor(value));
 
     [Fact]
-    public void Presets_ExposeTheExpectedSevenThemeColors()
+    public void Presets_ExposeTheExpectedThemeColors()
     {
         Assert.True(ThemeService.Presets.Count >= 5);
         Assert.All(ThemeService.Presets.Values, palette =>
@@ -31,6 +31,7 @@ public sealed class ThemeServiceTests
             Assert.True(ThemeService.IsValidColor(palette.Text));
             Assert.True(ThemeService.IsValidColor(palette.MutedText));
             Assert.True(ThemeService.IsValidColor(palette.Border));
+            Assert.True(ThemeService.IsValidColor(palette.TitleBar!));
         });
     }
 }
