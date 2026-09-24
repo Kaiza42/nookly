@@ -101,6 +101,10 @@ public partial class LibraryViewModel(
     private string? errorMessage;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasLibraryStatus))]
+    private string? libraryStatusMessage;
+
+    [ObservableProperty]
     private bool isCreatePanelOpen;
 
     [ObservableProperty]
@@ -247,6 +251,7 @@ public partial class LibraryViewModel(
     private string? detailsStatusMessage;
 
     public bool ShowEmptyState => !IsLoading && !HasError && !HasItems;
+    public bool HasLibraryStatus => !string.IsNullOrWhiteSpace(LibraryStatusMessage);
     public bool ShowNoDislikedPreferences => !HasDislikedPreferences;
     public bool ShowNoFilteredDislikedPreferences =>
         HasDislikedPreferences && FilteredDislikedPreferences.Count == 0;
@@ -791,6 +796,7 @@ public partial class LibraryViewModel(
             HasSearchResults = SearchResults.Count > 0;
             HasItems = true;
             RefreshLibraryFilter();
+            LibraryStatusMessage = $"{saved.Title} a ete ajoute a ta bibliotheque.";
             SetPage(library: true);
         }
         catch (HttpRequestException exception)
@@ -842,6 +848,7 @@ public partial class LibraryViewModel(
     [RelayCommand]
     private void EditMedia(MediaListItemViewModel item)
     {
+        LibraryStatusMessage = null;
         SetPage(library: true);
         editingMediaId = item.Id;
         IsEditMode = true;
@@ -902,6 +909,7 @@ public partial class LibraryViewModel(
             HasItems = Items.Count > 0;
             RefreshLibraryFilter();
             CloseForm();
+            LibraryStatusMessage = "Modifications enregistrees.";
         }
         catch (HttpRequestException)
         {
@@ -934,6 +942,7 @@ public partial class LibraryViewModel(
             Items.Remove(item);
             HasItems = Items.Count > 0;
             RefreshLibraryFilter();
+            LibraryStatusMessage = $"{item.Title} a ete retire de ta bibliotheque.";
 
             if (editingMediaId == item.Id)
             {
@@ -962,6 +971,7 @@ public partial class LibraryViewModel(
         IsLoading = true;
         HasError = false;
         ErrorMessage = null;
+        LibraryStatusMessage = null;
 
         try
         {

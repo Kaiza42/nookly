@@ -20,6 +20,7 @@ public partial class MainWindow : Window
     private readonly System.Windows.Threading.DispatcherTimer activityTimer;
     private bool allowClose;
     private bool isSidebarCollapsed;
+    private bool sidebarAutoCollapsed;
     public MainWindow(LibraryViewModel viewModel, AdminViewModel adminViewModel,
         Services.SessionStore session, Services.MemberApiClient memberApiClient,
         Services.ThemeService themeService)
@@ -314,7 +315,28 @@ public partial class MainWindow : Window
 
     private void ToggleSidebar_Click(object sender, RoutedEventArgs e)
     {
-        isSidebarCollapsed = !isSidebarCollapsed;
+        sidebarAutoCollapsed = false;
+        SetSidebarCollapsed(!isSidebarCollapsed);
+    }
+
+    private void MainWindow_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        if (e.NewSize.Width < 900 && !isSidebarCollapsed)
+        {
+            sidebarAutoCollapsed = true;
+            SetSidebarCollapsed(true);
+        }
+        else if (e.NewSize.Width > 1050 && isSidebarCollapsed && sidebarAutoCollapsed)
+        {
+            sidebarAutoCollapsed = false;
+            SetSidebarCollapsed(false);
+        }
+    }
+
+    private void SetSidebarCollapsed(bool collapsed)
+    {
+        if (isSidebarCollapsed == collapsed) return;
+        isSidebarCollapsed = collapsed;
         SidebarColumn.Width = new GridLength(isSidebarCollapsed ? 64 : 220);
         SidebarBrand.Visibility = isSidebarCollapsed ? Visibility.Collapsed : Visibility.Visible;
         ExpandedNavigation.Visibility = isSidebarCollapsed ? Visibility.Collapsed : Visibility.Visible;

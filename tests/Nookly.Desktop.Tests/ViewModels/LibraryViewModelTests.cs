@@ -30,6 +30,8 @@ public sealed class LibraryViewModelTests
         Assert.Equal(9m, updated.PersonalRating);
         Assert.Equal("Mon avis personnel", updated.PersonalNotes);
         Assert.True(updated.IsFavorite);
+        Assert.True(viewModel.HasLibraryStatus);
+        Assert.Equal("Modifications enregistrees.", viewModel.LibraryStatusMessage);
     }
 
     [Fact]
@@ -58,6 +60,7 @@ public sealed class LibraryViewModelTests
         Assert.Empty(viewModel.Items);
         Assert.False(viewModel.HasItems);
         Assert.True(apiClient.DeleteCalled);
+        Assert.Contains("Dune", Assert.IsType<string>(viewModel.LibraryStatusMessage));
     }
 
     [Fact]
@@ -91,6 +94,7 @@ public sealed class LibraryViewModelTests
         Assert.NotNull(apiClient.LastCreateRequest);
         Assert.Equal("tmdb", apiClient.LastCreateRequest.ExternalSource);
         Assert.Equal("438631", apiClient.LastCreateRequest.ExternalId);
+        Assert.Contains("ajoute", Assert.IsType<string>(viewModel.LibraryStatusMessage));
     }
 
     [Fact]

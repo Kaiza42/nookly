@@ -70,7 +70,10 @@ public partial class App : System.Windows.Application
 
     public async Task ShowWelcomeThenMainAsync(string displayName)
     {
-        var welcome = serviceProvider!.GetRequiredService<WelcomeWindow>();
+        var provider = serviceProvider ?? throw new InvalidOperationException("Application services are unavailable.");
+        var session = provider.GetRequiredService<SessionStore>();
+        if (session.Member is not null) provider.GetRequiredService<ThemeService>().Load(session.Member.Id);
+        var welcome = provider.GetRequiredService<WelcomeWindow>();
         welcome.SetDisplayName(displayName);
         welcome.Show();
         await Task.Delay(TimeSpan.FromSeconds(3));

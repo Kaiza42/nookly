@@ -91,6 +91,10 @@ public sealed class ThemeService
         var titleBar = palette.TitleBar ?? palette.Surface;
         SetBrush("ThemeTitleBarBrush", titleBar);
         SetBrush("ThemeTitleBarTextBrush", ContrastText(titleBar));
+        SetBrush("ThemeSubtleSurfaceBrush", Blend(palette.Surface, palette.Background, 0.55));
+        SetBrush("ThemeAccentSurfaceBrush", Blend(palette.Surface, palette.Accent, 0.14));
+        SetBrush("ThemeDangerBrush", "#B63E3E");
+        SetBrush("ThemeDangerSurfaceBrush", Blend(palette.Surface, "#B63E3E", 0.10));
     }
 
     private static void SetBrush(string key, string value) =>
@@ -109,6 +113,14 @@ public sealed class ThemeService
         var color = (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(value);
         var luminance = (0.2126 * color.R + 0.7152 * color.G + 0.0722 * color.B) / 255;
         return luminance > 0.58 ? "#11161C" : "#F4F7F6";
+    }
+
+    private static string Blend(string from, string to, double amount)
+    {
+        var first = (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(from);
+        var second = (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(to);
+        static byte Mix(byte a, byte b, double ratio) => (byte)Math.Round(a + (b - a) * ratio);
+        return $"#{Mix(first.R, second.R, amount):X2}{Mix(first.G, second.G, amount):X2}{Mix(first.B, second.B, amount):X2}";
     }
 
     private string GetPath(Guid memberId) => Path.Combine(directory, $"{memberId:N}.json");

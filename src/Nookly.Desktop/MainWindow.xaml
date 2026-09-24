@@ -6,6 +6,7 @@
         Title="Nookly" Height="720" Width="1120" MinHeight="500" MinWidth="760"
         WindowStartupLocation="CenterScreen" Loaded="OnLoaded" Closing="OnClosing"
         WindowStyle="None" ResizeMode="CanResize" StateChanged="Window_StateChanged"
+        SizeChanged="MainWindow_SizeChanged"
         BorderThickness="0" SnapsToDevicePixels="True"
         Background="{DynamicResource ThemeBackgroundBrush}"
         Foreground="{DynamicResource ThemeTextBrush}">
@@ -244,6 +245,54 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style x:Key="LibraryActionButton" TargetType="Button" BasedOn="{StaticResource SoftButton}">
+            <Setter Property="Width" Value="32" />
+            <Setter Property="Height" Value="32" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        </Style>
+        <Style x:Key="LibrarySearchBox" TargetType="TextBox">
+            <Setter Property="Height" Value="42" />
+            <Setter Property="Padding" Value="38,0,12,0" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Background" Value="{DynamicResource ThemeSurfaceBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource ThemeTextBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="InputBorder" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6">
+                            <Grid>
+                                <TextBlock Text="&#xE721;" FontFamily="Segoe MDL2 Assets" FontSize="14"
+                                           Foreground="{DynamicResource ThemeMutedTextBrush}"
+                                           Margin="13,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                                <TextBlock x:Name="Placeholder" Text="Rechercher dans ma bibliotheque"
+                                           Margin="38,0,12,0" VerticalAlignment="Center"
+                                           Foreground="{DynamicResource ThemeMutedTextBrush}" Visibility="Collapsed" />
+                                <ScrollViewer x:Name="PART_ContentHost" />
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="Text" Value="" />
+                                    <Condition Property="IsKeyboardFocused" Value="False" />
+                                </MultiTrigger.Conditions>
+                                <Setter TargetName="Placeholder" Property="Visibility" Value="Visible" />
+                            </MultiTrigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="InputBorder" Property="BorderBrush" Value="{DynamicResource ThemeAccentBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <Style x:Key="SeasonWatchedToggle" TargetType="ToggleButton">
             <Setter Property="Height" Value="32" />
             <Setter Property="Padding" Value="12,0" />
@@ -272,8 +321,8 @@
                                 <Setter TargetName="ToggleSurface" Property="Background" Value="#EAF2EE" />
                             </Trigger>
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="ToggleSurface" Property="Background" Value="#286C53" />
-                                <Setter TargetName="ToggleSurface" Property="BorderBrush" Value="#286C53" />
+                                <Setter TargetName="ToggleSurface" Property="Background" Value="{DynamicResource ThemeAccentBrush}" />
+                                <Setter TargetName="ToggleSurface" Property="BorderBrush" Value="{DynamicResource ThemeAccentBrush}" />
                                 <Setter Property="Foreground" Value="White" />
                                 <Setter TargetName="CheckMark" Property="Visibility" Value="Visible" />
                             </Trigger>
@@ -288,7 +337,7 @@
             <Setter Property="FontSize" Value="12" />
             <Setter Property="FontWeight" Value="Normal" />
             <Setter Property="Background" Value="#F1F8F5" />
-            <Setter Property="Foreground" Value="#286C53" />
+            <Setter Property="Foreground" Value="{DynamicResource ThemeAccentBrush}" />
             <Setter Property="BorderBrush" Value="#AFCFC1" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="Cursor" Value="Hand" />
@@ -511,7 +560,7 @@
                     <Run Text="{Binding StatusLabel, Mode=OneWay}" /><Run Text="  |  TMDB " />
                     <Run Text="{Binding RatingLabel, Mode=OneWay}" />
                 </TextBlock>
-                <TextBlock Text="{Binding GenresLabel}" Margin="0,8,0,0" Foreground="#286C53"
+                <TextBlock Text="{Binding GenresLabel}" Margin="0,8,0,0" Foreground="{DynamicResource ThemeAccentBrush}"
                            TextWrapping="Wrap" />
                 <TextBlock Margin="0,16,0,0" TextWrapping="Wrap">
                     <Run Text="Realisation : " FontWeight="SemiBold" />
@@ -522,7 +571,7 @@
                     <Run Text="{Binding CastLabel, Mode=OneWay}" />
                 </TextBlock>
                 <TextBlock Text="Synopsis" Margin="0,24,0,0" FontSize="16" FontWeight="SemiBold" />
-                <TextBlock Text="{Binding Description}" Margin="0,8,0,0" Foreground="#4D5967"
+                <TextBlock Text="{Binding Description}" Margin="0,8,0,0" Foreground="{DynamicResource ThemeTextBrush}"
                            LineHeight="21" TextWrapping="Wrap" MaxWidth="1050"
                            HorizontalAlignment="Left" />
                 <Button Content="Voir la bande-annonce" Command="{Binding DataContext.OpenTrailerCommand, RelativeSource={RelativeSource AncestorType=Window}}"
@@ -538,7 +587,7 @@
                                 <Run Text="Choisir une saison" />
                                 <Run Text="  ·  " Foreground="#87918C" />
                                 <Run Text="{Binding DataContext.SelectedSeason.Title, RelativeSource={RelativeSource AncestorType=Window}, Mode=OneWay}"
-                                     Foreground="#286C53" />
+                                     Foreground="{DynamicResource ThemeAccentBrush}" />
                             </TextBlock>
                         </Expander.Header>
                         <Border Margin="0,7,0,0" Padding="10,10,4,4" Background="#EEF3F0"
@@ -566,7 +615,7 @@
                                 <StackPanel>
                                     <TextBlock Text="{Binding Title}" FontSize="17" FontWeight="SemiBold" />
                                     <TextBlock Text="{Binding MetaLabel}" Margin="0,5,0,0" Foreground="{DynamicResource ThemeMutedTextBrush}" />
-                                    <TextBlock Text="{Binding Description}" Margin="0,8,0,14" Foreground="#4D5967"
+                                    <TextBlock Text="{Binding Description}" Margin="0,8,0,14" Foreground="{DynamicResource ThemeTextBrush}"
                                                TextWrapping="Wrap" MaxWidth="1050"
                                                HorizontalAlignment="Left" />
                                     <ToggleButton Content="Saison vue" IsChecked="{Binding IsWatched, Mode=TwoWay}"
@@ -608,7 +657,7 @@
                                                             <TextBlock Text="{Binding MetaLabel}" Margin="0,3,0,0"
                                                                        Foreground="{DynamicResource ThemeMutedTextBrush}" FontSize="11" />
                                                             <TextBlock Text="{Binding Description}" Margin="0,5,0,0"
-                                                                       Foreground="#4D5967" TextWrapping="Wrap"
+                                                                       Foreground="{DynamicResource ThemeTextBrush}" TextWrapping="Wrap"
                                                                        HorizontalAlignment="Stretch" />
                                                             <TextBox Text="{Binding PersonalNotes, UpdateSourceTrigger=PropertyChanged}"
                                                                      AcceptsReturn="True" TextWrapping="Wrap" MaxLength="4000"
@@ -630,7 +679,7 @@
                         </ContentControl.ContentTemplate>
                     </ContentControl>
                     <TextBlock Text="{Binding DataContext.DetailsStatusMessage, RelativeSource={RelativeSource AncestorType=Window}}"
-                               Foreground="#286C53" Margin="0,8,0,0" />
+                               Foreground="{DynamicResource ThemeAccentBrush}" Margin="0,8,0,0" />
                 </StackPanel>
             </StackPanel>
         </DataTemplate>
@@ -769,7 +818,7 @@
             </Grid>
         </Border>
 
-        <Grid Grid.Row="1" Grid.Column="1" Margin="34,28">
+        <Grid Grid.Row="1" Grid.Column="1" Margin="24,24" MaxWidth="1500" HorizontalAlignment="Stretch">
             <!-- Bibliotheque : la recherche filtre uniquement les medias deja ajoutes. -->
             <Grid Visibility="{Binding IsLibraryPage, Converter={StaticResource BoolToVisibility}}">
                 <Grid.RowDefinitions>
@@ -796,9 +845,17 @@
                     </StackPanel>
                 </Grid>
 
-                <TextBox Grid.Row="1" Text="{Binding LibrarySearchQuery, UpdateSourceTrigger=PropertyChanged}"
-                         Margin="0,22,0,0" Height="40" Padding="12,8" BorderBrush="#C9CED6"
-                         ToolTip="Rechercher uniquement dans ta bibliotheque" />
+                <Grid Grid.Row="1" Margin="0,20,0,0">
+                    <TextBox Text="{Binding LibrarySearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                             Style="{StaticResource LibrarySearchBox}"
+                             ToolTip="Rechercher uniquement dans ta bibliotheque" />
+                    <Border HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0"
+                            Padding="8,3" Background="{DynamicResource ThemeBackgroundBrush}" CornerRadius="4"
+                            Visibility="{Binding HasItems, Converter={StaticResource BoolToVisibility}}">
+                        <TextBlock Text="{Binding FilteredItems.Count, StringFormat={}{0} resultat(s)}"
+                                   FontSize="11" Foreground="{DynamicResource ThemeMutedTextBrush}" />
+                    </Border>
+                </Grid>
 
                 <Border Grid.Row="2" Margin="0,14,0,0" Padding="18" Background="{DynamicResource ThemeSurfaceBrush}"
                         BorderBrush="{DynamicResource ThemeBorderBrush}" BorderThickness="1" CornerRadius="6"
@@ -818,19 +875,19 @@
                         <TextBlock Grid.ColumnSpan="4" Text="Mes informations personnelles" Margin="0,0,0,14"
                                    FontSize="16" FontWeight="SemiBold" />
                         <StackPanel Grid.Row="1" Margin="0,0,12,0">
-                            <TextBlock Text="Statut" Margin="0,0,0,6" Foreground="#4D5967" />
+                            <TextBlock Text="Statut" Margin="0,0,0,6" Foreground="{DynamicResource ThemeMutedTextBrush}" />
                             <ComboBox ItemsSource="{Binding MediaStatuses}"
                                       SelectedItem="{Binding SelectedMediaStatus}" DisplayMemberPath="Label"
                                       Height="36" />
                         </StackPanel>
                         <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,12,0">
-                            <TextBlock Text="Ma note /10" Margin="0,0,0,6" Foreground="#4D5967" />
+                            <TextBlock Text="Ma note /10" Margin="0,0,0,6" Foreground="{DynamicResource ThemeMutedTextBrush}" />
                             <TextBox Text="{Binding PersonalRatingText, UpdateSourceTrigger=PropertyChanged}"
                                      Height="36" Padding="9,7" ToolTip="Nombre entre 0 et 10, par exemple 8,5" />
                             <CheckBox Content="Favori" IsChecked="{Binding IsFavorite}" Margin="0,10,0,0" />
                         </StackPanel>
                         <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,0,12,0">
-                            <TextBlock Text="Mes notes personnelles" Margin="0,0,0,6" Foreground="#4D5967" />
+                            <TextBlock Text="Mes notes personnelles" Margin="0,0,0,6" Foreground="{DynamicResource ThemeMutedTextBrush}" />
                             <TextBox Text="{Binding NewPersonalNotes, UpdateSourceTrigger=PropertyChanged}"
                                      MinHeight="64" MaxHeight="100" Padding="10,7"
                                      AcceptsReturn="True" TextWrapping="Wrap"
@@ -845,12 +902,12 @@
                         <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,14,12,0"
                                     Visibility="{Binding EditingSupportsEpisodeProgress, Converter={StaticResource BoolToVisibility}}">
                             <StackPanel Width="120" Margin="0,0,12,0">
-                                <TextBlock Text="Saison actuelle" Margin="0,0,0,6" Foreground="#4D5967" />
+                                <TextBlock Text="Saison actuelle" Margin="0,0,0,6" Foreground="{DynamicResource ThemeMutedTextBrush}" />
                                 <TextBox Text="{Binding CurrentSeasonText, UpdateSourceTrigger=PropertyChanged}"
                                          Height="34" Padding="8,6" />
                             </StackPanel>
                             <StackPanel Width="120">
-                                <TextBlock Text="Episode actuel" Margin="0,0,0,6" Foreground="#4D5967" />
+                                <TextBlock Text="Episode actuel" Margin="0,0,0,6" Foreground="{DynamicResource ThemeMutedTextBrush}" />
                                 <TextBox Text="{Binding CurrentEpisodeText, UpdateSourceTrigger=PropertyChanged}"
                                          Height="34" Padding="8,6" />
                             </StackPanel>
@@ -863,8 +920,31 @@
                 </Border>
 
                 <Grid Grid.Row="3" Margin="0,18,0,0">
-                    <ProgressBar Height="3" VerticalAlignment="Top" IsIndeterminate="True"
-                                 Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}" />
+                    <Border Panel.ZIndex="4" HorizontalAlignment="Right" VerticalAlignment="Top"
+                            Padding="11,7" Background="{DynamicResource ThemeAccentSurfaceBrush}"
+                            BorderBrush="{DynamicResource ThemeAccentBrush}" BorderThickness="1" CornerRadius="6"
+                            Visibility="{Binding HasLibraryStatus, Converter={StaticResource BoolToVisibility}}">
+                        <TextBlock Text="{Binding LibraryStatusMessage}" Foreground="{DynamicResource ThemeAccentBrush}" />
+                    </Border>
+                    <StackPanel Panel.ZIndex="3" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}">
+                        <ProgressBar Width="180" Height="3" IsIndeterminate="True"
+                                     Foreground="{DynamicResource ThemeAccentBrush}" />
+                        <TextBlock Text="Mise a jour de ta bibliotheque..." Margin="0,12,0,0"
+                                   Foreground="{DynamicResource ThemeMutedTextBrush}" HorizontalAlignment="Center" />
+                    </StackPanel>
+                    <Border Panel.ZIndex="3" HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="460"
+                            Padding="18,15" Background="{DynamicResource ThemeSurfaceBrush}"
+                            BorderBrush="{DynamicResource ThemeBorderBrush}" BorderThickness="1" CornerRadius="7"
+                            Visibility="{Binding HasError, Converter={StaticResource BoolToVisibility}}">
+                        <StackPanel>
+                            <TextBlock Text="Impossible de charger la bibliotheque" FontWeight="SemiBold" FontSize="16" />
+                            <TextBlock Text="{Binding ErrorMessage}" Margin="0,7,0,0" TextWrapping="Wrap"
+                                       Foreground="{DynamicResource ThemeMutedTextBrush}" />
+                            <Button Content="Reessayer" Command="{Binding LoadCommand}" Margin="0,13,0,0"
+                                    HorizontalAlignment="Left" Style="{StaticResource PrimaryButton}" />
+                        </StackPanel>
+                    </Border>
                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
                                 Visibility="{Binding ShowEmptyState, Converter={StaticResource BoolToVisibility}}">
                         <TextBlock Text="Ta bibliotheque est vide" FontSize="18" FontWeight="SemiBold" />
@@ -872,7 +952,7 @@
                                 Style="{StaticResource PrimaryButton}" Margin="0,14,0,0" />
                     </StackPanel>
                     <TextBlock Text="Aucun resultat dans ta bibliotheque."
-                               HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#69717D"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource ThemeMutedTextBrush}"
                                Visibility="{Binding ShowNoLibraryResults, Converter={StaticResource BoolToVisibility}}" />
                     <ListView ItemsSource="{Binding FilteredItems}"
                               Visibility="{Binding HasFilteredItems, Converter={StaticResource BoolToVisibility}}"
@@ -887,8 +967,8 @@
                         </ListView.ItemContainerStyle>
                         <ListView.ItemTemplate>
                             <DataTemplate>
-                                <Border MinHeight="112" Padding="14,12" Background="{DynamicResource ThemeSurfaceBrush}"
-                                        BorderBrush="#E0E3E8" BorderThickness="1" CornerRadius="6">
+                                <Border MinHeight="108" Padding="14,11" Background="{DynamicResource ThemeSurfaceBrush}"
+                                        BorderBrush="{DynamicResource ThemeBorderBrush}" BorderThickness="1" CornerRadius="7">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="64" />
@@ -909,32 +989,32 @@
                                             <TextBlock Text="{Binding Title}" FontSize="16" FontWeight="SemiBold"
                                                        TextTrimming="CharacterEllipsis" />
                                             <TextBlock Grid.Row="1" Text="{Binding Description}" Margin="0,5,0,0"
-                                                       Foreground="#747D89" TextWrapping="Wrap"
+                                                       Foreground="{DynamicResource ThemeMutedTextBrush}" TextWrapping="Wrap"
                                                        MaxHeight="38" TextTrimming="CharacterEllipsis" />
                                             <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,7,0,0">
-                                                <TextBlock Text="{Binding TypeLabel}" Foreground="#4D5967" />
+                                                <TextBlock Text="{Binding TypeLabel}" Foreground="{DynamicResource ThemeTextBrush}" />
                                                 <TextBlock Text="  |  " Foreground="#A0A6AE" />
-                                                <TextBlock Text="{Binding StatusLabel}" Foreground="#286C53" />
+                                                <TextBlock Text="{Binding StatusLabel}" Foreground="{DynamicResource ThemeAccentBrush}" />
                                                 <TextBlock Text="  |  " Foreground="#A0A6AE" />
-                                                <TextBlock Text="{Binding RatingLabel}" Foreground="#4D5967" />
+                                                <TextBlock Text="{Binding RatingLabel}" Foreground="{DynamicResource ThemeTextBrush}" />
                                             </StackPanel>
                                             <TextBlock Grid.Row="3" Text="{Binding PersonalNotes}" Margin="0,5,0,0"
-                                                       Foreground="#286C53" FontStyle="Italic"
+                                                       Foreground="{DynamicResource ThemeAccentBrush}" FontStyle="Italic"
                                                        TextTrimming="CharacterEllipsis" />
                                         </Grid>
                                         <StackPanel Grid.Column="2" Orientation="Horizontal"
                                                     HorizontalAlignment="Right" VerticalAlignment="Center">
-                                            <Button Content="Voir"
+                                            <Button Content="&#xE890;"
                                                     Command="{Binding DataContext.ShowLibraryItemCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                    CommandParameter="{Binding}" Style="{StaticResource SoftButton}"
+                                                    CommandParameter="{Binding}" Style="{StaticResource LibraryActionButton}"
                                                     ToolTip="Voir la fiche" Margin="0,0,8,0" />
-                                            <Button Content="Modifier"
+                                            <Button Content="&#xE70F;"
                                                     Command="{Binding DataContext.EditMediaCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                    CommandParameter="{Binding}" Style="{StaticResource SoftButton}"
+                                                    CommandParameter="{Binding}" Style="{StaticResource LibraryActionButton}"
                                                     ToolTip="Modifier mes informations" Margin="0,0,7,0" />
                                             <Button Content="&#xE74D;" ToolTip="Supprimer de ma bibliotheque"
                                                     Command="{Binding DataContext.DeleteMediaCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                    CommandParameter="{Binding}" Style="{StaticResource VoteIconButton}"
+                                                    CommandParameter="{Binding}" Style="{StaticResource LibraryActionButton}"
                                                     Foreground="#C43D3D" />
                                         </StackPanel>
                                     </Grid>
@@ -974,9 +1054,9 @@
                             <Style TargetType="Button" BasedOn="{StaticResource SoftButton}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsDiscoveryBrowseSelected}" Value="True">
-                                        <Setter Property="Background" Value="#E2F1EA" />
-                                        <Setter Property="BorderBrush" Value="#78AC96" />
-                                        <Setter Property="Foreground" Value="#225C46" />
+                                        <Setter Property="Background" Value="{DynamicResource ThemeAccentSurfaceBrush}" />
+                                        <Setter Property="BorderBrush" Value="{DynamicResource ThemeAccentBrush}" />
+                                        <Setter Property="Foreground" Value="{DynamicResource ThemeAccentBrush}" />
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
@@ -988,9 +1068,9 @@
                             <Style TargetType="Button" BasedOn="{StaticResource SoftButton}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsDiscoveryHistorySelected}" Value="True">
-                                        <Setter Property="Background" Value="#E2F1EA" />
-                                        <Setter Property="BorderBrush" Value="#78AC96" />
-                                        <Setter Property="Foreground" Value="#225C46" />
+                                        <Setter Property="Background" Value="{DynamicResource ThemeAccentSurfaceBrush}" />
+                                        <Setter Property="BorderBrush" Value="{DynamicResource ThemeAccentBrush}" />
+                                        <Setter Property="Foreground" Value="{DynamicResource ThemeAccentBrush}" />
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
@@ -1011,17 +1091,17 @@
                                  GotKeyboardFocus="DiscoveryTitleInput_Changed"
                                  LostKeyboardFocus="DiscoveryTitleInput_Changed" />
                         <TextBlock x:Name="DiscoveryTitlePlaceholder" Margin="13,0" VerticalAlignment="Center"
-                                   Foreground="#9299A3" IsHitTestVisible="False" />
+                                   Foreground="{DynamicResource ThemeMutedTextBrush}" IsHitTestVisible="False" />
                     </Grid>
                     <Button Grid.Column="1" Content="Rechercher" Command="{Binding SearchCommand}"
                             Style="{StaticResource PrimaryButton}" Height="34" Margin="10,0,0,0" />
                 </Grid>
                 <Expander Grid.Row="3" Header="Filtres" IsExpanded="False" Margin="0,8,0,0"
-                          Foreground="#35423C" FontWeight="SemiBold"
+                          Foreground="{DynamicResource ThemeTextBrush}" FontWeight="SemiBold"
                           Visibility="{Binding IsDiscoveryBrowseSelected, Converter={StaticResource BoolToVisibility}}"
                           Style="{StaticResource CleanExpander}">
                     <Border Margin="0,6,0,0" Padding="12,10" Background="{DynamicResource ThemeSurfaceBrush}"
-                            BorderBrush="#D9E2DE" BorderThickness="1" CornerRadius="7">
+                            BorderBrush="{DynamicResource ThemeBorderBrush}" BorderThickness="1" CornerRadius="7">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="58" />
@@ -1033,7 +1113,7 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
-                        <TextBlock Text="Types" Foreground="#53605A" FontWeight="SemiBold" Margin="0,6,8,0" />
+                        <TextBlock Text="Types" Foreground="{DynamicResource ThemeMutedTextBrush}" FontWeight="SemiBold" Margin="0,6,8,0" />
                         <ItemsControl Grid.Column="1" ItemsSource="{Binding DiscoveryMediaTypes}">
                             <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate><DataTemplate>
@@ -1041,7 +1121,7 @@
                                         CommandParameter="{Binding}" Style="{StaticResource FilterTileButton}" />
                             </DataTemplate></ItemsControl.ItemTemplate>
                         </ItemsControl>
-                        <TextBlock Grid.Row="1" Text="Genres" Foreground="#53605A" FontWeight="SemiBold" Margin="0,6,8,0" />
+                        <TextBlock Grid.Row="1" Text="Genres" Foreground="{DynamicResource ThemeMutedTextBrush}" FontWeight="SemiBold" Margin="0,6,8,0" />
                         <ItemsControl Grid.Row="1" Grid.Column="1" ItemsSource="{Binding DiscoveryGenres}">
                             <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate><DataTemplate>
@@ -1049,7 +1129,7 @@
                                         CommandParameter="{Binding}" Style="{StaticResource FilterTileButton}" />
                             </DataTemplate></ItemsControl.ItemTemplate>
                         </ItemsControl>
-                        <TextBlock Grid.Row="2" Text="Pays" Foreground="#53605A" FontWeight="SemiBold" Margin="0,6,8,0" />
+                        <TextBlock Grid.Row="2" Text="Pays" Foreground="{DynamicResource ThemeMutedTextBrush}" FontWeight="SemiBold" Margin="0,6,8,0" />
                         <ItemsControl Grid.Row="2" Grid.Column="1" ItemsSource="{Binding DiscoveryCountries}">
                             <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate><DataTemplate>
@@ -1058,16 +1138,16 @@
                             </DataTemplate></ItemsControl.ItemTemplate>
                         </ItemsControl>
                         <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Margin="0,2,0,0">
-                            <TextBlock Text="Annee" Margin="0,0,7,0" Foreground="#53605A" VerticalAlignment="Center" />
+                            <TextBlock Text="Annee" Margin="0,0,7,0" Foreground="{DynamicResource ThemeMutedTextBrush}" VerticalAlignment="Center" />
                             <TextBox Text="{Binding DiscoveryYear, UpdateSourceTrigger=PropertyChanged}"
                                      Width="72" Height="28" Padding="7,1" TextAlignment="Center"
                                      VerticalContentAlignment="Center" ToolTip="Par exemple 2024"
                                      Style="{StaticResource RoundedTextBox}" />
-                            <TextBlock Text="Acteur" Margin="16,0,7,0" Foreground="#53605A" VerticalAlignment="Center" />
+                            <TextBlock Text="Acteur" Margin="16,0,7,0" Foreground="{DynamicResource ThemeMutedTextBrush}" VerticalAlignment="Center" />
                             <TextBox Text="{Binding ActorQuery, UpdateSourceTrigger=PropertyChanged}"
                                      Width="170" Height="28" Padding="7,1" TextAlignment="Center"
                                      VerticalContentAlignment="Center" Style="{StaticResource RoundedTextBox}" />
-                            <TextBlock Text="Realisateur" Margin="16,0,7,0" Foreground="#53605A" VerticalAlignment="Center" />
+                            <TextBlock Text="Realisateur" Margin="16,0,7,0" Foreground="{DynamicResource ThemeMutedTextBrush}" VerticalAlignment="Center" />
                             <TextBox Text="{Binding DirectorQuery, UpdateSourceTrigger=PropertyChanged}"
                                      Width="170" Height="28" Padding="7,1" TextAlignment="Center"
                                      VerticalContentAlignment="Center" Style="{StaticResource RoundedTextBox}" />
@@ -1079,7 +1159,7 @@
                             Visibility="{Binding IsDiscoveryBrowseSelected, Converter={StaticResource BoolToVisibility}}">
                     <ProgressBar Height="3" Margin="0,12,0,0" IsIndeterminate="True"
                                  Visibility="{Binding IsSearching, Converter={StaticResource BoolToVisibility}}" />
-                    <TextBlock Text="{Binding SearchErrorMessage}" Margin="0,12,0,0" Foreground="#8E2F2A"
+                    <TextBlock Text="{Binding SearchErrorMessage}" Margin="0,12,0,0" Foreground="{DynamicResource ThemeDangerBrush}"
                                Visibility="{Binding HasSearchError, Converter={StaticResource BoolToVisibility}}" />
                 </StackPanel>
                 <ListView Grid.Row="5" ItemsSource="{Binding SearchResults}" Margin="0,18,0,0"
@@ -1108,16 +1188,16 @@
                                         </Border>
                                         <StackPanel Grid.Column="1" Margin="14,2,20,0">
                                             <TextBlock Text="{Binding Title}" FontSize="16" FontWeight="SemiBold" />
-                                            <TextBlock Margin="0,5,0,0" Foreground="#69717D">
+                                            <TextBlock Margin="0,5,0,0" Foreground="{DynamicResource ThemeMutedTextBrush}">
                                                 <Run Text="{Binding TypeLabel, Mode=OneWay}" /><Run Text=" - " />
                                                 <Run Text="{Binding YearLabel, Mode=OneWay}" /><Run Text=" - " />
                                                 <Run Text="{Binding RatingLabel, Mode=OneWay}" />
                                             </TextBlock>
                                             <TextBlock Text="{Binding CastLabel}" Margin="0,5,0,0"
-                                                       Foreground="#4D5967" FontSize="12"
+                                                       Foreground="{DynamicResource ThemeTextBrush}" FontSize="12"
                                                        TextTrimming="CharacterEllipsis" />
                                             <TextBlock Text="{Binding Description}" Margin="0,7,0,0"
-                                                       Foreground="#747D89" TextTrimming="CharacterEllipsis" />
+                                                       Foreground="{DynamicResource ThemeMutedTextBrush}" TextTrimming="CharacterEllipsis" />
                                         </StackPanel>
                                         <StackPanel Grid.Column="2" Orientation="Horizontal"
                                                     VerticalAlignment="Center" Margin="12,0,0,0">
@@ -1142,7 +1222,7 @@
                     </ListView.ItemTemplate>
                 </ListView>
                 <TextBlock Grid.Row="5" Text="Aucun contenu consulte pour le moment."
-                           HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#69717D"
+                           HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource ThemeMutedTextBrush}"
                            Visibility="{Binding ShowEmptyDiscoveryHistory, Converter={StaticResource BoolToVisibility}}" />
                 <ListView Grid.Row="5" ItemsSource="{Binding DiscoveryHistory}" Margin="0,18,0,0"
                           Visibility="{Binding IsDiscoveryHistorySelected, Converter={StaticResource BoolToVisibility}}"
@@ -1169,18 +1249,18 @@
                                     </Border>
                                     <StackPanel Grid.Column="1" Margin="14,2,20,0">
                                         <TextBlock Text="{Binding Title}" FontSize="16" FontWeight="SemiBold" />
-                                        <TextBlock Text="{Binding MetaLabel}" Margin="0,5,0,0" Foreground="#69717D" />
+                                        <TextBlock Text="{Binding MetaLabel}" Margin="0,5,0,0" Foreground="{DynamicResource ThemeMutedTextBrush}" />
                                         <TextBlock Text="{Binding CastLabel}" Margin="0,5,0,0"
-                                                   Foreground="#4D5967" FontSize="12"
+                                                   Foreground="{DynamicResource ThemeTextBrush}" FontSize="12"
                                                    TextTrimming="CharacterEllipsis" />
                                         <TextBlock Text="{Binding Description}" Margin="0,7,0,0"
-                                                   Foreground="#747D89" TextTrimming="CharacterEllipsis" />
+                                                   Foreground="{DynamicResource ThemeMutedTextBrush}" TextTrimming="CharacterEllipsis" />
                                     </StackPanel>
                                     <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="12,0,0,0">
                                         <Button Content="Voir" Command="{Binding DataContext.ShowHistoryItemCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                                 CommandParameter="{Binding}" Style="{StaticResource SoftButton}" />
                                         <TextBlock Text="{Binding ViewedAtLabel}" Margin="0,7,0,0"
-                                                   Foreground="#7A838D" FontSize="10" HorizontalAlignment="Right" />
+                                                   Foreground="{DynamicResource ThemeMutedTextBrush}" FontSize="10" HorizontalAlignment="Right" />
                                     </StackPanel>
                                 </Grid>
                             </Border>
@@ -1197,22 +1277,22 @@
                 </Grid.RowDefinitions>
                 <Button Content="Retour aux resultats" Command="{Binding BackToDiscoverCommand}"
                         HorizontalAlignment="Left" Height="34" Padding="12,0"
-                        Background="White" BorderBrush="#D7DBE1" />
+                        Style="{StaticResource SoftButton}" />
                 <ScrollViewer Grid.Row="1" Margin="0,24,0,0" VerticalScrollBarVisibility="Auto"
                               Focusable="False" FocusVisualStyle="{x:Null}">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="260" />
+                        <ColumnDefinition Width="220" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <Border Width="240" Height="360" VerticalAlignment="Top" HorizontalAlignment="Left"
+                    <Border Width="200" Height="300" VerticalAlignment="Top" HorizontalAlignment="Left"
                             Background="#E4E7EB" CornerRadius="6">
                         <Image Source="{Binding SelectedSearchResult.PosterUrl}" Stretch="UniformToFill" />
                     </Border>
                     <StackPanel Grid.Column="1" Margin="26,0,0,0">
                         <TextBlock Text="{Binding SelectedSearchResult.Title}" FontSize="30"
                                    FontWeight="SemiBold" TextWrapping="Wrap" />
-                        <TextBlock Margin="0,10,0,0" Foreground="#69717D" FontSize="15">
+                        <TextBlock Margin="0,10,0,0" Foreground="{DynamicResource ThemeMutedTextBrush}" FontSize="15">
                             <Run Text="{Binding SelectedSearchResult.TypeLabel, Mode=OneWay}" /><Run Text=" - " />
                             <Run Text="{Binding SelectedSearchResult.YearLabel, Mode=OneWay}" /><Run Text=" - Note TMDB " />
                             <Run Text="{Binding SelectedSearchResult.RatingLabel, Mode=OneWay}" />
@@ -1220,13 +1300,13 @@
                         <Button Content="Ajouter a ma liste" Command="{Binding AddSearchResultCommand}"
                                 CommandParameter="{Binding SelectedSearchResult}"
                                 Style="{StaticResource PrimaryButton}" HorizontalAlignment="Left" Margin="0,18,0,0" />
-                        <TextBlock Text="Chargement des informations..." Margin="0,18,0,0" Foreground="#69717D"
+                        <TextBlock Text="Chargement des informations..." Margin="0,18,0,0" Foreground="{DynamicResource ThemeMutedTextBrush}"
                                    Visibility="{Binding IsLoadingDetails, Converter={StaticResource BoolToVisibility}}" />
                         <ContentControl Content="{Binding SelectedMediaDetails}"
                                         ContentTemplate="{StaticResource RichDetailsTemplate}" />
-                        <TextBlock Text="{Binding SearchErrorMessage}" Margin="0,12,0,0" Foreground="#8E2F2A"
+                        <TextBlock Text="{Binding SearchErrorMessage}" Margin="0,12,0,0" Foreground="{DynamicResource ThemeDangerBrush}"
                                    Visibility="{Binding HasSearchError, Converter={StaticResource BoolToVisibility}}" />
-                        <TextBlock Text="{Binding DetailsErrorMessage}" Margin="0,12,0,0" Foreground="#8E2F2A"
+                        <TextBlock Text="{Binding DetailsErrorMessage}" Margin="0,12,0,0" Foreground="{DynamicResource ThemeDangerBrush}"
                                    Visibility="{Binding HasDetailsError, Converter={StaticResource BoolToVisibility}}" />
                     </StackPanel>
                 </Grid>
@@ -1244,11 +1324,11 @@
                 <ScrollViewer Grid.Row="1" Margin="0,22,0,0" VerticalScrollBarVisibility="Auto"
                               Focusable="False" FocusVisualStyle="{x:Null}">
                     <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="260" />
+                            <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="220" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <Border Width="220" Height="330" VerticalAlignment="Top" HorizontalAlignment="Left"
+                        <Border Width="200" Height="300" VerticalAlignment="Top" HorizontalAlignment="Left"
                                 Background="#E4E7EB" CornerRadius="6">
                             <Image Source="{Binding SelectedLibraryItem.PosterUrl}" Stretch="UniformToFill" />
                         </Border>
@@ -1259,27 +1339,27 @@
                                 <TextBlock Text="  Favori" Margin="14,9,0,0" Foreground="#B26A00" FontWeight="SemiBold"
                                            Visibility="{Binding SelectedLibraryItem.IsFavorite, Converter={StaticResource BoolToVisibility}}" />
                             </StackPanel>
-                            <TextBlock Margin="0,10,0,0" Foreground="#69717D" FontSize="14">
+                            <TextBlock Margin="0,10,0,0" Foreground="{DynamicResource ThemeMutedTextBrush}" FontSize="14">
                                 <Run Text="{Binding SelectedLibraryItem.TypeLabel, Mode=OneWay}" /><Run Text="  |  " />
                                 <Run Text="{Binding SelectedLibraryItem.ReleaseDateLabel, Mode=OneWay}" /><Run Text="  |  TMDB " />
                                 <Run Text="{Binding SelectedLibraryItem.CommunityRatingLabel, Mode=OneWay}" />
                             </TextBlock>
                             <TextBlock Text="{Binding SelectedLibraryItem.StatusLabel}" Margin="0,18,0,0"
-                                       Foreground="#286C53" FontWeight="SemiBold" />
+                                       Foreground="{DynamicResource ThemeAccentBrush}" FontWeight="SemiBold" />
                             <TextBlock Text="{Binding SelectedLibraryItem.ProgressLabel}" Margin="0,7,0,0"
-                                       Foreground="#4D5967"
+                                       Foreground="{DynamicResource ThemeTextBrush}"
                                        Visibility="{Binding SelectedLibraryItem.SupportsEpisodeProgress, Converter={StaticResource BoolToVisibility}}" />
-                            <TextBlock Text="Chargement des informations..." Margin="0,18,0,0" Foreground="#69717D"
+                            <TextBlock Text="Chargement des informations..." Margin="0,18,0,0" Foreground="{DynamicResource ThemeMutedTextBrush}"
                                        Visibility="{Binding IsLoadingDetails, Converter={StaticResource BoolToVisibility}}" />
                             <ContentControl Content="{Binding SelectedMediaDetails}"
                                             ContentTemplate="{StaticResource RichDetailsTemplate}" />
-                            <TextBlock Text="{Binding DetailsErrorMessage}" Margin="0,12,0,0" Foreground="#8E2F2A"
+                            <TextBlock Text="{Binding DetailsErrorMessage}" Margin="0,12,0,0" Foreground="{DynamicResource ThemeDangerBrush}"
                                        Visibility="{Binding HasDetailsError, Converter={StaticResource BoolToVisibility}}" />
                             <TextBlock Text="Mes informations" Margin="0,26,0,0" FontSize="16" FontWeight="SemiBold" />
                             <TextBlock Text="{Binding SelectedLibraryItem.RatingLabel, StringFormat=Ma note : {0}}"
-                                       Margin="0,8,0,0" Foreground="#4D5967" />
+                                       Margin="0,8,0,0" Foreground="{DynamicResource ThemeTextBrush}" />
                             <TextBlock Text="{Binding SelectedLibraryItem.PersonalNotes}" Margin="0,8,0,0"
-                                       Foreground="#286C53" TextWrapping="Wrap" FontStyle="Italic" />
+                                       Foreground="{DynamicResource ThemeAccentBrush}" TextWrapping="Wrap" FontStyle="Italic" />
                             <Button Content="Modifier mes informations"
                                     Command="{Binding EditMediaCommand}"
                                     CommandParameter="{Binding SelectedLibraryItem}"
@@ -1304,12 +1384,12 @@
                     </Grid.ColumnDefinitions>
                     <StackPanel>
                         <TextBlock Text="Banque" FontSize="28" FontWeight="SemiBold" />
-                        <TextBlock Text="Suis tes recettes et tes depenses" Margin="0,5,0,0" Foreground="#69717D" />
+                        <TextBlock Text="Suis tes recettes et tes depenses" Margin="0,5,0,0" Foreground="{DynamicResource ThemeMutedTextBrush}" />
                     </StackPanel>
                     <StackPanel Grid.Column="1" HorizontalAlignment="Right">
-                        <TextBlock Text="Solde actuel" Foreground="#69717D" HorizontalAlignment="Right" />
+                        <TextBlock Text="Solde actuel" Foreground="{DynamicResource ThemeMutedTextBrush}" HorizontalAlignment="Right" />
                         <TextBlock Text="{Binding CurrentBalanceLabel}" FontSize="28" FontWeight="SemiBold"
-                                   Foreground="#20242B" HorizontalAlignment="Right" />
+                                   Foreground="{DynamicResource ThemeTextBrush}" HorizontalAlignment="Right" />
                         <Button Content="Reinitialiser ce mois" Command="{Binding ResetBankMonthCommand}"
                                 Height="28" Padding="10,0" Margin="0,7,0,0" HorizontalAlignment="Right" />
                     </StackPanel>
@@ -1390,7 +1470,8 @@
                         </Grid>
                         <Button Grid.Column="2" Content="+ Recette" Command="{Binding AddIncomeCommand}"
                                 Height="36" Padding="14,0" Margin="10,0,0,0"
-                                Background="#286C53" Foreground="White" BorderBrush="#286C53" />
+                                Background="{DynamicResource ThemeAccentBrush}" Foreground="White"
+                                BorderBrush="{DynamicResource ThemeAccentBrush}" />
                         <Button Grid.Column="3" Content="- Depense" Command="{Binding AddExpenseCommand}"
                                 Height="36" Padding="14,0" Margin="8,0,0,0"
                                 Background="#A43B36" Foreground="White" BorderBrush="#A43B36" />
@@ -1411,7 +1492,7 @@
                                                 BorderBrush="{DynamicResource ThemeBorderBrush}" BorderThickness="1" CornerRadius="4">
                                             <StackPanel>
                                                 <TextBlock Text="{Binding MonthLabel}" FontWeight="SemiBold" FontSize="15" />
-                                                <TextBlock Text="{Binding SummaryLabel}" Margin="0,5,0,8" Foreground="#69717D" />
+                                                <TextBlock Text="{Binding SummaryLabel}" Margin="0,5,0,8" Foreground="{DynamicResource ThemeMutedTextBrush}" />
                                                 <ItemsControl ItemsSource="{Binding Entries}">
                                                     <ItemsControl.ItemTemplate>
                                                         <DataTemplate>
@@ -1433,7 +1514,7 @@
                             </ItemsControl>
                         </ScrollViewer>
                     </Expander>
-                    <TextBlock Grid.Row="1" Text="Aucune operation pour le moment." Foreground="#69717D"
+                    <TextBlock Grid.Row="1" Text="Aucune operation pour le moment." Foreground="{DynamicResource ThemeMutedTextBrush}"
                                VerticalAlignment="Center" HorizontalAlignment="Center">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
@@ -1467,7 +1548,7 @@
                                         </Grid.ColumnDefinitions>
                                         <StackPanel>
                                             <TextBlock Text="{Binding Label}" FontWeight="SemiBold" FontSize="14" />
-                                            <TextBlock Text="{Binding DateLabel}" Margin="0,4,0,0" Foreground="#69717D" FontSize="11" />
+                                            <TextBlock Text="{Binding DateLabel}" Margin="0,4,0,0" Foreground="{DynamicResource ThemeMutedTextBrush}" FontSize="11" />
                                         </StackPanel>
                                         <Grid Grid.Column="1" VerticalAlignment="Center" Margin="16,0">
                                             <TextBlock Text="{Binding AmountLabel}" Foreground="#287A55" FontSize="15" FontWeight="SemiBold"
@@ -1497,7 +1578,7 @@
                 <StackPanel>
                     <TextBlock Text="Parametres" FontSize="28" FontWeight="SemiBold" />
                         <TextBlock Text="Personnalise le comportement de Nookly" Margin="0,5,0,0"
-                               Foreground="#69717D" />
+                               Foreground="{DynamicResource ThemeMutedTextBrush}" />
                 </StackPanel>
                 <ScrollViewer Grid.Row="1" Margin="0,24,0,0" VerticalScrollBarVisibility="Auto">
                     <StackPanel>
@@ -1598,7 +1679,7 @@
                                   Style="{StaticResource CleanExpander}">
                             <StackPanel TextElement.FontSize="12" TextElement.FontWeight="Normal">
                                 <TextBlock Text="Gere les contenus retires de tes suggestions."
-                                           Margin="19,3,0,12" Foreground="#69717D" FontSize="12"
+                                           Margin="19,3,0,12" Foreground="{DynamicResource ThemeMutedTextBrush}" FontSize="12"
                                            FontWeight="Normal" />
                                 <Grid Margin="0,0,0,10">
                             <TextBox x:Name="HiddenTitleSearchInput"
@@ -1616,10 +1697,10 @@
                                 <Border Padding="0" Background="Transparent" BorderThickness="0">
                             <Grid>
                                 <TextBlock Text="Aucun titre masque."
-                                           Foreground="#69717D" VerticalAlignment="Center"
+                                           Foreground="{DynamicResource ThemeMutedTextBrush}" VerticalAlignment="Center"
                                            Visibility="{Binding ShowNoDislikedPreferences, Converter={StaticResource BoolToVisibility}}" />
                                 <TextBlock Text="Aucun titre ne correspond a cette recherche."
-                                           Foreground="#69717D" VerticalAlignment="Center"
+                                           Foreground="{DynamicResource ThemeMutedTextBrush}" VerticalAlignment="Center"
                                            Visibility="{Binding ShowNoFilteredDislikedPreferences, Converter={StaticResource BoolToVisibility}}" />
                                 <ItemsControl ItemsSource="{Binding FilteredDislikedPreferences}"
                                               Visibility="{Binding HasDislikedPreferences, Converter={StaticResource BoolToVisibility}}">
@@ -1641,12 +1722,12 @@
                                                         <TextBlock Text="{Binding Title}" FontWeight="SemiBold"
                                                                    FontSize="14" TextTrimming="CharacterEllipsis" />
                                                         <TextBlock Text="{Binding MetaLabel}" Margin="0,4,0,0"
-                                                                   Foreground="#69717D" FontSize="11" />
+                                                                   Foreground="{DynamicResource ThemeMutedTextBrush}" FontSize="11" />
                                                         <TextBlock Text="{Binding CastLabel}" Margin="0,5,0,0"
-                                                                   Foreground="#4D5967" FontSize="11"
+                                                                   Foreground="{DynamicResource ThemeTextBrush}" FontSize="11"
                                                                    TextTrimming="CharacterEllipsis" />
                                                         <TextBlock Text="{Binding Description}" Margin="0,6,0,0"
-                                                                   Foreground="#4D5967" FontSize="12"
+                                                                   Foreground="{DynamicResource ThemeTextBrush}" FontSize="12"
                                                                    TextWrapping="Wrap" MaxHeight="34"
                                                                    TextTrimming="CharacterEllipsis" />
                                                     </StackPanel>
@@ -1683,7 +1764,7 @@
                     <StackPanel>
                         <TextBlock Text="Administration" FontSize="28" FontWeight="SemiBold" />
                         <TextBlock Text="Comptes, activite et notifications. Les donnees personnelles restent privees."
-                                   Margin="0,5,0,0" Foreground="#69717D" />
+                                   Margin="0,5,0,0" Foreground="{DynamicResource ThemeMutedTextBrush}" />
                     </StackPanel>
                     <Button Grid.Column="1" Content="Actualiser" Command="{Binding LoadCommand}"
                             Height="34" Padding="14,0" VerticalAlignment="Top" />
@@ -1707,7 +1788,7 @@
                     <StackPanel>
                         <TextBlock Text="Envoyer une notification" FontSize="16" FontWeight="SemiBold" />
                         <TextBlock Text="Selectionne d'abord un utilisateur dans la liste."
-                                   Margin="0,4,0,12" Foreground="#69717D" />
+                                   Margin="0,4,0,12" Foreground="{DynamicResource ThemeMutedTextBrush}" />
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="220" />
@@ -1721,17 +1802,17 @@
                                      Height="36" Margin="10,0" Padding="9,0" VerticalContentAlignment="Center"
                                      ToolTip="Message" />
                             <Button Grid.Column="2" Content="Envoyer" Command="{Binding SendNotificationCommand}"
-                                    Height="36" Padding="15,0" Background="#286C53" Foreground="White" />
+                                    Height="36" Padding="15,0" Background="{DynamicResource ThemeAccentBrush}" Foreground="White" />
                         </Grid>
-                        <TextBlock Text="{Binding StatusMessage}" Margin="0,10,0,0" Foreground="#286C53" />
+                        <TextBlock Text="{Binding StatusMessage}" Margin="0,10,0,0" Foreground="{DynamicResource ThemeAccentBrush}" />
                     </StackPanel>
                 </Border>
             </Grid>
         </Grid>
         <Grid x:Name="CloseConfirmationOverlay" Grid.RowSpan="2" Grid.ColumnSpan="2" Panel.ZIndex="100"
               Background="#7A11161C" Visibility="Collapsed">
-            <Border Width="430" Padding="24" Background="#F8F9FA"
-                    BorderBrush="#D5DDD9" BorderThickness="1" CornerRadius="8"
+            <Border Width="430" Padding="24" Background="{DynamicResource ThemeBackgroundBrush}"
+                    BorderBrush="{DynamicResource ThemeBorderBrush}" BorderThickness="1" CornerRadius="8"
                     HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -1748,14 +1829,14 @@
                                    VerticalAlignment="Center" />
                         <Button Grid.Column="1" Content="&#xE711;" Click="CancelClose_Click"
                                 Width="30" Height="30" Background="Transparent" BorderThickness="0"
-                                FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="#68727D"
+                                FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="{DynamicResource ThemeMutedTextBrush}"
                                 Cursor="Hand" FocusVisualStyle="{x:Null}" ToolTip="Annuler" />
                     </Grid>
                     <StackPanel Grid.Row="1" Margin="0,18,0,22">
                         <TextBlock Text="Garder Nookly actif pres de l'horloge ?"
                                    FontSize="15" FontWeight="SemiBold" />
                         <TextBlock Text="Tu pourras le rouvrir depuis la zone de notification."
-                                   Margin="0,7,0,0" Foreground="#65717B" TextWrapping="Wrap" />
+                                   Margin="0,7,0,0" Foreground="{DynamicResource ThemeMutedTextBrush}" TextWrapping="Wrap" />
                     </StackPanel>
                     <Grid Grid.Row="2">
                         <Grid.ColumnDefinitions>

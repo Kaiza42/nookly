@@ -8,9 +8,9 @@
         <Style x:Key="DialogButton" TargetType="Button">
             <Setter Property="Height" Value="36" />
             <Setter Property="Padding" Value="15,0" />
-            <Setter Property="Background" Value="White" />
-            <Setter Property="Foreground" Value="#26302C" />
-            <Setter Property="BorderBrush" Value="#C9D1CD" />
+            <Setter Property="Background" Value="{DynamicResource ThemeSurfaceBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource ThemeTextBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBorderBrush}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="FocusVisualStyle" Value="{x:Null}" />
@@ -25,7 +25,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#EEF1EF" />
+                                <Setter Property="Opacity" Value="0.82" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -44,7 +44,8 @@
             </Style.Triggers>
         </Style>
     </Window.Resources>
-    <Border Background="#F8F9FA" BorderBrush="#D5DDD9" BorderThickness="1" CornerRadius="8">
+    <Border Background="{DynamicResource ThemeBackgroundBrush}"
+            BorderBrush="{DynamicResource ThemeBorderBrush}" BorderThickness="1" CornerRadius="9">
         <Grid Margin="24">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
@@ -60,14 +61,14 @@
                            VerticalAlignment="Center" />
                 <Button Grid.Column="1" Content="&#xE711;" Click="Cancel_Click"
                         Width="30" Height="30" Background="Transparent" BorderThickness="0"
-                        FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="#68727D"
+                        FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="{DynamicResource ThemeMutedTextBrush}"
                         Cursor="Hand" FocusVisualStyle="{x:Null}" />
             </Grid>
             <StackPanel Grid.Row="1" Margin="0,18,0,18" VerticalAlignment="Center">
-                <TextBlock x:Name="ConfirmationText" Foreground="#4D5967" FontSize="14"
+                <TextBlock x:Name="ConfirmationText" Foreground="{DynamicResource ThemeTextBrush}" FontSize="14"
                            TextWrapping="Wrap" />
                 <TextBlock Text="Le titre sera retire de ta liste personnelle."
-                           Margin="0,7,0,0" Foreground="#7A838D" FontSize="12" TextWrapping="Wrap" />
+                           Margin="0,7,0,0" Foreground="{DynamicResource ThemeMutedTextBrush}" FontSize="12" TextWrapping="Wrap" />
             </StackPanel>
             <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Content="Annuler" Click="Cancel_Click" Style="{StaticResource DialogButton}"

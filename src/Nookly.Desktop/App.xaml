@@ -13,5 +13,9 @@
         <SolidColorBrush x:Key="ThemeBorderBrush" Color="#D7DBE1" />
         <SolidColorBrush x:Key="ThemeTitleBarBrush" Color="#F5F6F8" />
         <SolidColorBrush x:Key="ThemeTitleBarTextBrush" Color="#11161C" />
+        <SolidColorBrush x:Key="ThemeSubtleSurfaceBrush" Color="#F7F8F9" />
+        <SolidColorBrush x:Key="ThemeAccentSurfaceBrush" Color="#E2EEE9" />
+        <SolidColorBrush x:Key="ThemeDangerBrush" Color="#B63E3E" />
+        <SolidColorBrush x:Key="ThemeDangerSurfaceBrush" Color="#FFF1F0" />
     </Application.Resources>
 </Application>
